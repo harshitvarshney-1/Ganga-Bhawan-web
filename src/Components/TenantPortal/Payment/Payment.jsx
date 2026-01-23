@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { BASE_URL } from '../../../services/api';
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -79,7 +80,7 @@ const Payment = () => {
       setUser(userData);
 
       // Fetch payment history from backend
-      const response = await fetch('http://localhost:5000/api/payments/history', {
+      const response = await fetch(`${BASE_URL}/api/payments/history`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -205,7 +206,7 @@ const Payment = () => {
       formData.append('monthIndex', modal.monthIndex);
       formData.append('amount', modal.amount);
 
-      const response = await fetch('http://localhost:5000/api/payments/submit', {
+      const response = await fetch(`${BASE_URL}/api/payments/submit`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -481,7 +482,7 @@ const Payment = () => {
                     <p className="font-bold text-emerald-600">₹{payment.amount}</p>
                     {payment.barcodeImage && (
                       <a 
-                        href={`http://localhost:5000/${payment.barcodeImage}`}
+                        href={`${BASE_URL}/${payment.barcodeImage}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-cyan-600 hover:underline mt-1 block"

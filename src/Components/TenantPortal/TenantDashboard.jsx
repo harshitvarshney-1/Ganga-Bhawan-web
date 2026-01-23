@@ -4,6 +4,7 @@ import Sidebar from './Sidebar/Sidebar';
 import Profile from './Profile/Profile';
 import Details from './Details/Details';
 import Payment from './Payment/Payment';
+import { BASE_URL } from '../../services/api';
 
 const TenantDashboard = () => {
   const [activeSection, setActiveSection] = useState('profile');
@@ -71,7 +72,7 @@ const TenantDashboard = () => {
   const fetchUserProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/tenant/profile', {
+      const response = await fetch(`${BASE_URL}/api/tenant/profile`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -89,7 +90,7 @@ const TenantDashboard = () => {
         permanentAddress: data.permanentAddress || ''
       });
       if (data.profilePicture) {
-        setProfilePicturePreview(`http://localhost:5000/${data.profilePicture}`);
+        setProfilePicturePreview(`${BASE_URL}/${data.profilePicture}`);
       }
       setLoading(false);
     } catch (error) {
@@ -134,7 +135,7 @@ const TenantDashboard = () => {
         formDataToSend.append('profilePicture', profilePicture);
       }
 
-      const response = await fetch('http://localhost:5000/api/tenant/profile', {
+      const response = await fetch(`${BASE_URL}/api/tenant/profile`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -148,7 +149,7 @@ const TenantDashboard = () => {
         setUserData(data.user);
         setEditing(false);
         if (data.user.profilePicture) {
-          setProfilePicturePreview(`http://localhost:5000/${data.user.profilePicture}`);
+          setProfilePicturePreview(`${BASE_URL}/${data.user.profilePicture}`);
         }
         alert('Profile updated successfully!');
       } else {

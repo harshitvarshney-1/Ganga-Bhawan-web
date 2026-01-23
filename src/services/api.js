@@ -1,4 +1,5 @@
-const API_URL = 'http://localhost:5000/api';
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const API_URL = `${BASE_URL}/api`;
 
 // Register Tenant
 export const registerTenant = async (formData) => {
@@ -7,13 +8,13 @@ export const registerTenant = async (formData) => {
       method: 'POST',
       body: formData, // FormData object (files ke liye)
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.error || 'Registration failed');
     }
-    
+
     return data;
   } catch (error) {
     throw error;
@@ -30,17 +31,17 @@ export const login = async (email, password, loginType) => {
       },
       body: JSON.stringify({ email, password, loginType }),
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.error || 'Login failed');
     }
-    
+
     // Save token to localStorage
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
-    
+
     return data;
   } catch (error) {
     throw error;
@@ -51,20 +52,20 @@ export const login = async (email, password, loginType) => {
 export const getTenantProfile = async () => {
   try {
     const token = localStorage.getItem('token');
-    
+
     const response = await fetch(`${API_URL}/tenant/profile`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
       },
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.error || 'Failed to fetch profile');
     }
-    
+
     return data;
   } catch (error) {
     throw error;
@@ -75,20 +76,20 @@ export const getTenantProfile = async () => {
 export const getPendingTenants = async () => {
   try {
     const token = localStorage.getItem('token');
-    
+
     const response = await fetch(`${API_URL}/admin/pending-tenants`, {
       method: 'GET',
       headers: {
         'Authorization': `Bearer ${token}`,
       },
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.error || 'Failed to fetch tenants');
     }
-    
+
     return data;
   } catch (error) {
     throw error;
@@ -99,20 +100,20 @@ export const getPendingTenants = async () => {
 export const approveTenant = async (tenantId) => {
   try {
     const token = localStorage.getItem('token');
-    
+
     const response = await fetch(`${API_URL}/admin/approve-tenant/${tenantId}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
       },
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.error || 'Failed to approve tenant');
     }
-    
+
     return data;
   } catch (error) {
     throw error;
@@ -123,20 +124,20 @@ export const approveTenant = async (tenantId) => {
 export const rejectTenant = async (tenantId) => {
   try {
     const token = localStorage.getItem('token');
-    
+
     const response = await fetch(`${API_URL}/admin/reject-tenant/${tenantId}`, {
       method: 'DELETE',
       headers: {
         'Authorization': `Bearer ${token}`,
       },
     });
-    
+
     const data = await response.json();
-    
+
     if (!response.ok) {
       throw new Error(data.error || 'Failed to reject tenant');
     }
-    
+
     return data;
   } catch (error) {
     throw error;

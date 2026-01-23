@@ -1,4 +1,5 @@
 import React from 'react';
+import { BASE_URL } from '../../../services/api';
 
 const Details = ({ userData, formData, editing, setEditing, handleInputChange, handleSave, saving }) => {
   return (
@@ -107,7 +108,7 @@ const Details = ({ userData, formData, editing, setEditing, handleInputChange, h
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {userData?.aadhaarFront && (
             <a
-              href={`http://localhost:5000/${userData.aadhaarFront}`}
+              href={`${BASE_URL}/${userData.aadhaarFront}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-6 hover:from-blue-100 hover:to-cyan-100 transition-all shadow-md"
@@ -129,7 +130,7 @@ const Details = ({ userData, formData, editing, setEditing, handleInputChange, h
 
           {userData?.aadhaarBack && (
             <a
-              href={`http://localhost:5000/${userData.aadhaarBack}`}
+              href={`${BASE_URL}/${userData.aadhaarBack}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-6 hover:from-blue-100 hover:to-cyan-100 transition-all shadow-md"

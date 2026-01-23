@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { BASE_URL } from '../../services/api';
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -91,13 +92,13 @@ const AdminDashboard = () => {
   const fetchTenants = async () => {
     try {
       const token = localStorage.getItem('token');
-      const pendingRes = await fetch('http://localhost:5000/api/admin/pending-tenants', {
+      const pendingRes = await fetch(`${BASE_URL}/api/admin/pending-tenants`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const pendingData = await pendingRes.json();
       setPendingTenants(pendingData);
 
-      const approvedRes = await fetch('http://localhost:5000/api/admin/approved-tenants', {
+      const approvedRes = await fetch(`${BASE_URL}/api/admin/approved-tenants`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const approvedData = await approvedRes.json();
@@ -131,7 +132,7 @@ const AdminDashboard = () => {
     setPaymentLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/admin/payments-summary', {
+      const res = await fetch(`${BASE_URL}/api/admin/payments-summary`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (!res.ok) {
@@ -158,7 +159,7 @@ const AdminDashboard = () => {
   const fetchPendingPayments = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:5000/api/admin/pending-payments', {
+      const res = await fetch(`${BASE_URL}/api/admin/pending-payments`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       if (res.ok) {
@@ -178,7 +179,7 @@ const AdminDashboard = () => {
   const handleApprovePayment = async (paymentId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/approve-payment/${paymentId}`, {
+      const response = await fetch(`${BASE_URL}/api/admin/approve-payment/${paymentId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -211,7 +212,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/reject-payment/${paymentId}`, {
+      const response = await fetch(`${BASE_URL}/api/admin/reject-payment/${paymentId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -233,7 +234,7 @@ const AdminDashboard = () => {
   const handleApprove = async (tenantId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/approve-tenant/${tenantId}`, {
+      const response = await fetch(`${BASE_URL}/api/admin/approve-tenant/${tenantId}`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -252,7 +253,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/reject-tenant/${tenantId}`, {
+      const response = await fetch(`${BASE_URL}/api/admin/reject-tenant/${tenantId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -271,7 +272,7 @@ const AdminDashboard = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/admin/delete-tenant/${tenantId}`, {
+      const response = await fetch(`${BASE_URL}/api/admin/delete-tenant/${tenantId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -446,7 +447,7 @@ const AdminDashboard = () => {
           {tenant.aadhaarFront && (
             <div className="flex gap-3 mb-6">
               <a
-                href={`http://localhost:5000/${tenant.aadhaarFront}`}
+                href={`${BASE_URL}/${tenant.aadhaarFront}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
@@ -455,7 +456,7 @@ const AdminDashboard = () => {
               </a>
               {tenant.aadhaarBack && (
                 <a
-                  href={`http://localhost:5000/${tenant.aadhaarBack}`}
+                  href={`${BASE_URL}/${tenant.aadhaarBack}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
