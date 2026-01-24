@@ -70,12 +70,7 @@ export default function Login() {
           const user = token ? JSON.parse(localStorage.getItem('user') || '{}') : null;
           if (user) {
             return (
-              <div className="bg-blue-900/50 border border-blue-500 rounded-lg p-3 mb-4">
-                <p className="text-blue-200 text-sm">
-                  आप पहले से {user.role === 'admin' ? 'Admin' : 'Tenant'} के रूप में logged in हैं। 
-                  अलग role से login करने के लिए नीचे form भरें।
-                </p>
-              </div>
+              <div className="bg-blue-900/50 border border-blue-500 rounded-lg p-3 mb-4"></div>
             );
           }
           return null;
