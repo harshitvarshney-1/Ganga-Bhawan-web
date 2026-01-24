@@ -1235,29 +1235,7 @@ const AdminDashboard = () => {
                   <label className="text-xs text-red-500 font-semibold uppercase tracking-wider">Password (Hashed)</label>
                   <p className="text-sm font-mono text-gray-900 break-all bg-red-50 p-2 rounded">{selectedTenant.password || 'N/A'}</p>
                 </div>
-                {/* Manual Password Reset Section */}
-                <div className="space-y-2 col-span-2 bg-gray-50 p-6 rounded-2xl border-2 border-dashed border-gray-200">
-                  <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Reset Account Password (Manual)</label>
-                  <div className="flex flex-col sm:flex-row gap-3 mt-2">
-                    <input
-                      type="text"
-                      value={resetPasswordInput}
-                      onChange={(e) => setResetPasswordInput(e.target.value)}
-                      placeholder="Enter new plain text password..."
-                      className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none"
-                    />
-                    <button
-                      onClick={() => handleResetPassword(selectedTenant._id)}
-                      disabled={resetting}
-                      className="px-6 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50"
-                    >
-                      {resetting ? 'Updating...' : 'Update Password'}
-                    </button>
-                  </div>
-                  <p className="text-[10px] text-gray-400 mt-2 italic">
-                    * This will override the tenant's current password. Inform them via WhatsApp/Call after updating.
-                  </p>
-                </div>
+
                 <div className="space-y-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Father's Phone</label>
                   <p className="text-lg font-bold text-gray-900">{selectedTenant.fatherPhone || 'N/A'}</p>
@@ -1275,6 +1253,35 @@ const AdminDashboard = () => {
                   <p className="text-lg font-bold text-gray-900">{selectedTenant.permanentAddress}</p>
                 </div>
 
+              </div>
+
+              {/* Enhanced Manual Password Reset Section */}
+              <div className="bg-red-50/50 p-6 rounded-2xl border-2 border-dashed border-red-200 mb-6">
+                <h3 className="text-sm font-bold text-red-600 uppercase tracking-widest mb-4 flex items-center gap-2">
+                  <span>🔒</span> Manual Password Override
+                </h3>
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    value={resetPasswordInput}
+                    onChange={(e) => setResetPasswordInput(e.target.value)}
+                    placeholder="Type new plain password here..."
+                    className="flex-1 px-4 py-3 border border-red-200 rounded-xl focus:ring-2 focus:ring-red-500 outline-none shadow-sm"
+                  />
+                  <button
+                    onClick={() => handleResetPassword(selectedTenant._id)}
+                    disabled={resetting}
+                    className="px-8 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 active:scale-95 transition-all disabled:opacity-50 shadow-lg shadow-red-200"
+                  >
+                    {resetting ? 'Overriding...' : 'Set New Password'}
+                  </button>
+                </div>
+                <div className="mt-3 flex items-start gap-2">
+                  <span className="text-red-400 text-xs">⚠️</span>
+                  <p className="text-[11px] text-red-500 leading-tight">
+                    This will change the login password immediately. The tenant will <strong>not</strong> be notified automatically. You must inform them of their new password.
+                  </p>
+                </div>
               </div>
 
                {selectedTenant.aadhaarFile && (
