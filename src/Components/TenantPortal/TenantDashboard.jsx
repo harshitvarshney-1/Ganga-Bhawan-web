@@ -90,8 +90,13 @@ const TenantDashboard = () => {
         permanentAddress: data.permanentAddress || ''
       });
       if (data.profilePicture) {
-        setProfilePicturePreview(`${BASE_URL}/${data.profilePicture}`);
+        if (data.profilePicture.startsWith('data:') || data.profilePicture.startsWith('http')) {
+          setProfilePicturePreview(data.profilePicture);
+        } else {
+          setProfilePicturePreview(`${BASE_URL}/${data.profilePicture}`);
+        }
       }
+
       setLoading(false);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -149,8 +154,13 @@ const TenantDashboard = () => {
         setUserData(data.user);
         setEditing(false);
         if (data.user.profilePicture) {
-          setProfilePicturePreview(`${BASE_URL}/${data.user.profilePicture}`);
+          if (data.user.profilePicture.startsWith('data:') || data.user.profilePicture.startsWith('http')) {
+            setProfilePicturePreview(data.user.profilePicture);
+          } else {
+            setProfilePicturePreview(`${BASE_URL}/${data.user.profilePicture}`);
+          }
         }
+
         alert('Profile updated successfully!');
       } else {
         alert(data.error || 'Failed to update profile');

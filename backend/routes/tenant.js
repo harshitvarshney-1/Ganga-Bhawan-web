@@ -7,24 +7,18 @@ const User = require('../models/User');
 const router = express.Router();
 
 // File Upload Configuration for Profile Picture
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '..', 'uploads');
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
+// File Upload Configuration for Profile Picture (Memory storage for Vercel)
+const storage = multer.memoryStorage();
 
-const upload = multer({ 
+
+const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png|gif|webp/;
     const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = fileTypes.test(file.mimetype);
-    
+
     if (mimetype && extname) {
       return cb(null, true);
     } else {
@@ -76,8 +70,14 @@ router.put('/profile', auth, upload.single('profilePicture'), async (req, res) =
 
     // Update profile picture if uploaded (permanent - can be updated)
     if (req.file) {
-      user.profilePicture = `uploads/${req.file.filename}`;
+      user.profilePicture = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+      user.profilePictureData = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+        filename: req.file.originalname
+      };
     }
+
 
     await user.save();
 

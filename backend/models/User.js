@@ -1,76 +1,83 @@
 const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  fullName: { 
-    type: String, 
-    required: true 
+  fullName: {
+    type: String,
+    required: true
   },
-  email: { 
-    type: String, 
-    required: true, 
+  email: {
+    type: String,
+    required: true,
     unique: true,
-    lowercase: true 
+    lowercase: true
   },
-  password: { 
-    type: String, 
-    required: true 
+  password: {
+    type: String,
+    required: true
   },
-  mobileNumber: { 
-    type: String, 
-    required: true 
+  mobileNumber: {
+    type: String,
+    required: true
   },
-  fatherName: { 
-    type: String, 
-    required: true 
+  fatherName: {
+    type: String,
+    required: true
   },
-  fatherPhone: { 
-    type: String 
+  fatherPhone: {
+    type: String
   },
-  motherName: { 
-    type: String 
+  motherName: {
+    type: String
   },
-  motherPhone: { 
-    type: String 
+  motherPhone: {
+    type: String
   },
-  dateOfBirth: { 
-    type: Date, 
-    required: true 
+  dateOfBirth: {
+    type: Date,
+    required: true
   },
-  gender: { 
-    type: String, 
+  gender: {
+    type: String,
     required: true,
     enum: ['Male', 'Female', 'Other']
   },
-  permanentAddress: { 
-    type: String, 
-    required: true 
+  permanentAddress: {
+    type: String,
+    required: true
   },
-  aadhaarNumber: { 
-    type: String, 
-    required: true, 
-    unique: true 
+  aadhaarNumber: {
+    type: String,
+    required: true,
+    unique: true
   },
-  aadhaarFront: { 
-    type: String 
+  aadhaarFile: {
+    type: String
   },
-  aadhaarBack: { 
-    type: String 
+  aadhaarFileData: {
+    data: Buffer,
+    contentType: String,
+    filename: String
   },
   profilePicture: {
     type: String
   },
-  role: { 
-    type: String, 
-    enum: ['tenant', 'admin'], 
-    default: 'tenant' 
+  profilePictureData: {
+    data: Buffer,
+    contentType: String,
+    filename: String
   },
-  isApproved: { 
-    type: Boolean, 
-    default: false 
+  role: {
+    type: String,
+    enum: ['tenant', 'admin'],
+    default: 'tenant'
   },
-  createdAt: { 
-    type: Date, 
-    default: Date.now 
+  isApproved: {
+    type: Boolean,
+    default: false
+  },
+  createdAt: {
+    type: Date,
+    default: Date.now
   }
 });
 

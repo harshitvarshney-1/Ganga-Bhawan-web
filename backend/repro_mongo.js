@@ -1,9 +1,14 @@
 const mongoose = require('mongoose');
+require('dotenv').config();
 
-// Hardcoded for testing to bypass .env issues
-const uri = "mongodb+srv://admin:C8nQDYIgiCroNyuy@cluster0.eafgzh.mongodb.net/tenant-system?retryWrites=true&w=majority&appName=Cluster0";
+const uri = process.env.MONGO_URI;
 
-console.log('Testing Hardcoded URI...');
+if (!uri) {
+    console.error('❌ MONGO_URI not found in .env');
+    process.exit(1);
+}
+
+console.log('Testing URI from .env...');
 
 mongoose.connect(uri)
     .then(() => {
@@ -15,3 +20,4 @@ mongoose.connect(uri)
         if (err.cause) console.error('Cause:', err.cause);
         process.exit(1);
     });
+

@@ -8,24 +8,18 @@ const User = require('../models/User');
 const router = express.Router();
 
 // File Upload Configuration
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '..', 'uploads');
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
+// File Upload Configuration (Memory storage for Vercel)
+const storage = multer.memoryStorage();
 
-const upload = multer({ 
+
+const upload = multer({
   storage: storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
     const fileTypes = /jpeg|jpg|png|pdf/;
     const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
     const mimetype = fileTypes.test(file.mimetype);
-    
+
     if (mimetype && extname) {
       return cb(null, true);
     } else {
@@ -36,14 +30,13 @@ const upload = multer({
 
 // REGISTER TENANT
 router.post('/register', upload.fields([
-  { name: 'aadhaarFront', maxCount: 1 },
-  { name: 'aadhaarBack', maxCount: 1 }
+  { name: 'aadhaarFile', maxCount: 1 }
 ]), async (req, res) => {
   try {
-    const { 
-      fullName, email, password, mobileNumber, 
+    const {
+      fullName, email, password, mobileNumber,
       fatherName, fatherPhone, motherName, motherPhone,
-      dateOfBirth, gender, permanentAddress, aadhaarNumber 
+      dateOfBirth, gender, permanentAddress, aadhaarNumber
     } = req.body;
 
     // Validation
@@ -52,13 +45,13 @@ router.post('/register', upload.fields([
     }
 
     // Check if user already exists
-    const existingUser = await User.findOne({ 
-      $or: [{ email }, { aadhaarNumber }] 
+    const existingUser = await User.findOne({
+      $or: [{ email }, { aadhaarNumber }]
     });
-    
+
     if (existingUser) {
-      return res.status(400).json({ 
-        error: 'Email or Aadhaar number already registered' 
+      return res.status(400).json({
+        error: 'Email or Aadhaar number already registered'
       });
     }
 
@@ -80,17 +73,22 @@ router.post('/register', upload.fields([
       gender,
       permanentAddress,
       aadhaarNumber,
-      aadhaarFront: req.files['aadhaarFront']?.[0] ? `uploads/${req.files['aadhaarFront'][0].filename}` : null,
-      aadhaarBack: req.files['aadhaarBack']?.[0] ? `uploads/${req.files['aadhaarBack'][0].filename}` : null,
+      aadhaarFile: req.files['aadhaarFile']?.[0] ? `data:${req.files['aadhaarFile'][0].mimetype};base64,${req.files['aadhaarFile'][0].buffer.toString('base64')}` : null,
+      aadhaarFileData: req.files['aadhaarFile']?.[0] ? {
+        data: req.files['aadhaarFile'][0].buffer,
+        contentType: req.files['aadhaarFile'][0].mimetype,
+        filename: req.files['aadhaarFile'][0].originalname
+      } : null,
       role: 'tenant',
+
       isApproved: false
     });
 
     await newUser.save();
 
-    res.status(201).json({ 
+    res.status(201).json({
       success: true,
-      message: 'Registration successful! Please wait for admin approval.' 
+      message: 'Registration successful! Please wait for admin approval.'
     });
 
   } catch (error) {
@@ -128,17 +126,17 @@ router.post('/login', async (req, res) => {
 
     // Check if tenant is approved
     if (user.role === 'tenant' && !user.isApproved) {
-      return res.status(403).json({ 
-        error: 'Your account is pending admin approval' 
+      return res.status(403).json({
+        error: 'Your account is pending admin approval'
       });
     }
 
     // Generate JWT token
     const token = jwt.sign(
-      { 
-        userId: user._id, 
+      {
+        userId: user._id,
         role: user.role,
-        email: user.email 
+        email: user.email
       },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }

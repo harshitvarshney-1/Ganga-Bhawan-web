@@ -2,7 +2,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+// Configure dotenv to look in the current directory first
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config(); // Also look in root if not found
+
 const paymentRoutes = require('./routes/payment');
 
 const app = express();
@@ -18,6 +21,9 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Add path for temporary storage if needed (though we use memory)
+app.use('/tmp', express.static('/tmp'));
+
 
 // Database Connection
 mongoose.connect(process.env.MONGO_URI)

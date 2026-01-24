@@ -462,28 +462,19 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {tenant.aadhaarFront && (
-            <div className="flex gap-3 mb-6">
+          {tenant.aadhaarFile && (
+            <div className="mb-6">
               <a
-                href={`${BASE_URL}/${tenant.aadhaarFront}`}
+                href={tenant.aadhaarFile.startsWith('data:') ? tenant.aadhaarFile : `${BASE_URL}/${tenant.aadhaarFile}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
               >
-                📄 Aadhaar Front
+                📄 View Aadhaar Card (Image/PDF)
               </a>
-              {tenant.aadhaarBack && (
-                <a
-                  href={`${BASE_URL}/${tenant.aadhaarBack}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
-                >
-                  📄 Aadhaar Back
-                </a>
-              )}
             </div>
           )}
+
 
           <div className="flex gap-3 pt-6 border-t border-gray-100">
             <button
@@ -1094,31 +1085,22 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {selectedTenant.aadhaarFront && (
+               {selectedTenant.aadhaarFile && (
                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4">Documents</h3>
                   <div className="flex gap-4">
                     <a 
-                      href={`http://localhost:5000/${selectedTenant.aadhaarFront}`} 
+                      href={selectedTenant.aadhaarFile.startsWith('data:') ? selectedTenant.aadhaarFile : `${BASE_URL}/${selectedTenant.aadhaarFile}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold"
                     >
-                      📄 View Aadhaar Front
+                      📄 View Aadhaar Card
                     </a>
-                    {selectedTenant.aadhaarBack && (
-                      <a 
-                        href={`http://localhost:5000/${selectedTenant.aadhaarBack}`} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold"
-                      >
-                        📄 View Aadhaar Back
-                      </a>
-                    )}
                   </div>
                 </div>
               )}
+
 
               {/* Action Buttons */}
               <div className="flex gap-4 pt-6 border-t border-gray-200">

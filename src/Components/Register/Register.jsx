@@ -20,8 +20,7 @@ export default function Register() {
   });
   
   const [files, setFiles] = useState({
-    aadhaarFront: null,
-    aadhaarBack: null,
+    aadhaarFile: null,
   });
   
   const [loading, setLoading] = useState(false);
@@ -84,12 +83,10 @@ export default function Register() {
       });
       
       // Append files
-      if (files.aadhaarFront) {
-        data.append('aadhaarFront', files.aadhaarFront);
+      if (files.aadhaarFile) {
+        data.append('aadhaarFile', files.aadhaarFile);
       }
-      if (files.aadhaarBack) {
-        data.append('aadhaarBack', files.aadhaarBack);
-      }
+
 
       // Call API
       const result = await registerTenant(data);
@@ -290,28 +287,19 @@ export default function Register() {
           </div>
 
           {/* Aadhaar Upload */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-300 mb-2">Upload Aadhaar (Front)</label>
-              <input
-                type="file"
-                name="aadhaarFront"
-                onChange={handleFileChange}
-                accept="image/*,application/pdf"
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-300 mb-2">Upload Aadhaar (Back)</label>
-              <input
-                type="file"
-                name="aadhaarBack"
-                onChange={handleFileChange}
-                accept="image/*,application/pdf"
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              />
-            </div>
+          <div>
+            <label className="block text-gray-300 mb-2">Upload Aadhaar (Photo or PDF)</label>
+            <input
+              type="file"
+              name="aadhaarFile"
+              onChange={handleFileChange}
+              accept="image/*,application/pdf"
+              required
+              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+            />
+            <p className="text-gray-400 text-xs mt-1">Please upload a single file (Image or PDF) containing both sides of your Aadhaar.</p>
           </div>
+
 
           {/* Submit Button */}
           <button
