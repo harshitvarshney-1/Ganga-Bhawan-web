@@ -19,7 +19,7 @@ router.get('/pending-tenants', auth, isAdmin, async (req, res) => {
     const tenants = await User.find({
       role: 'tenant',
       isApproved: false
-    }).select('-password');
+    });
 
     res.json(tenants);
   } catch (error) {
@@ -33,7 +33,7 @@ router.get('/approved-tenants', auth, isAdmin, async (req, res) => {
     const tenants = await User.find({
       role: 'tenant',
       isApproved: true
-    }).select('-password');
+    });
 
     res.json(tenants);
   } catch (error) {

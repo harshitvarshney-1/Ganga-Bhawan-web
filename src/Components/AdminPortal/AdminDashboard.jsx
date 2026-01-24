@@ -1189,6 +1189,22 @@ const AdminDashboard = () => {
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Registration Date</label>
                   <p className="text-lg font-bold text-gray-900">{new Date(selectedTenant.createdAt).toLocaleString()}</p>
                 </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-red-500 font-semibold uppercase tracking-wider">Password (Hashed)</label>
+                  <p className="text-sm font-mono text-gray-900 break-all bg-red-50 p-2 rounded">{selectedTenant.password || 'N/A'}</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Father's Phone</label>
+                  <p className="text-lg font-bold text-gray-900">{selectedTenant.fatherPhone || 'N/A'}</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Mother's Name</label>
+                  <p className="text-lg font-bold text-gray-900">{selectedTenant.motherName || 'N/A'}</p>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Mother's Phone</label>
+                  <p className="text-lg font-bold text-gray-900">{selectedTenant.motherPhone || 'N/A'}</p>
+                </div>
                 <div className="space-y-2 col-span-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Permanent Address</label>
                   <p className="text-lg font-bold text-gray-900">{selectedTenant.permanentAddress}</p>
