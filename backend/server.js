@@ -7,30 +7,15 @@ const paymentRoutes = require('./routes/payment');
 
 const app = express();
 
-// Handle preflight OPTIONS requests
-app.options('*', cors(corsOptions));
-
 // CORS + body parsing FIRST (before any routes) so /api/payments etc. get CORS headers
 // CORS configuration
 const corsOptions = {
-  origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'https://gangabhawan.vercel.app',
-      'https://ganga-bhawan-web.vercel.app',
-      'http://localhost:3000',
-      'http://localhost:5173',
-      'http://localhost:5000'
-    ];
-    
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: [
+    'https://gangabhawan.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    process.env.CLIENT_URL
+  ].filter(Boolean), // Remove any undefined values
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
@@ -39,18 +24,7 @@ app.use(cors(corsOptions));
 
 // Additional CORS headers for Vercel compatibility
 app.use((req, res, next) => {
-  const allowedOrigins = [
-    'https://gangabhawan.vercel.app',
-    'https://ganga-bhawan-web.vercel.app',
-    'http://localhost:3000',
-    'http://localhost:5173'
-  ];
-  
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-  
+  res.header('Access-Control-Allow-Origin', req.headers.origin || 'https://gangabhawan.vercel.app');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, Origin, X-Requested-With');
   res.header('Access-Control-Allow-Credentials', 'true');
@@ -80,20 +54,7 @@ app.use('/api/admin', require('./routes/admin'));
 
 // Test Route
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'Backend is running!',
-    timestamp: new Date().toISOString(),
-    cors: 'enabled'
-  });
-});
-
-// CORS Test Route
-app.get('/api/test', (req, res) => {
-  res.json({ 
-    message: 'CORS test successful!',
-    origin: req.headers.origin,
-    timestamp: new Date().toISOString()
-  });
+  res.json({ message: 'Backend is running!' });
 });
 
 // Start Server
