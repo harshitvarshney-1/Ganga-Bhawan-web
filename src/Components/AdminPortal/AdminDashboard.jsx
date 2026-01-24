@@ -30,6 +30,8 @@ const AdminDashboard = () => {
   const [tenantPayments, setTenantPayments] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
+  const [resetPasswordInput, setResetPasswordInput] = useState('');
+  const [resetting, setResetting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -278,6 +280,46 @@ const AdminDashboard = () => {
     setSelectedHistoryTenant(tenant);
     fetchTenantPayments(tenant._id);
     setIsHistoryModalOpen(true);
+  };
+
+  const handleResetPassword = async (tenantId) => {
+    if (!resetPasswordInput || resetPasswordInput.length < 6) {
+      alert('⚠️ Password must be at least 6 characters long');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to change the password for ${selectedTenant.fullName}?`)) {
+      return;
+    }
+
+    setResetting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${BASE_URL}/api/admin/reset-password/${tenantId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ newPassword: resetPasswordInput })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert(`✅ ${data.message}`);
+        setResetPasswordInput(''); // Clear input
+        // Refresh data to show new hash (optional but good practice)
+        fetchTenants();
+      } else {
+        alert(`❌ ${data.error || 'Failed to reset password'}`);
+      }
+    } catch (error) {
+      console.error('Password reset error:', error);
+      alert('❌ Server error during password reset');
+    } finally {
+      setResetting(false);
+    }
   };
 
   const handleApprove = async (tenantId) => {
@@ -1192,6 +1234,29 @@ const AdminDashboard = () => {
                 <div className="space-y-2">
                   <label className="text-xs text-red-500 font-semibold uppercase tracking-wider">Password (Hashed)</label>
                   <p className="text-sm font-mono text-gray-900 break-all bg-red-50 p-2 rounded">{selectedTenant.password || 'N/A'}</p>
+                </div>
+                {/* Manual Password Reset Section */}
+                <div className="space-y-2 col-span-2 bg-gray-50 p-6 rounded-2xl border-2 border-dashed border-gray-200">
+                  <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Reset Account Password (Manual)</label>
+                  <div className="flex flex-col sm:flex-row gap-3 mt-2">
+                    <input
+                      type="text"
+                      value={resetPasswordInput}
+                      onChange={(e) => setResetPasswordInput(e.target.value)}
+                      placeholder="Enter new plain text password..."
+                      className="flex-1 px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-cyan-500 outline-none"
+                    />
+                    <button
+                      onClick={() => handleResetPassword(selectedTenant._id)}
+                      disabled={resetting}
+                      className="px-6 py-3 bg-gray-900 text-white font-bold rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50"
+                    >
+                      {resetting ? 'Updating...' : 'Update Password'}
+                    </button>
+                  </div>
+                  <p className="text-[10px] text-gray-400 mt-2 italic">
+                    * This will override the tenant's current password. Inform them via WhatsApp/Call after updating.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Father's Phone</label>

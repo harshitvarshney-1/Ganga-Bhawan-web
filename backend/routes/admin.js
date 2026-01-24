@@ -258,4 +258,35 @@ router.get('/tenant-payments/:tenantId', auth, isAdmin, async (req, res) => {
   }
 });
 
+// POST: Reset tenant password (manual override by admin)
+router.post('/reset-password/:tenantId', auth, isAdmin, async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+    }
+
+    const tenant = await User.findById(req.params.tenantId);
+    if (!tenant) {
+      return res.status(404).json({ error: 'Tenant not found' });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    tenant.password = hashedPassword;
+    await tenant.save();
+
+    res.json({
+      success: true,
+      message: `Password for ${tenant.fullName} has been updated successfully.`
+    });
+  } catch (error) {
+    console.error('Error resetting password:', error);
+    res.status(500).json({ error: 'Server error during password reset' });
+  }
+});
+
 module.exports = router;
