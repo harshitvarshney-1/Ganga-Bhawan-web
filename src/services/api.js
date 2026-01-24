@@ -1,5 +1,5 @@
-// Use backend URL for production, relative path for development
-export const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://ganga-bhawan-backend.vercel.app';
+// Use relative path in production (Vercel proxies /api requests)
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || '';
 const API_URL = `${BASE_URL}/api`;
 
 // Register Tenant
