@@ -20,8 +20,7 @@ export default function Register() {
   });
   
   const [files, setFiles] = useState({
-    aadhaarFront: null,
-    aadhaarBack: null,
+    aadhaarDocument: null,
   });
   
   const [loading, setLoading] = useState(false);
@@ -74,6 +73,13 @@ export default function Register() {
     setLoading(true);
     setError('');
 
+    // Frontend validation
+    if (!files.aadhaarDocument) {
+      setError('Please upload your Aadhaar document');
+      setLoading(false);
+      return;
+    }
+
     try {
       // Create FormData object
       const data = new FormData();
@@ -84,11 +90,8 @@ export default function Register() {
       });
       
       // Append files
-      if (files.aadhaarFront) {
-        data.append('aadhaarFront', files.aadhaarFront);
-      }
-      if (files.aadhaarBack) {
-        data.append('aadhaarBack', files.aadhaarBack);
+      if (files.aadhaarDocument) {
+        data.append('aadhaarDocument', files.aadhaarDocument);
       }
 
       // Call API
@@ -196,6 +199,7 @@ export default function Register() {
                 name="fatherPhone"
                 value={formData.fatherPhone}
                 onChange={handleChange}
+                required
                 pattern="[0-9]{10}"
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 placeholder="10-digit number"
@@ -212,6 +216,7 @@ export default function Register() {
                 name="motherName"
                 value={formData.motherName}
                 onChange={handleChange}
+                required
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 placeholder="Mother's name"
               />
@@ -223,6 +228,7 @@ export default function Register() {
                 name="motherPhone"
                 value={formData.motherPhone}
                 onChange={handleChange}
+                required
                 pattern="[0-9]{10}"
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 placeholder="10-digit number"
@@ -290,26 +296,29 @@ export default function Register() {
           </div>
 
           {/* Aadhaar Upload */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-300 mb-2">Upload Aadhaar (Front)</label>
+          <div>
+            <label className="block text-gray-300 mb-2">Upload Aadhaar Document (PDF or Photo)</label>
+            <div className="flex gap-4">
               <input
                 type="file"
-                name="aadhaarFront"
+                name="aadhaarDocument"
                 onChange={handleFileChange}
                 accept="image/*,application/pdf"
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                required
+                className="hidden"
+                id="aadhaarDocument"
               />
-            </div>
-            <div>
-              <label className="block text-gray-300 mb-2">Upload Aadhaar (Back)</label>
-              <input
-                type="file"
-                name="aadhaarBack"
-                onChange={handleFileChange}
-                accept="image/*,application/pdf"
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              />
+              <label
+                htmlFor="aadhaarDocument"
+                className="flex-1 bg-cyan-600 text-white px-4 py-3 rounded hover:bg-cyan-500 transition cursor-pointer text-center font-semibold"
+              >
+                📎 Choose File
+              </label>
+              {files.aadhaarDocument && (
+                <span className="flex-1 bg-gray-700 text-white px-4 py-3 rounded text-center truncate">
+                  {files.aadhaarDocument.name}
+                </span>
+              )}
             </div>
           </div>
 

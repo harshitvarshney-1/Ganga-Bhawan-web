@@ -64,18 +64,6 @@ export default function Login() {
       <div className="max-w-md w-full bg-gray-800 rounded-lg p-4 sm:p-6 lg:p-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">Login</h2>
 
-        {/* Check if already logged in */}
-        {(() => {
-          const token = localStorage.getItem('token');
-          const user = token ? JSON.parse(localStorage.getItem('user') || '{}') : null;
-          if (user) {
-            return (
-              <div className="bg-blue-900/50 border border-blue-500 rounded-lg p-3 mb-4"></div>
-            );
-          }
-          return null;
-        })()}
-
         {/* Tabs */}
         <div className="flex gap-2 mb-6">
           <button

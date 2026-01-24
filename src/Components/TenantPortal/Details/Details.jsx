@@ -105,10 +105,10 @@ const Details = ({ userData, formData, editing, setEditing, handleInputChange, h
           </svg>
           Documents
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {userData?.aadhaarFront && (
+        <div className="flex justify-center">
+          {userData?.aadhaarDocument && (
             <a
-              href={`${BASE_URL}/${userData.aadhaarFront}`}
+              href={`${BASE_URL}/${userData.aadhaarDocument}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-6 hover:from-blue-100 hover:to-cyan-100 transition-all shadow-md"
@@ -119,29 +119,7 @@ const Details = ({ userData, formData, editing, setEditing, handleInputChange, h
                 </svg>
               </div>
               <div>
-                <p className="font-semibold text-gray-900">Aadhaar Front</p>
-                <p className="text-sm text-gray-500">View Document</p>
-              </div>
-              <svg className="w-5 h-5 text-blue-600 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </a>
-          )}
-
-          {userData?.aadhaarBack && (
-            <a
-              href={`${BASE_URL}/${userData.aadhaarBack}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-6 hover:from-blue-100 hover:to-cyan-100 transition-all shadow-md"
-            >
-              <div className="bg-blue-500 rounded-lg p-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div>
-                <p className="font-semibold text-gray-900">Aadhaar Back</p>
+                <p className="font-semibold text-gray-900">Aadhaar Document</p>
                 <p className="text-sm text-gray-500">View Document</p>
               </div>
               <svg className="w-5 h-5 text-blue-600 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
