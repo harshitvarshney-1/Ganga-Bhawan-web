@@ -32,6 +32,7 @@ const AdminDashboard = () => {
   const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
   const [resetPasswordInput, setResetPasswordInput] = useState('');
   const [resetting, setResetting] = useState(false);
+  const [selectedAadhaar, setSelectedAadhaar] = useState(null);
 
   const navigate = useNavigate();
 
@@ -101,16 +102,19 @@ const AdminDashboard = () => {
       if (event.key === 'Escape' && fullScreenImage) {
         setFullScreenImage(null);
       }
+      if (event.key === 'Escape' && selectedAadhaar) {
+        setSelectedAadhaar(null);
+      }
     };
 
-    if (fullScreenImage) {
+    if (fullScreenImage || selectedAadhaar) {
       document.addEventListener('keydown', handleKeyDown);
     }
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
     };
-  }, [fullScreenImage]);
+  }, [fullScreenImage, selectedAadhaar]);
 
   // Fetch tenants as before
   const fetchTenants = async () => {
@@ -509,14 +513,12 @@ const AdminDashboard = () => {
 
           {tenant.aadhaarFile && (
             <div className="mb-6">
-              <a
-                href={tenant.aadhaarFile.startsWith('data:') ? tenant.aadhaarFile : `${BASE_URL}/${tenant.aadhaarFile}`}
-                target="_blank"
-                rel="noopener noreferrer"
+              <button
+                onClick={() => setSelectedAadhaar(tenant)}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
               >
                 📄 View Aadhaar Card (Image/PDF)
-              </a>
+              </button>
             </div>
           )}
 
@@ -1274,14 +1276,12 @@ const AdminDashboard = () => {
                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4">Documents</h3>
                   <div className="flex gap-4">
-                    <a 
-                      href={selectedTenant.aadhaarFile.startsWith('data:') ? selectedTenant.aadhaarFile : `${BASE_URL}/${selectedTenant.aadhaarFile}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
+                    <button 
+                      onClick={() => setSelectedAadhaar(selectedTenant)}
                       className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold"
                     >
                       📄 View Aadhaar Card
-                    </a>
+                    </button>
                   </div>
                 </div>
               )}
@@ -1455,6 +1455,77 @@ const AdminDashboard = () => {
         </div>
       )}
 
+      {/* Aadhaar File Viewer Modal - FULL IMAGE FIT IN VIEW */}
+{selectedAadhaar && (
+  <div 
+    className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+    onClick={() => setSelectedAadhaar(null)}
+  >
+    <div 
+      className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl flex flex-col"
+      style={{ height: '90vh' }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {/* Header - Fixed */}
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 flex-shrink-0">
+        <div>
+          <h3 className="text-lg font-semibold text-gray-800">
+            Aadhaar Card: {selectedAadhaar.fullName}
+          </h3>
+          <p className="text-sm text-gray-500">ID: {selectedAadhaar.aadhaarNumber}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <a
+            href={`${BASE_URL}/api/admin/tenant-aadhaar/${selectedAadhaar._id}?token=${localStorage.getItem('token')}`}
+            download
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all flex items-center gap-2 text-sm"
+          >
+            Download ⬇️
+          </a>
+          <button
+            onClick={() => setSelectedAadhaar(null)}
+            className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-lg transition-all text-gray-600 text-xl"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+
+      {/* Content Area - Full image fit without scroll */}
+      <div 
+        className="flex-1 bg-gray-900 flex items-center justify-center p-4 overflow-hidden"
+      >
+        {/* Check if PDF or Image */}
+        {selectedAadhaar.aadhaarFileData?.contentType === 'application/pdf' || 
+         selectedAadhaar.aadhaarFile?.includes('pdf') || 
+         selectedAadhaar.aadhaarFileData?.filename?.toLowerCase().endsWith('.pdf') ? (
+          <iframe
+            src={`${BASE_URL}/api/admin/tenant-aadhaar/${selectedAadhaar._id}?token=${localStorage.getItem('token')}`}
+            className="w-full h-full rounded-lg"
+            title="Aadhaar PDF"
+          />
+        ) : (
+          <img
+            src={`${BASE_URL}/api/admin/tenant-aadhaar/${selectedAadhaar._id}?token=${localStorage.getItem('token')}`}
+            alt="Aadhaar Card"
+            className="w-full h-full object-contain"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "https://via.placeholder.com/800x600?text=Error+Loading+Image";
+            }}
+          />
+        )}
+      </div>
+
+      {/* Footer - Fixed */}
+      <div className="p-3 bg-white border-t border-gray-100 text-center flex-shrink-0">
+        <p className="text-xs text-gray-500">
+          Large images might take a moment to load. Press ESC or click ✕ to close.
+        </p>
+      </div>
+    </div>
+  </div>
+)}
       {/* Payment History Modal */}
       <PaymentHistoryModal />
     </div>

@@ -108,7 +108,7 @@ const Details = ({ userData, formData, editing, setEditing, handleInputChange, h
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {userData?.aadhaarFile && (
             <a
-              href={userData.aadhaarFile.startsWith('data:') ? userData.aadhaarFile : `${BASE_URL}/${userData.aadhaarFile}`}
+              href={`${BASE_URL}/api/admin/tenant-aadhaar/${userData._id}?token=${localStorage.getItem('token')}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-200 rounded-xl p-6 hover:from-blue-100 hover:to-cyan-100 transition-all shadow-md w-full"

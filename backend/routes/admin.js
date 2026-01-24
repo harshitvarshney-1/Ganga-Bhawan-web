@@ -1,5 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const auth = require('../middleware/auth');
 const User = require('../models/User');
 const Payment = require('../models/Payment');
@@ -287,6 +288,34 @@ router.post('/reset-password/:tenantId', auth, isAdmin, async (req, res) => {
   } catch (error) {
     console.error('Error resetting password:', error);
     res.status(500).json({ error: `Server error: ${error.message}` });
+  }
+});
+
+// GET: Serving Aadhaar file from database Buffer
+router.get('/tenant-aadhaar/:id', async (req, res) => {
+  try {
+    // Custom auth logic for query param token (for <img> and <iframe>)
+    const token = req.query.token || (req.headers['authorization']?.startsWith('Bearer ') ? req.headers['authorization'].split(' ')[1] : null);
+
+    if (!token) {
+      return res.status(401).json({ error: 'No token, authorization denied' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (decoded.role !== 'admin' && decoded.userId !== req.params.id) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    const tenant = await User.findById(req.params.id);
+    if (!tenant || !tenant.aadhaarFileData || !tenant.aadhaarFileData.data) {
+      return res.status(404).json({ error: 'Aadhaar file not found' });
+    }
+
+    res.set('Content-Type', tenant.aadhaarFileData.contentType || 'image/jpeg');
+    res.send(tenant.aadhaarFileData.data);
+  } catch (error) {
+    console.error('Error serving Aadhaar file:', error);
+    res.status(500).json({ error: 'Server error serving file' });
   }
 });
 
