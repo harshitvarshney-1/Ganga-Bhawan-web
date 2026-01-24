@@ -3,67 +3,42 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 const User = require('../models/User');
 
 const router = express.Router();
 
-// Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, '..', 'uploads');
-const documentsDir = path.join(uploadsDir, 'documents');
-
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
-}
-
-if (!fs.existsSync(documentsDir)) {
-  fs.mkdirSync(documentsDir, { recursive: true });
-}
-
 // File Upload Configuration
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    // Save documents in organized directory
-    if (file.fieldname === 'aadhaarDocument') {
-      cb(null, documentsDir);
-    } else {
-      cb(null, uploadsDir);
-    }
+    const uploadPath = path.join(__dirname, '..', 'uploads');
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-    // Create unique filename with timestamp and original extension
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    const basename = path.basename(file.originalname, ext);
-    cb(null, `${uniqueSuffix}-${basename}${ext}`);
+    cb(null, Date.now() + '-' + file.originalname);
   }
 });
 
 const upload = multer({ 
   storage: storage,
-  limits: { 
-    fileSize: 10 * 1024 * 1024, // Increased to 10MB for better document handling
-    files: 1 // Limit to 1 file per upload
-  },
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /jpeg|jpg|png|pdf/;
-    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-    const mimetype = allowedTypes.test(file.mimetype);
+    const fileTypes = /jpeg|jpg|png|pdf/;
+    const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = fileTypes.test(file.mimetype);
     
     if (mimetype && extname) {
       return cb(null, true);
     } else {
-      cb(new Error('Only JPEG, PNG, and PDF files are allowed!'));
+      cb('Error: Images and PDFs only!');
     }
   }
 });
 
 // REGISTER TENANT
 router.post('/register', upload.fields([
-  { name: 'aadhaarDocument', maxCount: 1 }
+  { name: 'aadhaarFront', maxCount: 1 },
+  { name: 'aadhaarBack', maxCount: 1 }
 ]), async (req, res) => {
-  let uploadedFile = null;
-  
   try {
     const { 
       fullName, email, password, mobileNumber, 
@@ -72,22 +47,8 @@ router.post('/register', upload.fields([
     } = req.body;
 
     // Validation
-    if (!fullName || !email || !password || !mobileNumber || !fatherName || !fatherPhone || !motherName || !motherPhone || !dateOfBirth || !gender || !permanentAddress || !aadhaarNumber) {
+    if (!fullName || !email || !password || !mobileNumber || !aadhaarNumber) {
       return res.status(400).json({ error: 'Please fill all required fields' });
-    }
-
-    // Check if file is uploaded
-    if (!req.files || !req.files['aadhaarDocument'] || req.files['aadhaarDocument'].length === 0) {
-      return res.status(400).json({ error: 'Aadhaar document is required' });
-    }
-
-    uploadedFile = req.files['aadhaarDocument'][0];
-
-    // Additional file validation
-    if (uploadedFile.size === 0) {
-      // Clean up empty file
-      fs.unlinkSync(uploadedFile.path);
-      return res.status(400).json({ error: 'Uploaded file is empty' });
     }
 
     // Check if user already exists
@@ -96,8 +57,6 @@ router.post('/register', upload.fields([
     });
     
     if (existingUser) {
-      // Clean up uploaded file if user already exists
-      fs.unlinkSync(uploadedFile.path);
       return res.status(400).json({ 
         error: 'Email or Aadhaar number already registered' 
       });
@@ -121,18 +80,10 @@ router.post('/register', upload.fields([
       gender,
       permanentAddress,
       aadhaarNumber,
-      aadhaarDocument: req.files['aadhaarDocument']?.[0] ? `uploads/documents/${req.files['aadhaarDocument'][0].filename}` : null,
+      aadhaarFront: req.files['aadhaarFront']?.[0] ? `uploads/${req.files['aadhaarFront'][0].filename}` : null,
+      aadhaarBack: req.files['aadhaarBack']?.[0] ? `uploads/${req.files['aadhaarBack'][0].filename}` : null,
       role: 'tenant',
-      isApproved: false,
-      createdAt: new Date(),
-      fileMetadata: {
-        aadhaarDocument: {
-          originalName: req.files['aadhaarDocument']?.[0]?.originalname,
-          uploadDate: new Date(),
-          size: req.files['aadhaarDocument']?.[0]?.size,
-          mimetype: req.files['aadhaarDocument']?.[0]?.mimetype
-        }
-      }
+      isApproved: false
     });
 
     await newUser.save();
@@ -144,17 +95,6 @@ router.post('/register', upload.fields([
 
   } catch (error) {
     console.error('Registration Error:', error);
-    
-    // Clean up uploaded file if registration fails
-    if (uploadedFile && fs.existsSync(uploadedFile.path)) {
-      try {
-        fs.unlinkSync(uploadedFile.path);
-        console.log('Cleaned up uploaded file due to registration error');
-      } catch (cleanupError) {
-        console.error('Error cleaning up file:', cleanupError);
-      }
-    }
-    
     res.status(500).json({ error: 'Server error during registration' });
   }
 });

@@ -26,10 +26,6 @@ const AdminDashboard = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState(null);
-  const [selectedTenantForPayment, setSelectedTenantForPayment] = useState(null);
-  const [showPaymentViewModal, setShowPaymentViewModal] = useState(false);
-  const [tenantPayments, setTenantPayments] = useState([]);
-  const [tenantPaymentsLoading, setTenantPaymentsLoading] = useState(false);
 
   const navigate = useNavigate();
 
@@ -194,33 +190,6 @@ const AdminDashboard = () => {
     } catch (err) {
       console.error('Error fetching pending payments:', err);
       setPendingPayments([]);
-    }
-  };
-
-  // Fetch payments for a specific tenant
-  const fetchTenantPayments = async (tenantId) => {
-    setTenantPaymentsLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${BASE_URL}/api/admin/tenant-payments/${tenantId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (res.ok) {
-        const data = await res.json();
-        setTenantPayments(data);
-      } else {
-        console.warn('Tenant payments fetch failed:', res.status, res.statusText);
-        setTenantPayments([]);
-      }
-    } catch (err) {
-      console.error('Error fetching tenant payments:', err);
-      setTenantPayments([]);
-    } finally {
-      setTenantPaymentsLoading(false);
     }
   };
 
@@ -493,16 +462,26 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {tenant.aadhaarDocument && (
-            <div className="mb-6">
+          {tenant.aadhaarFront && (
+            <div className="flex gap-3 mb-6">
               <a
-                href={`${BASE_URL}/${tenant.aadhaarDocument}`}
+                href={`${BASE_URL}/${tenant.aadhaarFront}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
               >
-                📄 View Aadhaar Document
+                📄 Aadhaar Front
               </a>
+              {tenant.aadhaarBack && (
+                <a
+                  href={`${BASE_URL}/${tenant.aadhaarBack}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
+                >
+                  📄 Aadhaar Back
+                </a>
+              )}
             </div>
           )}
 
@@ -545,6 +524,62 @@ const AdminDashboard = () => {
       </div>
     );
   }
+
+  // Payment Status Sidebar Section
+  const PaymentStatusSidebar = () => {
+    // Show only for tenant list or overview tabs
+    // Combine pending and approved tenants
+    const allTenants = useMemo(() => [...approvedTenants, ...pendingTenants], [approvedTenants, pendingTenants]);
+    // Remove duplicates in case
+    const uniqueTenants = Array.from(new Map(allTenants.map(t => [t._id, t])).values());
+
+    return (
+      <div className="p-4">
+        <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
+          <span className="text-2xl">💳</span>
+          Payment Status
+        </h3>
+        <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
+          {paymentLoading ? (
+            <div className="text-center text-gray-300 py-4">Loading payments...</div>
+          ) : (
+            uniqueTenants.length === 0 ?
+              <div className="text-center text-gray-300 py-4">No tenants</div>
+            : uniqueTenants.map(tenant => {
+                const payment = paymentStatusMap[tenant._id];
+                return (
+                  <div
+                    className={`flex items-center px-3 py-2 rounded-xl gap-4 ${payment?.status === 'success' ? 'bg-emerald-900/60' : payment?.status === 'pending' ? 'bg-amber-900/50' : 'bg-red-900/30'} text-white`}
+                    key={tenant._id}
+                  >
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-lg flex-shrink-0">
+                      {tenant.fullName.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate font-medium">{tenant.fullName}</div>
+                      <div className="text-xs text-white/80 truncate">
+                        {payment && payment.latestMonthPaid ? payment.latestMonthPaid : "No record"}
+                      </div>
+                    </div>
+                    <div>
+                      {payment ? (
+                        payment.status === 'success'
+                          ? <span className="bg-emerald-500/90 text-white text-xs rounded-full px-3 py-1 font-bold">Paid</span>
+                          : payment.status === 'pending'
+                            ? <span className="bg-amber-400/90 text-gray-900 text-xs rounded-full px-3 py-1 font-bold">Pending</span>
+                            : <span className="bg-red-600/90 text-white text-xs rounded-full px-3 py-1 font-bold">Not Paid</span>
+                      ) : (
+                        <span className="bg-gray-400/90 text-white text-xs rounded-full px-3 py-1 font-bold">No Data</span>
+                      )}
+                    </div>
+                  </div>
+                )
+              })
+          )}
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -660,22 +695,12 @@ const AdminDashboard = () => {
                 </span>
               )}
             </button>
-            
-            <button 
-              onClick={() => {
-                setActiveTab('payment-status');
-                setIsMobileMenuOpen(false);
-              }}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all ${
-                activeTab === 'payment-status' 
-                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg' 
-                  : 'text-gray-300 hover:bg-gray-700'
-              }`}
-            >
-              <span className="text-xl">💰</span>
-              Payment Status
-            </button>
           </nav>
+          
+          {/* Payment Status Sidebar Section */}
+          <div className="mt-6 border-t border-gray-800">
+            <PaymentStatusSidebar />
+          </div>
         </div>
 
         {/* Logout Button - Fixed at bottom */}
@@ -932,114 +957,6 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Payment Status Tab */}
-        {activeTab === 'payment-status' && (
-          <div className="space-y-6">
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Status Overview</h2>
-              
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Tenant List */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Select Tenant</h3>
-                  <div className="max-h-96 overflow-y-auto space-y-2">
-                    {[...pendingTenants, ...approvedTenants].map((tenant) => {
-                      const paymentInfo = paymentStatusMap[tenant._id?.toString()];
-                      return (
-                        <button
-                          key={tenant._id}
-                          onClick={() => {
-                            setSelectedTenantForPayment(tenant);
-                            fetchTenantPayments(tenant._id);
-                            setShowPaymentViewModal(true);
-                          }}
-                          className="w-full flex items-center gap-3 p-4 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors text-left"
-                        >
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold flex-shrink-0">
-                            {tenant.fullName.charAt(0).toUpperCase()}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-gray-900 truncate">{tenant.fullName}</p>
-                            <p className="text-sm text-gray-500 truncate">{tenant.email}</p>
-                          </div>
-                          <div className="flex-shrink-0">
-                            {paymentInfo?.status === 'success' ? (
-                              <span className="inline-block px-2 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-800">
-                                Paid
-                              </span>
-                            ) : paymentInfo?.status === 'pending' ? (
-                              <span className="inline-block px-2 py-1 text-xs font-bold rounded-full bg-amber-100 text-amber-800">
-                                Pending
-                              </span>
-                            ) : (
-                              <span className="inline-block px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800">
-                                Unpaid
-                              </span>
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                    {[...pendingTenants, ...approvedTenants].length === 0 && (
-                      <p className="text-center text-gray-500 py-8">No tenants found</p>
-                    )}
-                  </div>
-                </div>
-                
-                {/* Payment Status Summary */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-gray-800">Payment Summary</h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200">
-                      <div className="text-2xl font-bold text-emerald-600">
-                        {(() => {
-                          const allTenants = [...pendingTenants, ...approvedTenants];
-                          const paidCount = allTenants.filter(tenant => {
-                            const paymentInfo = paymentStatusMap[tenant._id?.toString()];
-                            return paymentInfo?.status === 'success';
-                          }).length;
-                          return paidCount;
-                        })()}
-                      </div>
-                      <p className="text-sm text-emerald-700 font-medium">Paid Tenants</p>
-                    </div>
-                    <div className="bg-red-50 rounded-xl p-4 border border-red-200">
-                      <div className="text-2xl font-bold text-red-600">
-                        {(() => {
-                          const allTenants = [...pendingTenants, ...approvedTenants];
-                          return allTenants.filter(tenant => {
-                            const paymentInfo = paymentStatusMap[tenant._id?.toString()];
-                            return !paymentInfo || paymentInfo.status !== 'success';
-                          }).length;
-                        })()}
-                      </div>
-                      <p className="text-sm text-red-700 font-medium">Unpaid Tenants</p>
-                    </div>
-                    <div className="bg-amber-50 rounded-xl p-4 border border-amber-200">
-                      <div className="text-2xl font-bold text-amber-600">
-                        {(() => {
-                          const allTenants = [...pendingTenants, ...approvedTenants];
-                          return allTenants.filter(tenant => {
-                            const paymentInfo = paymentStatusMap[tenant._id?.toString()];
-                            return paymentInfo?.status === 'pending';
-                          }).length;
-                        })()}
-                      </div>
-                      <p className="text-sm text-amber-700 font-medium">Pending Approval</p>
-                    </div>
-                    <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                      <div className="text-2xl font-bold text-blue-600">
-                        {[...pendingTenants, ...approvedTenants].length}
-                      </div>
-                      <p className="text-sm text-blue-700 font-medium">Total Tenants</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Tenant Lists */}
         {(activeTab === 'pending' || activeTab === 'approved' || activeTab === 'all') && (
           <div className="space-y-6">
@@ -1177,18 +1094,28 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {selectedTenant.aadhaarDocument && (
+              {selectedTenant.aadhaarFront && (
                 <div className="bg-gray-50 rounded-2xl p-6 mb-6">
                   <h3 className="text-lg font-bold text-gray-900 mb-4">Documents</h3>
-                  <div className="flex justify-center">
+                  <div className="flex gap-4">
                     <a 
-                      href={`http://localhost:5000/${selectedTenant.aadhaarDocument}`} 
+                      href={`http://localhost:5000/${selectedTenant.aadhaarFront}`} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold"
+                      className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold"
                     >
-                      📄 View Aadhaar Document
+                      📄 View Aadhaar Front
                     </a>
+                    {selectedTenant.aadhaarBack && (
+                      <a 
+                        href={`http://localhost:5000/${selectedTenant.aadhaarBack}`} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold"
+                      >
+                        📄 View Aadhaar Back
+                      </a>
+                    )}
                   </div>
                 </div>
               )}
@@ -1327,116 +1254,6 @@ const AdminDashboard = () => {
                   ✕ Reject Payment
                 </button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Payment View Modal */}
-      {showPaymentViewModal && selectedTenantForPayment && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-900">
-                Payment History - {selectedTenantForPayment.fullName}
-              </h2>
-              <button
-                onClick={() => {
-                  setShowPaymentViewModal(false);
-                  setSelectedTenantForPayment(null);
-                  setTenantPayments([]);
-                }}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {tenantPaymentsLoading ? (
-                <div className="text-center py-12">
-                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto mb-4"></div>
-                  <p className="text-gray-500">Loading payment history...</p>
-                </div>
-              ) : tenantPayments.length === 0 ? (
-                <div className="text-center py-12">
-                  <div className="text-6xl mb-4">💳</div>
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">No Payment History</h3>
-                  <p className="text-gray-500">This tenant has not made any payments yet.</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {tenantPayments.map((payment) => (
-                    <div key={payment._id} className="border border-gray-200 rounded-xl p-6 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg ${
-                              payment.status === 'approved' 
-                                ? 'bg-gradient-to-br from-emerald-500 to-green-600' 
-                                : payment.status === 'rejected'
-                                ? 'bg-gradient-to-br from-red-500 to-rose-600'
-                                : 'bg-gradient-to-br from-amber-500 to-orange-600'
-                            }`}>
-                              {payment.status === 'approved' ? '✓' : payment.status === 'rejected' ? '✕' : '⏳'}
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-bold text-gray-900">{payment.month} Payment</h3>
-                              <p className="text-sm text-gray-500">
-                                Submitted: {new Date(payment.paymentDate).toLocaleDateString('en-IN', {
-                                  day: 'numeric',
-                                  month: 'long',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                            <div>
-                              <p className="text-xs text-gray-500 font-semibold uppercase mb-1">Amount</p>
-                              <p className="text-lg font-bold text-emerald-600">₹{payment.amount}</p>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 font-semibold uppercase mb-1">Status</p>
-                              <span className={`inline-block px-3 py-1 text-xs font-bold rounded-full ${
-                                payment.status === 'approved' 
-                                  ? 'bg-emerald-100 text-emerald-800' 
-                                  : payment.status === 'rejected'
-                                  ? 'bg-red-100 text-red-800'
-                                  : 'bg-amber-100 text-amber-800'
-                              }`}>
-                                {payment.status.toUpperCase()}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="text-xs text-gray-500 font-semibold uppercase mb-1">Payment Date</p>
-                              <p className="text-sm text-gray-700">
-                                {new Date(payment.createdAt).toLocaleDateString('en-IN')}
-                              </p>
-                            </div>
-                          </div>
-
-                          {payment.barcodeImage && (
-                            <div className="mt-4">
-                              <p className="text-xs text-gray-500 font-semibold uppercase mb-2">Payment Proof</p>
-                              <img
-                                src={payment.barcodeImage}
-                                alt="Payment proof"
-                                className="max-w-xs max-h-32 object-contain rounded-lg border border-gray-200"
-                              />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>

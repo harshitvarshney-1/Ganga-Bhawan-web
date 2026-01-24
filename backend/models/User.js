@@ -24,16 +24,13 @@ const userSchema = new mongoose.Schema({
     required: true 
   },
   fatherPhone: { 
-    type: String,
-    required: true
+    type: String 
   },
   motherName: { 
-    type: String,
-    required: true
+    type: String 
   },
   motherPhone: { 
-    type: String,
-    required: true
+    type: String 
   },
   dateOfBirth: { 
     type: Date, 
@@ -53,26 +50,14 @@ const userSchema = new mongoose.Schema({
     required: true, 
     unique: true 
   },
-  aadhaarDocument: { 
-    type: String,
-    required: true
+  aadhaarFront: { 
+    type: String 
+  },
+  aadhaarBack: { 
+    type: String 
   },
   profilePicture: {
     type: String
-  },
-  fileMetadata: {
-    aadhaarDocument: {
-      originalName: String,
-      uploadDate: Date,
-      size: Number,
-      mimetype: String
-    },
-    profilePicture: {
-      originalName: String,
-      uploadDate: Date,
-      size: Number,
-      mimetype: String
-    }
   },
   role: { 
     type: String, 
