@@ -286,7 +286,7 @@ router.post('/reset-password/:tenantId', auth, isAdmin, async (req, res) => {
     });
   } catch (error) {
     console.error('Error resetting password:', error);
-    res.status(500).json({ error: 'Server error during password reset' });
+    res.status(500).json({ error: `Server error: ${error.message}` });
   }
 });
 
