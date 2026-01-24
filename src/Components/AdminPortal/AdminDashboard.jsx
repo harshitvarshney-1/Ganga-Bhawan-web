@@ -2,6 +2,287 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../../services/api';
 
+const StatCard = ({ title, value, icon, gradient }) => (
+  <div className={`relative overflow-hidden rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 ${gradient}`}>
+    <div className="relative z-10">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-semibold text-white/90 uppercase tracking-wider">{title}</p>
+        <div className="text-3xl">{icon}</div>
+      </div>
+      <h3 className="text-4xl font-bold text-white mb-2">{value}</h3>
+    </div>
+    <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+  </div>
+);
+
+const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSelectedAadhaar, handleApprove, handleReject }) => {
+  return (
+    <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden">
+      <div className="p-6">
+        <div className="flex items-start gap-4 mb-6">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl flex-shrink-0 shadow-lg">
+            {tenant.fullName.charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-xl font-bold text-gray-900 mb-1 truncate">{tenant.fullName}</h3>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <span>{new Date(tenant.createdAt).toLocaleDateString()}</span>
+            </div>
+          </div>
+          <span className={`px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 ${
+            isPending ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
+          }`}>
+            {isPending ? '⏰' : '✅'} {isPending ? 'Pending' : 'Approved'}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+            <span className="text-cyan-600 text-xl">📧</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-gray-500 font-medium uppercase mb-1">Email</p>
+              <p className="text-sm font-semibold text-gray-900 truncate">{tenant.email}</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+            <span className="text-cyan-600 text-xl">📱</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-gray-500 font-medium uppercase mb-1">Mobile</p>
+              <p className="text-sm font-semibold text-gray-900">{tenant.mobileNumber}</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+            <span className="text-cyan-600 text-xl">🆔</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-gray-500 font-medium uppercase mb-1">Aadhaar</p>
+              <p className="text-sm font-semibold text-gray-900">{tenant.aadhaarNumber}</p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+            <span className="text-cyan-600 text-xl">👤</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-gray-500 font-medium uppercase mb-1">Gender</p>
+              <p className="text-sm font-semibold text-gray-900">{tenant.gender}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-3 bg-gray-50 rounded-lg mb-6">
+          <div className="flex items-start gap-2">
+            <span className="text-cyan-600 text-xl">📍</span>
+            <div className="flex-1">
+              <p className="text-xs text-gray-500 font-medium uppercase mb-1">Address</p>
+              <p className="text-sm text-gray-900 font-medium">{tenant.permanentAddress}</p>
+            </div>
+          </div>
+        </div>
+
+        {tenant.aadhaarFile && (
+          <div className="mb-6">
+            <button
+              onClick={() => setSelectedAadhaar(tenant)}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
+            >
+              📄 View Aadhaar Card (Image/PDF)
+            </button>
+          </div>
+        )}
+
+
+        <div className="flex gap-3 pt-6 border-t border-gray-100">
+          <button
+            onClick={() => { setSelectedTenant(tenant); setShowModal(true); }}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-semibold"
+          >
+            👁️ View
+          </button>
+          {isPending && (
+            <>
+              <button
+                onClick={() => handleApprove(tenant._id)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all font-semibold shadow-lg"
+              >
+                ✓ Approve
+              </button>
+              <button
+                onClick={() => handleReject(tenant._id)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:from-red-600 hover:to-rose-700 transition-all font-semibold shadow-lg"
+              >
+                ✕ Reject
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Status (Monthly History)</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {approvedTenants.length === 0 ? (
+            <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl">
+              <p className="text-gray-500 text-lg">No approved tenants to track payments</p>
+            </div>
+          ) : (
+            approvedTenants.map(tenant => (
+              <div 
+                key={tenant._id}
+                onClick={() => openHistoryModal(tenant)}
+                className="bg-white border-2 border-gray-100 rounded-2xl p-6 hover:border-cyan-500 hover:shadow-xl transition-all cursor-pointer group"
+              >
+                <div className="flex items-center gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform">
+                    {tenant.fullName.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 group-hover:text-cyan-600 transition-colors">{tenant.fullName}</h3>
+                    <p className="text-sm text-gray-500">{tenant.mobileNumber}</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                  <span className="text-xs font-semibold text-gray-400 uppercase">View History</span>
+                  <span className="text-xl">➡️</span>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const PaymentHistoryModal = ({ 
+  isHistoryModalOpen, 
+  setIsHistoryModalOpen, 
+  selectedHistoryTenant, 
+  loadingHistory, 
+  tenantPayments, 
+  setFullScreenImage 
+}) => {
+  if (!isHistoryModalOpen || !selectedHistoryTenant) return null;
+
+  const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const currentMonth = new Date().getMonth();
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <div 
+      className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4"
+      onClick={() => setIsHistoryModalOpen(false)}
+    >
+      <div 
+        className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between z-10">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl">
+              {selectedHistoryTenant.fullName.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">{selectedHistoryTenant.fullName}</h2>
+              <p className="text-sm text-gray-500">Payment History for {currentYear}</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => setIsHistoryModalOpen(false)}
+            className="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-xl transition-all text-gray-600 text-2xl"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="p-8">
+          {loadingHistory ? (
+            <div className="py-20 text-center">
+              <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-gray-500 font-semibold">Loading payment records...</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                {monthNamesShort.map((month, idx) => {
+                  const payment = tenantPayments.find(p => p.monthIndex === idx && new Date(p.paymentDate).getFullYear() === currentYear);
+                  const isPaid = payment?.status === 'success';
+                  const isPending = payment?.status === 'pending';
+                  const isRejected = payment?.status === 'rejected';
+                  const isOverdue = !isPaid && !isPending && idx <= currentMonth;
+
+                  let statusClass = "bg-gray-50 border-gray-200 text-gray-400";
+                  let statusIcon = "📅";
+                  let statusLabel = "Upcoming";
+
+                  if (isPaid) {
+                    statusClass = "bg-emerald-50 border-emerald-500 text-emerald-700";
+                    statusIcon = "✅";
+                    statusLabel = "Paid";
+                  } else if (isPending) {
+                    statusClass = "bg-amber-50 border-amber-500 text-amber-700";
+                    statusIcon = "⏳";
+                    statusLabel = "Pending";
+                  } else if (isRejected) {
+                    statusClass = "bg-red-50 border-red-500 text-red-700";
+                    statusIcon = "❌";
+                    statusLabel = "Rejected";
+                  } else if (isOverdue) {
+                    statusClass = "bg-rose-50 border-rose-500 text-rose-700";
+                    statusIcon = "❗";
+                    statusLabel = "Overdue";
+                  }
+
+                  return (
+                    <div 
+                      key={month}
+                      className={`relative p-4 rounded-2xl border-2 transition-all ${statusClass}`}
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="font-bold text-lg">{month}</span>
+                        <span className="text-xl">{statusIcon}</span>
+                      </div>
+                      <p className="text-xs font-bold uppercase tracking-wider mb-3">{statusLabel}</p>
+                      
+                      {(isPaid || isPending || isRejected) && payment.barcodeImage && (
+                        <button 
+                          onClick={() => setFullScreenImage(payment.barcodeImage)}
+                          className="w-full py-2 bg-white/60 hover:bg-white text-xs font-bold rounded-lg transition-colors border border-current"
+                        >
+                          👁️ View Receipt
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="bg-gray-50 rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4">Legend</h3>
+                <div className="flex flex-wrap gap-6">
+                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-emerald-500"></span> <span className="text-sm">Paid</span></div>
+                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-amber-500"></span> <span className="text-sm">Pending Approval</span></div>
+                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-rose-500"></span> <span className="text-sm">Overdue / Unpaid</span></div>
+                  <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-300"></span> <span className="text-sm">Upcoming</span></div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [pendingTenants, setPendingTenants] = useState([]);
@@ -19,8 +300,6 @@ const AdminDashboard = () => {
     thisMonth: 0,
     todayRegistrations: 0
   });
-  const [paymentStatusMap, setPaymentStatusMap] = useState({});
-  const [paymentLoading, setPaymentLoading] = useState(false);
   const [pendingPayments, setPendingPayments] = useState([]);
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -44,12 +323,10 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchTenants();
-    fetchAllPayments();
     fetchPendingPayments();
     
     // Refresh payments every 10 seconds to get latest payment updates
     const paymentInterval = setInterval(() => {
-      fetchAllPayments();
       fetchPendingPayments();
     }, 10000); // Check every 10 seconds for faster updates
     
@@ -155,33 +432,6 @@ const AdminDashboard = () => {
     }
   };
 
-  // Fetch all tenant payment status for sidebar
-  const fetchAllPayments = async () => {
-    setPaymentLoading(true);
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(`${BASE_URL}/api/admin/payments-summary`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!res.ok) {
-        console.error('Failed to fetch payments summary:', res.status);
-        setPaymentLoading(false);
-        return;
-      }
-      const data = await res.json();
-      // data expected: [{ tenantId, latestMonthPaid: 'June 2024', status: 'success'|'pending'|'failed' }, ...]
-      const statusMap = {};
-      data.forEach(item => {
-        statusMap[item.tenantId] = item;
-      });
-      setPaymentStatusMap(statusMap);
-      setPaymentLoading(false);
-    } catch (err) {
-      console.error('Error fetching payments summary:', err);
-      setPaymentLoading(false);
-      // Don't clear existing data on error, keep showing what we have
-    }
-  };
 
   // Fetch pending payments for approval
   const fetchPendingPayments = async () => {
@@ -219,7 +469,6 @@ const AdminDashboard = () => {
         // Refresh all payment data
         await Promise.all([
           fetchPendingPayments(),
-          fetchAllPayments(),
           fetchTenants() // Refresh tenants to update payment status in cards
         ]);
         
@@ -248,7 +497,6 @@ const AdminDashboard = () => {
       if (response.ok) {
         alert('✅ Payment rejected');
         fetchPendingPayments();
-        fetchAllPayments();
         setShowPaymentModal(false);
       } else {
         alert('❌ Error rejecting payment');
@@ -427,130 +675,7 @@ const AdminDashboard = () => {
     return tenants;
   }, [activeTab, pendingTenants, approvedTenants, searchTerm, dateRange, sortBy]);
 
-  const StatCard = ({ title, value, icon, gradient }) => (
-    <div className={`relative overflow-hidden rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 ${gradient}`}>
-      <div className="relative z-10">
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-semibold text-white/90 uppercase tracking-wider">{title}</p>
-          <div className="text-3xl">{icon}</div>
-        </div>
-        <h3 className="text-4xl font-bold text-white mb-2">{value}</h3>
-      </div>
-      <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-    </div>
-  );
 
-  const TenantCard = ({ tenant, isPending }) => {
-    const paymentInfo = paymentStatusMap[tenant._id];
-    return (
-      <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden">
-        <div className="p-6">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl flex-shrink-0 shadow-lg">
-              {tenant.fullName.charAt(0).toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-xl font-bold text-gray-900 mb-1 truncate">{tenant.fullName}</h3>
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span>{new Date(tenant.createdAt).toLocaleDateString()}</span>
-              </div>
-            </div>
-            <span className={`px-4 py-2 rounded-full text-xs font-bold flex items-center gap-2 ${
-              isPending ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'
-            }`}>
-              {isPending ? '⏰' : '✅'} {isPending ? 'Pending' : 'Approved'}
-            </span>
-          </div>
-
-
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-              <span className="text-cyan-600 text-xl">📧</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-gray-500 font-medium uppercase mb-1">Email</p>
-                <p className="text-sm font-semibold text-gray-900 truncate">{tenant.email}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-              <span className="text-cyan-600 text-xl">📱</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-gray-500 font-medium uppercase mb-1">Mobile</p>
-                <p className="text-sm font-semibold text-gray-900">{tenant.mobileNumber}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-              <span className="text-cyan-600 text-xl">🆔</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-gray-500 font-medium uppercase mb-1">Aadhaar</p>
-                <p className="text-sm font-semibold text-gray-900">{tenant.aadhaarNumber}</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-              <span className="text-cyan-600 text-xl">👤</span>
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-gray-500 font-medium uppercase mb-1">Gender</p>
-                <p className="text-sm font-semibold text-gray-900">{tenant.gender}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-3 bg-gray-50 rounded-lg mb-6">
-            <div className="flex items-start gap-2">
-              <span className="text-cyan-600 text-xl">📍</span>
-              <div className="flex-1">
-                <p className="text-xs text-gray-500 font-medium uppercase mb-1">Address</p>
-                <p className="text-sm text-gray-900 font-medium">{tenant.permanentAddress}</p>
-              </div>
-            </div>
-          </div>
-
-          {tenant.aadhaarFile && (
-            <div className="mb-6">
-              <button
-                onClick={() => setSelectedAadhaar(tenant)}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-sm font-semibold"
-              >
-                📄 View Aadhaar Card (Image/PDF)
-              </button>
-            </div>
-          )}
-
-
-          <div className="flex gap-3 pt-6 border-t border-gray-100">
-            <button
-              onClick={() => { setSelectedTenant(tenant); setShowModal(true); }}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-semibold"
-            >
-              👁️ View
-            </button>
-            {isPending && (
-              <>
-                <button
-                  onClick={() => handleApprove(tenant._id)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-green-600 text-white rounded-xl hover:from-emerald-600 hover:to-green-700 transition-all font-semibold shadow-lg"
-                >
-                  ✓ Approve
-                </button>
-                <button
-                  onClick={() => handleReject(tenant._id)}
-                  className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-red-500 to-rose-600 text-white rounded-xl hover:from-red-600 hover:to-rose-700 transition-all font-semibold shadow-lg"
-                >
-                  ✕ Reject
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   if (loading) {
     return (
@@ -565,158 +690,7 @@ const AdminDashboard = () => {
 
 
 
-  const PaymentStatusTab = () => {
-    return (
-      <div className="space-y-6">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Status (Monthly History)</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {approvedTenants.length === 0 ? (
-              <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl">
-                <p className="text-gray-500 text-lg">No approved tenants to track payments</p>
-              </div>
-            ) : (
-              approvedTenants.map(tenant => (
-                <div 
-                  key={tenant._id}
-                  onClick={() => openHistoryModal(tenant)}
-                  className="bg-white border-2 border-gray-100 rounded-2xl p-6 hover:border-cyan-500 hover:shadow-xl transition-all cursor-pointer group"
-                >
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform">
-                      {tenant.fullName.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900 group-hover:text-cyan-600 transition-colors">{tenant.fullName}</h3>
-                      <p className="text-sm text-gray-500">{tenant.mobileNumber}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-50">
-                    <span className="text-xs font-semibold text-gray-400 uppercase">View History</span>
-                    <span className="text-xl">➡️</span>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
-  const PaymentHistoryModal = () => {
-    if (!isHistoryModalOpen || !selectedHistoryTenant) return null;
-
-    const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-
-    return (
-      <div 
-        className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4"
-        onClick={() => setIsHistoryModalOpen(false)}
-      >
-        <div 
-          className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between z-10">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl">
-                {selectedHistoryTenant.fullName.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">{selectedHistoryTenant.fullName}</h2>
-                <p className="text-sm text-gray-500">Payment History for {currentYear}</p>
-              </div>
-            </div>
-            <button 
-              onClick={() => setIsHistoryModalOpen(false)}
-              className="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-xl transition-all text-gray-600 text-2xl"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="p-8">
-            {loadingHistory ? (
-              <div className="py-20 text-center">
-                <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-gray-500 font-semibold">Loading payment records...</p>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
-                  {monthNamesShort.map((month, idx) => {
-                    const payment = tenantPayments.find(p => p.monthIndex === idx && new Date(p.paymentDate).getFullYear() === currentYear);
-                    const isPaid = payment?.status === 'success';
-                    const isPending = payment?.status === 'pending';
-                    const isRejected = payment?.status === 'rejected';
-                    const isOverdue = !isPaid && !isPending && idx <= currentMonth;
-                    const isUpcoming = idx > currentMonth;
-
-                    let statusClass = "bg-gray-50 border-gray-200 text-gray-400";
-                    let statusIcon = "📅";
-                    let statusLabel = "Upcoming";
-
-                    if (isPaid) {
-                      statusClass = "bg-emerald-50 border-emerald-500 text-emerald-700";
-                      statusIcon = "✅";
-                      statusLabel = "Paid";
-                    } else if (isPending) {
-                      statusClass = "bg-amber-50 border-amber-500 text-amber-700";
-                      statusIcon = "⏳";
-                      statusLabel = "Pending";
-                    } else if (isRejected) {
-                      statusClass = "bg-red-50 border-red-500 text-red-700";
-                      statusIcon = "❌";
-                      statusLabel = "Rejected";
-                    } else if (isOverdue) {
-                      statusClass = "bg-rose-50 border-rose-500 text-rose-700";
-                      statusIcon = "❗";
-                      statusLabel = "Overdue";
-                    }
-
-                    return (
-                      <div 
-                        key={month}
-                        className={`relative p-4 rounded-2xl border-2 transition-all ${statusClass}`}
-                      >
-                        <div className="flex justify-between items-start mb-2">
-                          <span className="font-bold text-lg">{month}</span>
-                          <span className="text-xl">{statusIcon}</span>
-                        </div>
-                        <p className="text-xs font-bold uppercase tracking-wider mb-3">{statusLabel}</p>
-                        
-                        {(isPaid || isPending || isRejected) && payment.barcodeImage && (
-                          <button 
-                            onClick={() => setFullScreenImage(payment.barcodeImage)}
-                            className="w-full py-2 bg-white/60 hover:bg-white text-xs font-bold rounded-lg transition-colors border border-current"
-                          >
-                            👁️ View Receipt
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-
-                <div className="bg-gray-50 rounded-2xl p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Legend</h3>
-                  <div className="flex flex-wrap gap-6">
-                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-emerald-500"></span> <span className="text-sm">Paid</span></div>
-                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-amber-500"></span> <span className="text-sm">Pending Approval</span></div>
-                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-rose-500"></span> <span className="text-sm">Overdue / Unpaid</span></div>
-                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-300"></span> <span className="text-sm">Upcoming</span></div>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  };
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -1152,6 +1126,11 @@ const AdminDashboard = () => {
                     key={tenant._id} 
                     tenant={tenant} 
                     isPending={pendingTenants.includes(tenant)} 
+                    setSelectedTenant={setSelectedTenant}
+                    setShowModal={setShowModal}
+                    setSelectedAadhaar={setSelectedAadhaar}
+                    handleApprove={handleApprove}
+                    handleReject={handleReject}
                   />
                 ))
               )}
@@ -1161,7 +1140,10 @@ const AdminDashboard = () => {
 
         {/* Payment Status Tab */}
         {activeTab === 'payment-status' && (
-          <PaymentStatusTab />
+          <PaymentStatusTab 
+            approvedTenants={approvedTenants} 
+            openHistoryModal={openHistoryModal} 
+          />
         )}
       </main>
 
@@ -1527,7 +1509,14 @@ const AdminDashboard = () => {
   </div>
 )}
       {/* Payment History Modal */}
-      <PaymentHistoryModal />
+      <PaymentHistoryModal 
+        isHistoryModalOpen={isHistoryModalOpen}
+        setIsHistoryModalOpen={setIsHistoryModalOpen}
+        selectedHistoryTenant={selectedHistoryTenant}
+        loadingHistory={loadingHistory}
+        tenantPayments={tenantPayments}
+        setFullScreenImage={setFullScreenImage}
+      />
     </div>
   );
 };

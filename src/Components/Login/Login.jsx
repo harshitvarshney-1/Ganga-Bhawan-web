@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 import { login } from '../../services/api';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [loginType, setLoginType] = useState('tenant'); // 'tenant' or 'admin'
   const [formData, setFormData] = useState({
     email: '',
@@ -12,6 +11,7 @@ export default function Login() {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   // Handle browser back button - replace current history entry
   useEffect(() => {
@@ -69,7 +69,11 @@ export default function Login() {
         {/* Tabs */}
         <div className="flex gap-2 mb-6">
           <button
-            onClick={() => setLoginType('tenant')}
+            onClick={() => {
+              setLoginType('tenant');
+              setFormData({ email: '', password: '' });
+              setError('');
+            }}
             className={`flex-1 py-2 rounded font-medium transition ${
               loginType === 'tenant'
                 ? 'bg-cyan-400 text-gray-900'
@@ -79,7 +83,11 @@ export default function Login() {
             Tenant Login
           </button>
           <button
-            onClick={() => setLoginType('admin')}
+            onClick={() => {
+              setLoginType('admin');
+              setFormData({ email: '', password: '' });
+              setError('');
+            }}
             className={`flex-1 py-2 rounded font-medium transition ${
               loginType === 'admin'
                 ? 'bg-cyan-400 text-gray-900'
@@ -112,15 +120,28 @@ export default function Login() {
 
           <div>
             <label className="block text-gray-300 mb-2">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="Enter your password"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition"
+              >
+                {showPassword ? (
+                  <span title="Hide Password">🔒</span>
+                ) : (
+                  <span title="Show Password">👁️</span>
+                )}
+              </button>
+            </div>
           </div>
 
           <button

@@ -150,8 +150,7 @@ const Payment = () => {
     setModal({
       open: true,
       month: monthNames[monthIndex],
-      monthIndex: monthIndex,
-      amount: 5000 // Default amount
+      monthIndex: monthIndex
     });
     setBarcodeImage(null);
     setBarcodePreview(null);
@@ -223,7 +222,6 @@ const Payment = () => {
       formData.append('barcodeImage', barcodeImage);
       formData.append('month', modal.month);
       formData.append('monthIndex', modal.monthIndex);
-      formData.append('amount', modal.amount);
 
       const response = await fetch(`${BASE_URL}/api/payments/submit`, {
         method: 'POST',
@@ -231,7 +229,7 @@ const Payment = () => {
           'Authorization': `Bearer ${token}`
         },
         body: formData
-      }).catch(fetchError => {
+      }).catch(() => {
         // Handle network errors gracefully
         throw new Error('NETWORK_ERROR');
       });
@@ -346,7 +344,6 @@ const Payment = () => {
               const isPaid = isMonthPaid(index);
               const isCurrent = index === currentMonth;
               const isPast = index < currentMonth;
-              const canPay = !isPaid && (isCurrent || isPast);
               
               // Check if payment is pending (use monthIndex = month payment is FOR, not submit date)
               const pendingPayment = payments.find(p =>
@@ -354,6 +351,9 @@ const Payment = () => {
                 new Date(p.paymentDate).getFullYear() === currentYear &&
                 p.status === 'pending'
               );
+
+              // Can only pay if: not paid, not pending, and (current month or past month)
+              const canPay = !isPaid && !pendingPayment && (isCurrent || isPast);
 
               return (
                 <div
@@ -433,7 +433,7 @@ const Payment = () => {
                     {isPaid ? '✓ PAID' : pendingPayment ? '⏳ PENDING' : isCurrent ? 'PAY NOW' : isPast ? 'OVERDUE' : 'UPCOMING'}
                   </div>
 
-                  {/* Pay Button for Current/Overdue */}
+                  {/* Pay Button for Current/Overdue - Only show if canPay is true */}
                   {canPay && (
                     <button className={`
                       w-full mt-4 py-2 rounded-xl font-semibold text-white transition-all
@@ -498,7 +498,6 @@ const Payment = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="font-bold text-emerald-600">₹{payment.amount}</p>
                     {payment.barcodeImage && (
                       <button 
                         onClick={() => setFullScreenImage(payment.barcodeImage)}

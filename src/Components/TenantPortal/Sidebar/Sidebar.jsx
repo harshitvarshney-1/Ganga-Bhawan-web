@@ -5,8 +5,10 @@ const Sidebar = ({
   setActiveSection, 
   userData, 
   profilePicturePreview, 
-  editing, 
   handleProfilePictureChange,
+  handleSavePhoto,
+  saving,
+  profilePicture,
   handleLogout 
 }) => {
   return (
@@ -28,26 +30,48 @@ const Sidebar = ({
                   {userData?.fullName?.charAt(0).toUpperCase()}
                 </div>
               )}
-              {editing && (
-                <label className="absolute bottom-0 right-0 bg-cyan-500 hover:bg-cyan-600 rounded-full p-2 cursor-pointer shadow-lg transition">
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                  </svg>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleProfilePictureChange}
-                    className="hidden"
-                  />
-                </label>
-              )}
+              {/* Always show camera icon for photo upload */}
+              <label className="absolute bottom-0 right-0 bg-cyan-500 hover:bg-cyan-600 rounded-full p-2 cursor-pointer shadow-lg transition">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleProfilePictureChange}
+                  className="hidden"
+                />
+              </label>
             </div>
             <h2 className="text-xl font-semibold text-center">{userData?.fullName}</h2>
             <p className="text-sm text-gray-400 text-center mt-1">{userData?.email}</p>
             <span className="mt-2 px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-xs font-medium">
               {userData?.isApproved ? '✓ Approved' : '⏳ Pending'}
             </span>
+            
+            {/* Save Photo Button - shown when photo is selected */}
+            {profilePicture && (
+              <button
+                onClick={handleSavePhoto}
+                disabled={saving}
+                className="mt-4 w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                {saving ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    Save Photo
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
 

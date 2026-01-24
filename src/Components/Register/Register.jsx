@@ -25,6 +25,12 @@ export default function Register() {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Calculate DOB constraints
+  const today = new Date();
+  const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split('T')[0];
+  const minDate = "1995-01-01";
 
   // Redirect to home if user presses back button or if already logged in
   useEffect(() => {
@@ -55,9 +61,22 @@ export default function Register() {
   }, [navigate]);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+    
+    // Numeric only validation for specific fields
+    const numericFields = ['mobileNumber', 'fatherPhone', 'motherPhone', 'aadhaarNumber'];
+    if (numericFields.includes(name)) {
+      const numericValue = value.replace(/\D/g, ''); // Remove non-digits
+      setFormData({
+        ...formData,
+        [name]: numericValue,
+      });
+      return;
+    }
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
   };
 
@@ -72,6 +91,34 @@ export default function Register() {
     e.preventDefault();
     setLoading(true);
     setError('');
+
+    // Email Validation Regex
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
+    if (!emailRegex.test(formData.email)) {
+      setError('Please enter a valid email address.');
+      setLoading(false);
+      return;
+    }
+
+    // DOB Validation (18 years check)
+    if (formData.dateOfBirth) {
+      const dob = new Date(formData.dateOfBirth);
+      const ageLimit = new Date();
+      ageLimit.setFullYear(ageLimit.getFullYear() - 18);
+      
+      if (dob > ageLimit) {
+        setError('Tenant must be at least 18 years old.');
+        setLoading(false);
+        return;
+      }
+      
+      if (dob < new Date(minDate)) {
+        setError('Date of Birth cannot be earlier than 1995.');
+        setLoading(false);
+        return;
+      }
+    }
 
     try {
       // Create FormData object
@@ -146,15 +193,28 @@ export default function Register() {
           {/* Password */}
           <div>
             <label className="block text-gray-300 mb-2">Password</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="Create a strong password"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? "text" : "password"}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12"
+                placeholder="Create a strong password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition"
+              >
+                {showPassword ? (
+                  <span title="Hide Password">🔒</span>
+                ) : (
+                  <span title="Show Password">👁️</span>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Mobile Number */}
@@ -237,6 +297,8 @@ export default function Register() {
                 value={formData.dateOfBirth}
                 onChange={handleChange}
                 required
+                min={minDate}
+                max={eighteenYearsAgo}
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
             </div>

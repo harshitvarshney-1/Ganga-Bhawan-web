@@ -10,9 +10,7 @@ const TenantDashboard = () => {
   const [activeSection, setActiveSection] = useState('profile');
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [formData, setFormData] = useState({});
   const [profilePicture, setProfilePicture] = useState(null);
   const [profilePicturePreview, setProfilePicturePreview] = useState(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -79,16 +77,7 @@ const TenantDashboard = () => {
       });
       const data = await response.json();
       setUserData(data);
-      setFormData({
-        fullName: data.fullName || '',
-        email: data.email || '',
-        mobileNumber: data.mobileNumber || '',
-        fatherName: data.fatherName || '',
-        motherName: data.motherName || '',
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth).toISOString().split('T')[0] : '',
-        gender: data.gender || '',
-        permanentAddress: data.permanentAddress || ''
-      });
+      // No need to set formData as fields are read-only
       if (data.profilePicture) {
         if (data.profilePicture.startsWith('data:') || data.profilePicture.startsWith('http')) {
           setProfilePicturePreview(data.profilePicture);
@@ -104,13 +93,7 @@ const TenantDashboard = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
+  // Removed handleInputChange - fields are now read-only
 
   const handleProfilePictureChange = (e) => {
     const file = e.target.files[0];
@@ -124,21 +107,19 @@ const TenantDashboard = () => {
     }
   };
 
-  const handleSave = async () => {
+  const handleSavePhoto = async () => {
+    if (!profilePicture) {
+      alert('Please select a photo first');
+      return;
+    }
+
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
       const formDataToSend = new FormData();
       
-      // Append all editable fields
-      Object.keys(formData).forEach(key => {
-        formDataToSend.append(key, formData[key]);
-      });
-
-      // Append profile picture if selected
-      if (profilePicture) {
-        formDataToSend.append('profilePicture', profilePicture);
-      }
+      // Only append profile picture
+      formDataToSend.append('profilePicture', profilePicture);
 
       const response = await fetch(`${BASE_URL}/api/tenant/profile`, {
         method: 'PUT',
@@ -152,7 +133,7 @@ const TenantDashboard = () => {
       
       if (response.ok) {
         setUserData(data.user);
-        setEditing(false);
+        setProfilePicture(null);
         if (data.user.profilePicture) {
           if (data.user.profilePicture.startsWith('data:') || data.user.profilePicture.startsWith('http')) {
             setProfilePicturePreview(data.user.profilePicture);
@@ -161,13 +142,13 @@ const TenantDashboard = () => {
           }
         }
 
-        alert('Profile updated successfully!');
+        alert('✅ Profile photo updated successfully!');
       } else {
-        alert(data.error || 'Failed to update profile');
+        alert(data.error || 'Failed to update photo');
       }
     } catch (error) {
-      console.error('Error updating profile:', error);
-      alert('Error updating profile');
+      console.error('Error updating photo:', error);
+      alert('Error updating photo');
     } finally {
       setSaving(false);
     }
@@ -208,8 +189,10 @@ const TenantDashboard = () => {
           }}
           userData={userData}
           profilePicturePreview={profilePicturePreview}
-          editing={editing}
           handleProfilePictureChange={handleProfilePictureChange}
+          handleSavePhoto={handleSavePhoto}
+          saving={saving}
+          profilePicture={profilePicture}
           handleLogout={handleLogout}
         />
       </div>
@@ -239,23 +222,11 @@ const TenantDashboard = () => {
           {activeSection === 'profile' && (
             <Profile
               userData={userData}
-              formData={formData}
-              editing={editing}
-              setEditing={setEditing}
-              handleInputChange={handleInputChange}
-              handleSave={handleSave}
-              saving={saving}
             />
           )}
           {activeSection === 'details' && (
             <Details
               userData={userData}
-              formData={formData}
-              editing={editing}
-              setEditing={setEditing}
-              handleInputChange={handleInputChange}
-              handleSave={handleSave}
-              saving={saving}
             />
           )}
           {activeSection === 'payment' && <Payment />}

@@ -3,17 +3,20 @@ const contactData = [
     title: "Call Us",
     value: ["+91 84102 25050", "+91 74538 57474"],
     accent: "cyan",
+    icon: "📞",
   },
   {
     title: "WhatsApp",
     value: ["Chat with us on WhatsApp"],
     action: "https://wa.me/917453857474",
     accent: "green",
+    icon: "💬",
   },
   {
     title: "Email",
     value: ["harshitvarshney822@gmail.com"],
     accent: "blue",
+    icon: "📧",
   },
   {
     title: "Visit Us",
@@ -23,6 +26,7 @@ const contactData = [
       "Mathura, UP – 281406",
     ],
     accent: "orange",
+    icon: "📍",
   },
 ];
 
@@ -37,6 +41,11 @@ const ContactCards = () => {
           hover:border-cyan-500/40
           hover:-translate-y-1 transition"
         >
+          {/* Icon */}
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center mb-4 text-3xl">
+            {item.icon}
+          </div>
+
           <h3 className="text-xl font-semibold mb-4 text-white">
             {item.title}
           </h3>

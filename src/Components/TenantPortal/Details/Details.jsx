@@ -1,52 +1,19 @@
 import React from 'react';
 import { BASE_URL } from '../../../services/api';
 
-const Details = ({ userData, formData, editing, setEditing, handleInputChange, handleSave, saving }) => {
+const Details = ({ userData }) => {
   return (
     <div className="max-w-5xl">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
           Personal Details
         </h1>
-        {!editing ? (
-          <button
-            onClick={() => setEditing(true)}
-            className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-teal-500 text-white rounded-lg hover:from-cyan-600 hover:to-teal-600 transition-all shadow-lg flex items-center gap-2"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-            Edit Details
-          </button>
-        ) : (
-          <div className="flex gap-3">
-            <button
-              onClick={() => setEditing(false)}
-              className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg flex items-center gap-2 disabled:opacity-50"
-            >
-              {saving ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  Save Changes
-                </>
-              )}
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 border border-amber-200 rounded-lg">
+          <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span className="text-sm font-semibold text-amber-700">Details Locked</span>
+        </div>
       </div>
       
       <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
@@ -58,42 +25,40 @@ const Details = ({ userData, formData, editing, setEditing, handleInputChange, h
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Father's Name</label>
-            {editing ? (
-              <input
-                type="text"
-                name="fatherName"
-                value={formData.fatherName}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-cyan-500 focus:outline-none transition"
-              />
-            ) : (
-              <p className="text-lg font-medium text-gray-900">{userData?.fatherName}</p>
-            )}
+            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Father's Name
+            </label>
+            <p className="text-lg font-medium text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">{userData?.fatherName}</p>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Father's Phone</label>
-            <p className="text-lg font-medium text-gray-500">{userData?.fatherPhone || 'N/A'}</p>
-            <p className="text-xs text-gray-400 mt-1">This field cannot be edited</p>
+            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Father's Phone
+            </label>
+            <p className="text-lg font-medium text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">{userData?.fatherPhone || 'N/A'}</p>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Mother's Name</label>
-            {editing ? (
-              <input
-                type="text"
-                name="motherName"
-                value={formData.motherName}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-cyan-500 focus:outline-none transition"
-              />
-            ) : (
-              <p className="text-lg font-medium text-gray-900">{userData?.motherName || 'N/A'}</p>
-            )}
+            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Mother's Name
+            </label>
+            <p className="text-lg font-medium text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">{userData?.motherName || 'N/A'}</p>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Mother's Phone</label>
-            <p className="text-lg font-medium text-gray-500">{userData?.motherPhone || 'N/A'}</p>
-            <p className="text-xs text-gray-400 mt-1">This field cannot be edited</p>
+            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              Mother's Phone
+            </label>
+            <p className="text-lg font-medium text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">{userData?.motherPhone || 'N/A'}</p>
           </div>
         </div>
       </div>

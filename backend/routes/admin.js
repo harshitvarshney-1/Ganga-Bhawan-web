@@ -118,6 +118,9 @@ router.get('/payments-summary', auth, isAdmin, async (req, res) => {
     const tenantPaymentMap = {};
 
     payments.forEach(payment => {
+      // payment.userId could be null if the tenant was deleted
+      if (!payment.userId) return;
+
       const tenantId = payment.userId._id.toString();
 
       if (!tenantPaymentMap[tenantId]) {
