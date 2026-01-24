@@ -44,6 +44,7 @@ const Payment = () => {
   const [alert, setAlert] = useState({ open: false, message: "" });
   const [barcodeImage, setBarcodeImage] = useState(null);
   const [barcodePreview, setBarcodePreview] = useState(null);
+  const [fullScreenImage, setFullScreenImage] = useState(null);
 
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -62,6 +63,23 @@ const Payment = () => {
     
     return () => clearInterval(interval);
   }, []);
+
+  // Keyboard event listener for ESC key to close full screen image
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && fullScreenImage) {
+        setFullScreenImage(null);
+      }
+    };
+
+    if (fullScreenImage) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [fullScreenImage]);
 
   const fetchUserAndPayments = async () => {
     try {
@@ -481,14 +499,12 @@ const Payment = () => {
                   <div className="text-right">
                     <p className="font-bold text-emerald-600">₹{payment.amount}</p>
                     {payment.barcodeImage && (
-                      <a 
-                        href={payment.barcodeImage}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-cyan-600 hover:underline mt-1 block"
+                      <button 
+                        onClick={() => setFullScreenImage(payment.barcodeImage)}
+                        className="text-xs text-cyan-600 hover:underline mt-1 block cursor-pointer bg-transparent border-none p-0"
                       >
                         View Barcode
-                      </a>
+                      </button>
                     )}
                   </div>
                 </div>
@@ -619,6 +635,38 @@ const Payment = () => {
               </p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Full Screen Image Viewer */}
+      {fullScreenImage && (
+        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4">
+          <div className="relative max-w-full max-h-full">
+            <button
+              onClick={() => setFullScreenImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <img
+              src={fullScreenImage}
+              alt="Full size payment screenshot"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              style={{ maxWidth: '90vw', maxHeight: '90vh' }}
+            />
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+              <p className="text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+                Click outside or press ESC to close
+              </p>
+            </div>
+          </div>
+          {/* Click outside to close */}
+          <div 
+            className="absolute inset-0 -z-10" 
+            onClick={() => setFullScreenImage(null)}
+          />
         </div>
       )}
     </div>

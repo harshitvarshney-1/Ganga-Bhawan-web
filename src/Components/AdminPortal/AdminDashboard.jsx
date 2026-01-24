@@ -25,6 +25,7 @@ const AdminDashboard = () => {
   const [selectedPayment, setSelectedPayment] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [fullScreenImage, setFullScreenImage] = useState(null);
 
   const navigate = useNavigate();
 
@@ -87,6 +88,23 @@ const AdminDashboard = () => {
     };
     // eslint-disable-next-line
   }, []);
+
+  // Keyboard event listener for ESC key to close full screen image
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape' && fullScreenImage) {
+        setFullScreenImage(null);
+      }
+    };
+
+    if (fullScreenImage) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [fullScreenImage]);
 
   // Fetch tenants as before
   const fetchTenants = async () => {
@@ -897,10 +915,8 @@ const AdminDashboard = () => {
                                   className="max-w-full sm:max-w-xs max-h-48 object-contain rounded-lg border-2 border-gray-200 shadow-md"
                                 />
                                 <a
-                                  href={payment.barcodeImage}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold shrink-0"
+                                  onClick={() => setFullScreenImage(payment.barcodeImage)}
+                                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold shrink-0 cursor-pointer"
                                 >
                                   📷 Full size dekhen
                                 </a>
@@ -1209,14 +1225,12 @@ const AdminDashboard = () => {
                     />
                   </div>
                   <div className="mt-4 text-center">
-                    <a 
-                      href={selectedPayment.barcodeImage}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <button 
+                      onClick={() => setFullScreenImage(selectedPayment.barcodeImage)}
                       className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold"
                     >
                       📷 Open Full Size
-                    </a>
+                    </button>
                   </div>
                 </div>
               )}
@@ -1242,6 +1256,38 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Full Screen Image Viewer */}
+      {fullScreenImage && (
+        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4">
+          <div className="relative max-w-full max-h-full">
+            <button
+              onClick={() => setFullScreenImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <img
+              src={fullScreenImage}
+              alt="Full size payment screenshot"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              style={{ maxWidth: '90vw', maxHeight: '90vh' }}
+            />
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+              <p className="text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+                Click outside or press ESC to close
+              </p>
+            </div>
+          </div>
+          {/* Click outside to close */}
+          <div 
+            className="absolute inset-0 -z-10" 
+            onClick={() => setFullScreenImage(null)}
+          />
         </div>
       )}
     </div>
