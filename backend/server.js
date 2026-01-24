@@ -7,13 +7,33 @@ const paymentRoutes = require('./routes/payment');
 
 const app = express();
 
+<<<<<<< Updated upstream
 // CORS + body parsing FIRST (before any routes) so /api/payments etc. get CORS headers
 // CORS configuration
 const corsOptions = {
   origin: process.env.CLIENT_URL || '*', // Allow specific origin or all
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
+=======
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'https://gangabhawan.vercel.app',
+    'https://ganga-bhawan-web.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'http://localhost:5000'
+  ],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With']
+>>>>>>> Stashed changes
 };
+
+// Handle preflight OPTIONS requests
+app.options('*', cors(corsOptions));
+
+// CORS + body parsing FIRST (before any routes) so /api/payments etc. get CORS headers
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
