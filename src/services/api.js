@@ -156,6 +156,32 @@ export const isAuthenticated = () => {
   return !!localStorage.getItem('token');
 };
 
+// Admin: Reset Password (Manual Override)
+export const resetPassword = async (tenantId, newPassword) => {
+  try {
+    const token = localStorage.getItem('token');
+
+    const response = await fetch(`${API_URL}/admin/reset-password/${tenantId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ newPassword }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to reset password');
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+};
+
 // Get current user
 export const getCurrentUser = () => {
   const user = localStorage.getItem('user');

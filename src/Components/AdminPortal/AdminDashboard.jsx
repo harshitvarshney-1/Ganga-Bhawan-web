@@ -294,29 +294,15 @@ const AdminDashboard = () => {
 
     setResetting(true);
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/api/admin/reset-password/${tenantId}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ newPassword: resetPasswordInput })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert(`✅ ${data.message}`);
-        setResetPasswordInput(''); // Clear input
-        // Refresh data to show new hash (optional but good practice)
-        fetchTenants();
-      } else {
-        alert(`❌ ${data.error || 'Failed to reset password'}`);
-      }
+      const { resetPassword: apiResetPassword } = await import('../../services/api');
+      const data = await apiResetPassword(tenantId, resetPasswordInput);
+      
+      alert(`✅ ${data.message || 'Password updated successfully'}`);
+      setResetPasswordInput(''); 
+      fetchTenants();
     } catch (error) {
       console.error('Password reset error:', error);
-      alert('❌ Server error during password reset');
+      alert(`❌ Error: ${error.message || 'Server connection failed'}`);
     } finally {
       setResetting(false);
     }
