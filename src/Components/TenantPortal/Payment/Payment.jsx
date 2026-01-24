@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { BASE_URL } from '../../../services/api';
+import barcodeImg from '../../../assets/barcode.png';
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -441,7 +442,7 @@ const Payment = () => {
                         : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'
                       }
                     `}>
-                      Pay ₹5,000
+                      Pay
                     </button>
                   )}
                 </div>
@@ -541,18 +542,15 @@ const Payment = () => {
                 </button>
               </div>
 
-              <div className="bg-gradient-to-br from-cyan-50 to-blue-50 rounded-2xl p-6 mb-6 border-2 border-cyan-200">
-                <div className="text-center mb-4">
-                  <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center">
-                    <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
+              <div className="bg-white rounded-2xl p-4 mb-6 border-2 border-cyan-200">
+                <div className="text-center">
+                  <div className="mb-0">
+                    <img 
+                      src={barcodeImg} 
+                      alt="Payment Barcode" 
+                      className="w-full max-w-[240px] mx-auto rounded-lg shadow-md border-2 border-gray-100"
+                    />
                   </div>
-                  <h4 className="text-xl font-bold text-gray-900 mb-2">
-                    {modal.month} {currentYear}
-                  </h4>
-                  <p className="text-3xl font-bold text-cyan-600">₹{modal.amount}</p>
                 </div>
               </div>
 

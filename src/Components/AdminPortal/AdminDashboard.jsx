@@ -26,6 +26,10 @@ const AdminDashboard = () => {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [fullScreenImage, setFullScreenImage] = useState(null);
+  const [selectedHistoryTenant, setSelectedHistoryTenant] = useState(null);
+  const [tenantPayments, setTenantPayments] = useState([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
 
   const navigate = useNavigate();
 
@@ -249,6 +253,33 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchTenantPayments = async (tenantId) => {
+    setLoadingHistory(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(`${BASE_URL}/api/admin/tenant-payments/${tenantId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setTenantPayments(data);
+      } else {
+        setTenantPayments([]);
+      }
+    } catch (err) {
+      console.error('Error fetching tenant payments:', err);
+      setTenantPayments([]);
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
+  const openHistoryModal = (tenant) => {
+    setSelectedHistoryTenant(tenant);
+    fetchTenantPayments(tenant._id);
+    setIsHistoryModalOpen(true);
+  };
+
   const handleApprove = async (tenantId) => {
     try {
       const token = localStorage.getItem('token');
@@ -402,21 +433,7 @@ const AdminDashboard = () => {
             </span>
           </div>
 
-          {/* Payment Status Badge */}
-          <div className="flex items-center gap-2 mb-4">
-            <span className="text-xs font-semibold bg-blue-50 text-cyan-700 rounded-full px-3 py-1 flex items-center gap-1">
-              💳 Payment:&nbsp;
-              {paymentInfo ? (
-                paymentInfo.status === 'success' ?
-                  <span className="text-emerald-700 font-bold">Paid&nbsp;({paymentInfo.latestMonthPaid || 'N/A'})</span>
-                : paymentInfo.status === 'pending' ?
-                  <span className="text-amber-600 font-bold">Pending</span>
-                : <span className="text-red-600 font-bold">Not Paid</span>
-              ) : (
-                <span className="text-gray-400">No Data</span>
-              )}
-            </span>
-          </div>
+
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
             <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
@@ -516,57 +533,156 @@ const AdminDashboard = () => {
     );
   }
 
-  // Payment Status Sidebar Section
-  const PaymentStatusSidebar = () => {
-    // Show only for tenant list or overview tabs
-    // Combine pending and approved tenants
-    const allTenants = useMemo(() => [...approvedTenants, ...pendingTenants], [approvedTenants, pendingTenants]);
-    // Remove duplicates in case
-    const uniqueTenants = Array.from(new Map(allTenants.map(t => [t._id, t])).values());
 
+
+  const PaymentStatusTab = () => {
     return (
-      <div className="p-4">
-        <h3 className="text-lg font-bold mb-4 text-white flex items-center gap-2">
-          <span className="text-2xl">💳</span>
-          Payment Status
-        </h3>
-        <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1">
-          {paymentLoading ? (
-            <div className="text-center text-gray-300 py-4">Loading payments...</div>
-          ) : (
-            uniqueTenants.length === 0 ?
-              <div className="text-center text-gray-300 py-4">No tenants</div>
-            : uniqueTenants.map(tenant => {
-                const payment = paymentStatusMap[tenant._id];
-                return (
-                  <div
-                    className={`flex items-center px-3 py-2 rounded-xl gap-4 ${payment?.status === 'success' ? 'bg-emerald-900/60' : payment?.status === 'pending' ? 'bg-amber-900/50' : 'bg-red-900/30'} text-white`}
-                    key={tenant._id}
-                  >
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center font-bold text-lg flex-shrink-0">
+      <div className="space-y-6">
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment Status (Monthly History)</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {approvedTenants.length === 0 ? (
+              <div className="col-span-full py-12 text-center bg-gray-50 rounded-2xl">
+                <p className="text-gray-500 text-lg">No approved tenants to track payments</p>
+              </div>
+            ) : (
+              approvedTenants.map(tenant => (
+                <div 
+                  key={tenant._id}
+                  onClick={() => openHistoryModal(tenant)}
+                  className="bg-white border-2 border-gray-100 rounded-2xl p-6 hover:border-cyan-500 hover:shadow-xl transition-all cursor-pointer group"
+                >
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform">
                       {tenant.fullName.charAt(0).toUpperCase()}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="truncate font-medium">{tenant.fullName}</div>
-                      <div className="text-xs text-white/80 truncate">
-                        {payment && payment.latestMonthPaid ? payment.latestMonthPaid : "No record"}
-                      </div>
-                    </div>
                     <div>
-                      {payment ? (
-                        payment.status === 'success'
-                          ? <span className="bg-emerald-500/90 text-white text-xs rounded-full px-3 py-1 font-bold">Paid</span>
-                          : payment.status === 'pending'
-                            ? <span className="bg-amber-400/90 text-gray-900 text-xs rounded-full px-3 py-1 font-bold">Pending</span>
-                            : <span className="bg-red-600/90 text-white text-xs rounded-full px-3 py-1 font-bold">Not Paid</span>
-                      ) : (
-                        <span className="bg-gray-400/90 text-white text-xs rounded-full px-3 py-1 font-bold">No Data</span>
-                      )}
+                      <h3 className="text-lg font-bold text-gray-900 group-hover:text-cyan-600 transition-colors">{tenant.fullName}</h3>
+                      <p className="text-sm text-gray-500">{tenant.mobileNumber}</p>
                     </div>
                   </div>
-                )
-              })
-          )}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                    <span className="text-xs font-semibold text-gray-400 uppercase">View History</span>
+                    <span className="text-xl">➡️</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const PaymentHistoryModal = () => {
+    if (!isHistoryModalOpen || !selectedHistoryTenant) return null;
+
+    const monthNamesShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const currentMonth = new Date().getMonth();
+    const currentYear = new Date().getFullYear();
+
+    return (
+      <div 
+        className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-[60] p-4"
+        onClick={() => setIsHistoryModalOpen(false)}
+      >
+        <div 
+          className="bg-white rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="sticky top-0 bg-white border-b border-gray-100 p-6 flex items-center justify-between z-10">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl">
+                {selectedHistoryTenant.fullName.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{selectedHistoryTenant.fullName}</h2>
+                <p className="text-sm text-gray-500">Payment History for {currentYear}</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setIsHistoryModalOpen(false)}
+              className="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-xl transition-all text-gray-600 text-2xl"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div className="p-8">
+            {loadingHistory ? (
+              <div className="py-20 text-center">
+                <div className="w-12 h-12 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto mb-4"></div>
+                <p className="text-gray-500 font-semibold">Loading payment records...</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+                  {monthNamesShort.map((month, idx) => {
+                    const payment = tenantPayments.find(p => p.monthIndex === idx && new Date(p.paymentDate).getFullYear() === currentYear);
+                    const isPaid = payment?.status === 'success';
+                    const isPending = payment?.status === 'pending';
+                    const isRejected = payment?.status === 'rejected';
+                    const isOverdue = !isPaid && !isPending && idx <= currentMonth;
+                    const isUpcoming = idx > currentMonth;
+
+                    let statusClass = "bg-gray-50 border-gray-200 text-gray-400";
+                    let statusIcon = "📅";
+                    let statusLabel = "Upcoming";
+
+                    if (isPaid) {
+                      statusClass = "bg-emerald-50 border-emerald-500 text-emerald-700";
+                      statusIcon = "✅";
+                      statusLabel = "Paid";
+                    } else if (isPending) {
+                      statusClass = "bg-amber-50 border-amber-500 text-amber-700";
+                      statusIcon = "⏳";
+                      statusLabel = "Pending";
+                    } else if (isRejected) {
+                      statusClass = "bg-red-50 border-red-500 text-red-700";
+                      statusIcon = "❌";
+                      statusLabel = "Rejected";
+                    } else if (isOverdue) {
+                      statusClass = "bg-rose-50 border-rose-500 text-rose-700";
+                      statusIcon = "❗";
+                      statusLabel = "Overdue";
+                    }
+
+                    return (
+                      <div 
+                        key={month}
+                        className={`relative p-4 rounded-2xl border-2 transition-all ${statusClass}`}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <span className="font-bold text-lg">{month}</span>
+                          <span className="text-xl">{statusIcon}</span>
+                        </div>
+                        <p className="text-xs font-bold uppercase tracking-wider mb-3">{statusLabel}</p>
+                        
+                        {(isPaid || isPending || isRejected) && payment.barcodeImage && (
+                          <button 
+                            onClick={() => setFullScreenImage(payment.barcodeImage)}
+                            className="w-full py-2 bg-white/60 hover:bg-white text-xs font-bold rounded-lg transition-colors border border-current"
+                          >
+                            👁️ View Receipt
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="bg-gray-50 rounded-2xl p-6">
+                  <h3 className="text-lg font-bold text-gray-900 mb-4">Legend</h3>
+                  <div className="flex flex-wrap gap-6">
+                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-emerald-500"></span> <span className="text-sm">Paid</span></div>
+                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-amber-500"></span> <span className="text-sm">Pending Approval</span></div>
+                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-rose-500"></span> <span className="text-sm">Overdue / Unpaid</span></div>
+                    <div className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-gray-300"></span> <span className="text-sm">Upcoming</span></div>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -596,7 +712,7 @@ const AdminDashboard = () => {
                 🏠
               </div>
               <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-                RentEase
+                Ganga Bhawan
               </h2>
             </div>
           </div>
@@ -686,12 +802,23 @@ const AdminDashboard = () => {
                 </span>
               )}
             </button>
+
+            <button 
+              onClick={() => {
+                setActiveTab('payment-status');
+                setIsMobileMenuOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-semibold transition-all relative ${
+                activeTab === 'payment-status' 
+                  ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg' 
+                  : 'text-gray-300 hover:bg-gray-700'
+              }`}
+            >
+              <span className="text-xl">📊</span>
+              Payment Status
+            </button>
           </nav>
-          
-          {/* Payment Status Sidebar Section */}
-          <div className="mt-6 border-t border-gray-800">
-            <PaymentStatusSidebar />
-          </div>
+
         </div>
 
         {/* Logout Button - Fixed at bottom */}
@@ -872,10 +999,7 @@ const AdminDashboard = () => {
                               <p className="text-xs text-gray-500 font-semibold uppercase mb-1">Month</p>
                               <p className="text-lg font-bold text-gray-900">{payment.month}</p>
                             </div>
-                            <div>
-                              <p className="text-xs text-gray-500 font-semibold uppercase mb-1">Amount</p>
-                              <p className="text-lg font-bold text-emerald-600">₹{payment.amount}</p>
-                            </div>
+
                             <div>
                               <p className="text-xs text-gray-500 font-semibold uppercase mb-1">Submitted</p>
                               <p className="text-sm text-gray-700">
@@ -1004,6 +1128,11 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+
+        {/* Payment Status Tab */}
+        {activeTab === 'payment-status' && (
+          <PaymentStatusTab />
+        )}
       </main>
 
       {/* Modal */}
@@ -1064,25 +1193,7 @@ const AdminDashboard = () => {
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Permanent Address</label>
                   <p className="text-lg font-bold text-gray-900">{selectedTenant.permanentAddress}</p>
                 </div>
-                {/* Payment info in modal */}
-                <div className="space-y-2 col-span-2">
-                  <label className="text-xs text-cyan-700 font-semibold uppercase tracking-wider">Payment Status</label>
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">
-                      💳
-                    </span>
-                    {(() => {
-                      const payment = paymentStatusMap[selectedTenant._id];
-                      if (payment)
-                        return payment.status === "success"
-                          ? <span className="bg-emerald-500/90 text-white rounded-full px-4 py-1 font-bold">Paid ({payment.latestMonthPaid || "N/A"})</span>
-                          : payment.status === "pending"
-                            ? <span className="bg-amber-400/90 text-gray-900 rounded-full px-4 py-1 font-bold">Pending</span>
-                            : <span className="bg-red-600/90 text-white rounded-full px-4 py-1 font-bold">Not Paid</span>;
-                      else return <span className="bg-gray-400/90 text-white rounded-full px-4 py-1 font-bold">No Data</span>;
-                    })()}
-                  </div>
-                </div>
+
               </div>
 
                {selectedTenant.aadhaarFile && (
@@ -1172,10 +1283,7 @@ const AdminDashboard = () => {
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Month</label>
                   <p className="text-lg font-bold text-gray-900">{selectedPayment.month}</p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Amount</label>
-                  <p className="text-lg font-bold text-emerald-600">₹{selectedPayment.amount}</p>
-                </div>
+
                 <div className="space-y-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Submitted Date</label>
                   <p className="text-lg font-bold text-gray-900">
@@ -1272,6 +1380,9 @@ const AdminDashboard = () => {
           />
         </div>
       )}
+
+      {/* Payment History Modal */}
+      <PaymentHistoryModal />
     </div>
   );
 };

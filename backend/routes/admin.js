@@ -16,11 +16,11 @@ const isAdmin = (req, res, next) => {
 // GET: All pending tenant approvals
 router.get('/pending-tenants', auth, isAdmin, async (req, res) => {
   try {
-    const tenants = await User.find({ 
-      role: 'tenant', 
-      isApproved: false 
+    const tenants = await User.find({
+      role: 'tenant',
+      isApproved: false
     }).select('-password');
-    
+
     res.json(tenants);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -30,11 +30,11 @@ router.get('/pending-tenants', auth, isAdmin, async (req, res) => {
 // GET: All approved tenants
 router.get('/approved-tenants', auth, isAdmin, async (req, res) => {
   try {
-    const tenants = await User.find({ 
-      role: 'tenant', 
-      isApproved: true 
+    const tenants = await User.find({
+      role: 'tenant',
+      isApproved: true
     }).select('-password');
-    
+
     res.json(tenants);
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -49,15 +49,15 @@ router.post('/approve-tenant/:id', auth, isAdmin, async (req, res) => {
       { isApproved: true },
       { new: true }
     );
-    
+
     if (!tenant) {
       return res.status(404).json({ error: 'Tenant not found' });
     }
-    
-    res.json({ 
+
+    res.json({
       success: true,
       message: 'Tenant approved successfully',
-      tenant 
+      tenant
     });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -68,14 +68,14 @@ router.post('/approve-tenant/:id', auth, isAdmin, async (req, res) => {
 router.delete('/reject-tenant/:id', auth, isAdmin, async (req, res) => {
   try {
     const tenant = await User.findByIdAndDelete(req.params.id);
-    
+
     if (!tenant) {
       return res.status(404).json({ error: 'Tenant not found' });
     }
-    
-    res.json({ 
+
+    res.json({
       success: true,
-      message: 'Tenant rejected successfully' 
+      message: 'Tenant rejected successfully'
     });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -86,14 +86,14 @@ router.delete('/reject-tenant/:id', auth, isAdmin, async (req, res) => {
 router.delete('/delete-tenant/:id', auth, isAdmin, async (req, res) => {
   try {
     const tenant = await User.findByIdAndDelete(req.params.id);
-    
+
     if (!tenant) {
       return res.status(404).json({ error: 'Tenant not found' });
     }
-    
-    res.json({ 
+
+    res.json({
       success: true,
-      message: 'Tenant deleted permanently' 
+      message: 'Tenant deleted permanently'
     });
   } catch (error) {
     console.error('Error deleting tenant:', error);
@@ -106,18 +106,18 @@ router.get('/payments-summary', auth, isAdmin, async (req, res) => {
   try {
     // Get all tenants
     const tenants = await User.find({ role: 'tenant' }).select('_id fullName email');
-    
+
     // Get all successful payments
     const payments = await Payment.find({ status: 'success' })
       .sort({ paymentDate: -1 })
       .populate('userId', 'fullName email');
-    
+
     // Create a map of tenant payments
     const tenantPaymentMap = {};
-    
+
     payments.forEach(payment => {
       const tenantId = payment.userId._id.toString();
-      
+
       if (!tenantPaymentMap[tenantId]) {
         tenantPaymentMap[tenantId] = {
           tenantId: tenantId,
@@ -127,23 +127,23 @@ router.get('/payments-summary', auth, isAdmin, async (req, res) => {
           totalPayments: 0
         };
       }
-      
+
       // Update latest payment if this is more recent
-      if (!tenantPaymentMap[tenantId].latestPaymentDate || 
-          payment.paymentDate > tenantPaymentMap[tenantId].latestPaymentDate) {
+      if (!tenantPaymentMap[tenantId].latestPaymentDate ||
+        payment.paymentDate > tenantPaymentMap[tenantId].latestPaymentDate) {
         tenantPaymentMap[tenantId].latestMonthPaid = payment.month;
         tenantPaymentMap[tenantId].latestPaymentDate = payment.paymentDate;
         tenantPaymentMap[tenantId].status = 'success';
       }
-      
+
       tenantPaymentMap[tenantId].totalPayments += 1;
     });
-    
+
     // Create summary array for all tenants
     const summary = tenants.map(tenant => {
       const tenantId = tenant._id.toString();
       const paymentInfo = tenantPaymentMap[tenantId];
-      
+
       if (paymentInfo) {
         return {
           tenantId: tenantId,
@@ -163,7 +163,7 @@ router.get('/payments-summary', auth, isAdmin, async (req, res) => {
         };
       }
     });
-    
+
     res.json(summary);
   } catch (error) {
     console.error('Error fetching payments summary:', error);
@@ -177,7 +177,7 @@ router.get('/pending-payments', auth, isAdmin, async (req, res) => {
     const payments = await Payment.find({ status: 'pending' })
       .populate('userId', 'fullName email mobileNumber')
       .sort({ paymentDate: -1 });
-    
+
     res.json(payments);
   } catch (error) {
     console.error('Error fetching pending payments:', error);
@@ -189,21 +189,21 @@ router.get('/pending-payments', auth, isAdmin, async (req, res) => {
 router.post('/approve-payment/:paymentId', auth, isAdmin, async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.paymentId);
-    
+
     if (!payment) {
       return res.status(404).json({ error: 'Payment not found' });
     }
-    
+
     if (payment.status !== 'pending') {
       return res.status(400).json({ error: 'Payment is not pending' });
     }
-    
+
     payment.status = 'success';
     payment.approvedBy = req.user.userId || req.user.id;
     payment.approvedAt = new Date();
-    
+
     await payment.save();
-    
+
     res.json({
       success: true,
       message: 'Payment approved successfully',
@@ -219,21 +219,21 @@ router.post('/approve-payment/:paymentId', auth, isAdmin, async (req, res) => {
 router.post('/reject-payment/:paymentId', auth, isAdmin, async (req, res) => {
   try {
     const payment = await Payment.findById(req.params.paymentId);
-    
+
     if (!payment) {
       return res.status(404).json({ error: 'Payment not found' });
     }
-    
+
     if (payment.status !== 'pending') {
       return res.status(400).json({ error: 'Payment is not pending' });
     }
-    
+
     payment.status = 'rejected';
     payment.approvedBy = req.user.userId || req.user.id;
     payment.approvedAt = new Date();
-    
+
     await payment.save();
-    
+
     res.json({
       success: true,
       message: 'Payment rejected',
@@ -242,6 +242,19 @@ router.post('/reject-payment/:paymentId', auth, isAdmin, async (req, res) => {
   } catch (error) {
     console.error('Error rejecting payment:', error);
     res.status(500).json({ error: 'Failed to reject payment' });
+  }
+});
+
+// GET: All payments for a specific tenant (for payment history grid)
+router.get('/tenant-payments/:tenantId', auth, isAdmin, async (req, res) => {
+  try {
+    const payments = await Payment.find({ userId: req.params.tenantId })
+      .sort({ paymentDate: -1 });
+
+    res.json(payments);
+  } catch (error) {
+    console.error('Error fetching tenant payments:', error);
+    res.status(500).json({ error: 'Failed to fetch tenant payments' });
   }
 });
 
