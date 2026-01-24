@@ -23,6 +23,11 @@ const paymentSchema = new mongoose.Schema({
     type: String,
     default: null
   },
+  barcodeImageData: {
+    data: Buffer,
+    contentType: String,
+    filename: String
+  },
   status: {
     type: String,
     enum: ['pending', 'success', 'failed', 'rejected'],

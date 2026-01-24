@@ -13,19 +13,8 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  // Redirect to home if user presses back button or if already logged in
+  // Handle browser back button - replace current history entry
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      // If already logged in, redirect to appropriate dashboard
-      const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.role === 'admin') {
-        navigate('/admin-dashboard', { replace: true });
-      } else {
-        navigate('/tenant-dashboard', { replace: true });
-      }
-    }
-
     // Handle browser back button - replace current history entry
     const handlePopState = () => {
       navigate('/', { replace: true });
@@ -74,6 +63,23 @@ export default function Login() {
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-gray-800 rounded-lg p-4 sm:p-6 lg:p-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">Login</h2>
+
+        {/* Check if already logged in */}
+        {(() => {
+          const token = localStorage.getItem('token');
+          const user = token ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+          if (user) {
+            return (
+              <div className="bg-blue-900/50 border border-blue-500 rounded-lg p-3 mb-4">
+                <p className="text-blue-200 text-sm">
+                  आप पहले से {user.role === 'admin' ? 'Admin' : 'Tenant'} के रूप में logged in हैं। 
+                  अलग role से login करने के लिए नीचे form भरें।
+                </p>
+              </div>
+            );
+          }
+          return null;
+        })()}
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6">

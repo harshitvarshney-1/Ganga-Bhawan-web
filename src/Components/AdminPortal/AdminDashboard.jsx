@@ -892,12 +892,12 @@ const AdminDashboard = () => {
                               <p className="text-xs text-gray-500 font-semibold uppercase mb-2">Barcode Screenshot (Approval ke liye)</p>
                               <div className="flex flex-col sm:flex-row gap-4 items-start">
                                 <img
-                                  src={`http://localhost:5000/${payment.barcodeImage}`}
+                                  src={payment.barcodeImage}
                                   alt="Payment proof"
                                   className="max-w-full sm:max-w-xs max-h-48 object-contain rounded-lg border-2 border-gray-200 shadow-md"
                                 />
                                 <a
-                                  href={`http://localhost:5000/${payment.barcodeImage}`}
+                                  href={payment.barcodeImage}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold shrink-0"
@@ -1203,14 +1203,14 @@ const AdminDashboard = () => {
                   <h3 className="text-lg font-bold text-gray-900 mb-4">Barcode Screenshot</h3>
                   <div className="flex justify-center">
                     <img 
-                      src={`http://localhost:5000/${selectedPayment.barcodeImage}`}
+                      src={selectedPayment.barcodeImage}
                       alt="Barcode payment screenshot"
                       className="max-w-full max-h-96 rounded-xl border-2 border-gray-200 shadow-lg"
                     />
                   </div>
                   <div className="mt-4 text-center">
                     <a 
-                      href={`http://localhost:5000/${selectedPayment.barcodeImage}`}
+                      href={selectedPayment.barcodeImage}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold"

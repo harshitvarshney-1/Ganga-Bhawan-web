@@ -482,7 +482,7 @@ const Payment = () => {
                     <p className="font-bold text-emerald-600">₹{payment.amount}</p>
                     {payment.barcodeImage && (
                       <a 
-                        href={`${BASE_URL}/${payment.barcodeImage}`}
+                        href={payment.barcodeImage}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-xs text-cyan-600 hover:underline mt-1 block"

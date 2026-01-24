@@ -14,19 +14,8 @@ if (!fs.existsSync(barcodesDir)) {
   console.log('✅ Created uploads/barcodes directory');
 }
 
-// File Upload Configuration for Barcode Images
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, '..', 'uploads', 'barcodes');
-    if (!fs.existsSync(uploadPath)) {
-      fs.mkdirSync(uploadPath, { recursive: true });
-    }
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname);
-  }
-});
+// File Upload Configuration for Barcode Images (Memory storage for Vercel)
+const storage = multer.memoryStorage();
 
 const upload = multer({
   storage: storage,
@@ -115,7 +104,12 @@ router.post('/submit', auth, upload.single('barcodeImage'), async (req, res) => 
       month: month,
       monthIndex: parseInt(monthIndex),
       amount: parseFloat(amount),
-      barcodeImage: `uploads/barcodes/${req.file.filename}`,
+      barcodeImage: req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : null,
+      barcodeImageData: req.file ? {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+        filename: req.file.originalname
+      } : null,
       status: 'pending',
       paymentDate: new Date()
     });
