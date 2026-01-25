@@ -322,4 +322,23 @@ router.get('/tenant-aadhaar/:id', async (req, res) => {
   }
 });
 
+// DELETE: Delete a payment (Revoke approval/Reset status)
+router.delete('/delete-payment/:paymentId', auth, isAdmin, async (req, res) => {
+  try {
+    const payment = await Payment.findByIdAndDelete(req.params.paymentId);
+
+    if (!payment) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Payment record deleted successfully. Tenant can now re-upload.'
+    });
+  } catch (error) {
+    console.error('Error deleting payment:', error);
+    res.status(500).json({ error: 'Failed to delete payment' });
+  }
+});
+
 module.exports = router;

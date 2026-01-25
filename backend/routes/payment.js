@@ -80,6 +80,7 @@ router.post('/submit', auth, upload.single('barcodeImage'), async (req, res) => 
       userId: userId,
       month: month,
       monthIndex: parseInt(monthIndex),
+      isAdvanced: req.body.isAdvanced === 'true' || req.body.isAdvanced === true,
       status: { $in: ['pending', 'success'] }
     });
 
@@ -96,6 +97,7 @@ router.post('/submit', auth, upload.single('barcodeImage'), async (req, res) => 
       month: month,
       monthIndex: parseInt(monthIndex),
       amount: parseFloat(amount),
+      isAdvanced: req.body.isAdvanced === 'true' || req.body.isAdvanced === true,
       barcodeImage: req.file ? `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}` : null,
       barcodeImageData: req.file ? {
         data: req.file.buffer,

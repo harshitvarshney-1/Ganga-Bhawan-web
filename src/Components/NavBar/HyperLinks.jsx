@@ -35,7 +35,7 @@ const HyperLinks = () => {
         <li key={item.name}>
           <button
             onClick={() => handleScroll(item.id)}
-            className="hover:text-cyan-400 transition"
+            className="hover:text-cyan-400 transition w-full text-left block"
           >
             {item.name}
           </button>

@@ -33,7 +33,7 @@ const AboutIntro = () => {
       {/* STATS */}
       <div className="grid grid-cols-2 gap-6">
         {[
-          ["10+ Years", "Experience"],
+          ["2+ Years", "Experience"],
           ["100+", "Happy Tenants"],
           ["24×7", "Security"],
           ["100%", "Peaceful Area"],

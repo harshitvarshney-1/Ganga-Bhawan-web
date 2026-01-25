@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { login } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
+import Loader from '../Loader/Loader';
+
 
 export default function Login() {
   const navigate = useNavigate();
@@ -60,7 +62,9 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+    <>
+      {loading && <Loader text="LOGGING IN" />}
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full bg-gray-800 rounded-lg p-4 sm:p-6 lg:p-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">Login</h2>
 
@@ -161,5 +165,6 @@ export default function Login() {
         </p>
       </div>
     </div>
+    </>
   );
 } 

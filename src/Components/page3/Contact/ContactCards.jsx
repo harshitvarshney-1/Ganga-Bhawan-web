@@ -15,6 +15,7 @@ const contactData = [
   {
     title: "Email",
     value: ["harshitvarshney822@gmail.com"],
+    action: "mailto:harshitvarshney822@gmail.com",
     accent: "blue",
     icon: "📧",
   },
@@ -59,14 +60,16 @@ const ContactCards = () => {
           {item.action && (
             <a
               href={item.action}
-              target="_blank"
+              target={item.title === "Email" ? "_self" : "_blank"}
               rel="noreferrer"
-              className="inline-block mt-4 px-4 py-2 rounded-md
-              bg-green-500/10 text-green-400
-              hover:bg-green-500 hover:text-white
-              transition text-sm font-medium"
+              className={`inline-block mt-4 px-4 py-2 rounded-md
+              ${item.title === "WhatsApp" 
+                ? "bg-green-500/10 text-green-400 hover:bg-green-500" 
+                : "bg-blue-500/10 text-blue-400 hover:bg-blue-500"
+              }
+              hover:text-white transition text-sm font-medium`}
             >
-              Open WhatsApp
+              {item.title === "WhatsApp" ? "Open WhatsApp" : "Send Email"}
             </a>
           )}
         </div>

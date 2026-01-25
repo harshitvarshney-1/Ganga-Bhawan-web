@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../../services/api';
+import Loader from '../Loader/Loader';
+
 
 const StatCard = ({ title, value, icon, gradient }) => (
   <div className={`relative overflow-hidden rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 ${gradient}`}>
@@ -169,7 +171,8 @@ const PaymentHistoryModal = ({
   selectedHistoryTenant, 
   loadingHistory, 
   tenantPayments, 
-  setFullScreenImage 
+  setFullScreenImage,
+  handleDeletePayment // Added prop
 }) => {
   if (!isHistoryModalOpen || !selectedHistoryTenant) return null;
 
@@ -214,7 +217,7 @@ const PaymentHistoryModal = ({
             <>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
                 {monthNamesShort.map((month, idx) => {
-                  const payment = tenantPayments.find(p => p.monthIndex === idx && new Date(p.paymentDate).getFullYear() === currentYear);
+                  const payment = tenantPayments.find(p => !p.isAdvanced && p.monthIndex === idx && new Date(p.paymentDate).getFullYear() === currentYear);
                   const isPaid = payment?.status === 'success';
                   const isPending = payment?.status === 'pending';
                   const isRejected = payment?.status === 'rejected';
@@ -254,16 +257,87 @@ const PaymentHistoryModal = ({
                       <p className="text-xs font-bold uppercase tracking-wider mb-3">{statusLabel}</p>
                       
                       {(isPaid || isPending || isRejected) && payment.barcodeImage && (
-                        <button 
-                          onClick={() => setFullScreenImage(payment.barcodeImage)}
-                          className="w-full py-2 bg-white/60 hover:bg-white text-xs font-bold rounded-lg transition-colors border border-current"
-                        >
-                          👁️ View Receipt
-                        </button>
+                        <div className="flex gap-1 mt-2">
+                          <button 
+                            onClick={() => setFullScreenImage(payment.barcodeImage)}
+                            className="flex-1 py-1.5 bg-white/60 hover:bg-white text-[10px] font-bold rounded-lg transition-colors border border-current"
+                            title="View Receipt"
+                          >
+                            👁️ View
+                          </button>
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeletePayment(payment._id, selectedHistoryTenant._id);
+                            }}
+                            className="px-2 py-1.5 bg-red-500/10 hover:bg-red-500 text-red-600 hover:text-white rounded-lg transition-colors border border-red-200 hover:border-red-500"
+                            title="Delete Payment Record"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       )}
                     </div>
                   );
                 })}
+              </div>
+              
+              {/* Advanced Booking Box - Distinct Look */}
+              <div className="mb-8">
+                <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border-2 border-indigo-200 p-6 relative overflow-hidden group hover:border-indigo-400 transition-all">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 group-hover:bg-indigo-500/20 transition-all"></div>
+                  
+                  <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-2xl shadow-lg">
+                        🚀
+                      </div>
+                      <div>
+                        <h4 className="text-xl font-bold text-gray-900">Advanced Booking</h4>
+                        <p className="text-sm text-indigo-600 font-medium">Pre-pay for upcoming months</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap gap-3">
+                      {tenantPayments.filter(p => p.isAdvanced).map((payment, idx) => (
+                        <div key={idx} className="bg-white px-4 py-2 rounded-lg border border-indigo-100 shadow-sm flex items-center gap-3">
+                          <span className="font-bold text-indigo-700">{payment.month || 'Future Payment'}</span>
+                          <span className={`text-xs px-2 py-1 rounded-full ${
+                            payment.status === 'success' ? 'bg-emerald-100 text-emerald-700' : 
+                            payment.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                          }`}>
+                            {payment.status === 'success' ? 'Paid' : payment.status === 'pending' ? 'Pending' : 'Rejected'}
+                          </span>
+                          {payment.barcodeImage && (
+                            <div className="flex items-center gap-1">
+                              <button 
+                                onClick={() => setFullScreenImage(payment.barcodeImage)}
+                                className="text-indigo-600 hover:text-indigo-800 p-1 rounded hover:bg-indigo-50"
+                                title="View Receipt"
+                              >
+                                👁️
+                              </button>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeletePayment(payment._id, selectedHistoryTenant._id);
+                                }}
+                                className="text-red-400 hover:text-red-600 p-1 rounded hover:bg-red-50"
+                                title="Delete Record"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      
+                      {tenantPayments.filter(p => p.isAdvanced).length === 0 && (
+                        <span className="text-gray-400 text-sm italic py-2">No advanced payments yet</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="bg-gray-50 rounded-2xl p-6">
@@ -619,6 +693,34 @@ const AdminDashboard = () => {
     }
   };
 
+  // Delete Payment Record
+  const handleDeletePayment = async (paymentId, tenantId) => {
+    if (!window.confirm("⚠️ Are you sure you want to delete this payment record?\n\nThis will remove the payment proof and reset the status to 'Unpaid' for the tenant. They will need to upload the receipt again.")) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${BASE_URL}/api/admin/delete-payment/${paymentId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      if (response.ok) {
+        alert("✅ Payment record deleted. Tenant status reset.");
+        // Refresh payments in modal
+        if (tenantId) fetchTenantPayments(tenantId);
+        // Refresh dashboard stats
+        fetchTenants();
+      } else {
+        alert("❌ Failed to delete payment.");
+      }
+    } catch (error) {
+      console.error("Error deleting payment:", error);
+      alert("❌ Error deleting payment.");
+    }
+  };
+
   const exportToCSV = () => {
     const allTenants = [...pendingTenants, ...approvedTenants];
     const csvContent = [
@@ -678,15 +780,9 @@ const AdminDashboard = () => {
 
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-700 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-white text-xl font-semibold">Loading Admin Portal...</p>
-        </div>
-      </div>
-    );
+    return <Loader text="LOADING ADMIN PORTAL" />;
   }
+
 
 
 
@@ -1001,7 +1097,14 @@ const AdminDashboard = () => {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                             <div>
                               <p className="text-xs text-gray-500 font-semibold uppercase mb-1">Month</p>
-                              <p className="text-lg font-bold text-gray-900">{payment.month}</p>
+                              <div className="flex items-center gap-2">
+                                <p className="text-lg font-bold text-gray-900">{payment.month}</p>
+                                {payment.isAdvanced && (
+                                  <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full border border-indigo-200">
+                                    🚀 Advanced
+                                  </span>
+                                )}
+                              </div>
                             </div>
 
                             <div>
@@ -1031,14 +1134,9 @@ const AdminDashboard = () => {
                                 <img
                                   src={payment.barcodeImage}
                                   alt="Payment proof"
-                                  className="max-w-full sm:max-w-xs max-h-48 object-contain rounded-lg border-2 border-gray-200 shadow-md"
-                                />
-                                <a
                                   onClick={() => setFullScreenImage(payment.barcodeImage)}
-                                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold shrink-0 cursor-pointer"
-                                >
-                                  📷 Full size dekhen
-                                </a>
+                                  className="max-w-full sm:max-w-xs max-h-48 object-contain rounded-lg border-2 border-gray-200 shadow-md cursor-pointer hover:opacity-95 hover:shadow-lg transition-all"
+                                />
                               </div>
                             </div>
                           )}
@@ -1168,14 +1266,14 @@ const AdminDashboard = () => {
             </div>
             
             <div className="p-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-8">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-8">
                 <div className="space-y-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Full Name</label>
-                  <p className="text-lg font-bold text-gray-900">{selectedTenant.fullName}</p>
+                  <p className="text-lg font-bold text-gray-900 break-words">{selectedTenant.fullName}</p>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Email</label>
-                  <p className="text-lg font-bold text-gray-900">{selectedTenant.email}</p>
+                  <p className="text-lg font-bold text-gray-900 break-all">{selectedTenant.email}</p>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Mobile Number</label>
@@ -1183,7 +1281,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Aadhaar Number</label>
-                  <p className="text-lg font-bold text-gray-900">{selectedTenant.aadhaarNumber}</p>
+                  <p className="text-lg font-bold text-gray-900 break-all">{selectedTenant.aadhaarNumber}</p>
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Date of Birth</label>
@@ -1218,9 +1316,9 @@ const AdminDashboard = () => {
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Mother's Phone</label>
                   <p className="text-lg font-bold text-gray-900">{selectedTenant.motherPhone || 'N/A'}</p>
                 </div>
-                <div className="space-y-2 col-span-2">
+                <div className="space-y-2 col-span-1 md:col-span-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Permanent Address</label>
-                  <p className="text-lg font-bold text-gray-900">{selectedTenant.permanentAddress}</p>
+                  <p className="text-lg font-bold text-gray-900 break-words">{selectedTenant.permanentAddress}</p>
                 </div>
 
               </div>
@@ -1337,7 +1435,14 @@ const AdminDashboard = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs text-gray-500 font-semibold uppercase tracking-wider">Month</label>
-                  <p className="text-lg font-bold text-gray-900">{selectedPayment.month}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-lg font-bold text-gray-900">{selectedPayment.month}</p>
+                    {selectedPayment.isAdvanced && (
+                      <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full border border-indigo-200">
+                        🚀 Advanced Booking
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
@@ -1367,16 +1472,9 @@ const AdminDashboard = () => {
                     <img 
                       src={selectedPayment.barcodeImage}
                       alt="Barcode payment screenshot"
-                      className="max-w-full max-h-96 rounded-xl border-2 border-gray-200 shadow-lg"
-                    />
-                  </div>
-                  <div className="mt-4 text-center">
-                    <button 
                       onClick={() => setFullScreenImage(selectedPayment.barcodeImage)}
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all font-semibold"
-                    >
-                      📷 Open Full Size
-                    </button>
+                      className="max-w-full max-h-96 rounded-xl border-2 border-gray-200 shadow-lg cursor-pointer hover:opacity-95 hover:shadow-xl transition-all"
+                    />
                   </div>
                 </div>
               )}
@@ -1516,6 +1614,7 @@ const AdminDashboard = () => {
         loadingHistory={loadingHistory}
         tenantPayments={tenantPayments}
         setFullScreenImage={setFullScreenImage}
+        handleDeletePayment={handleDeletePayment}
       />
     </div>
   );

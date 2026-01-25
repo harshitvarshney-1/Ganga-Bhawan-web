@@ -18,6 +18,10 @@ const paymentSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
+  isAdvanced: {
+    type: Boolean,
+    default: false
+  },
 
   barcodeImage: {
     type: String,

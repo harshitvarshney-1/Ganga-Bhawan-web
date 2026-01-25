@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { registerTenant } from "../../services/api.js";
 import { useNavigate } from 'react-router-dom';
+import Loader from '../Loader/Loader';
+
 
 export default function Register() {
   const navigate = useNavigate();
@@ -149,7 +151,9 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+    <>
+      {loading && <Loader text="REGISTERING" />}
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full bg-gray-800 rounded-lg p-4 sm:p-6 lg:p-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-cyan-400 mb-6">
           Tenant Registration Form
@@ -381,5 +385,6 @@ export default function Register() {
         </p>
       </div>
     </div>
+    </>
   );
 }

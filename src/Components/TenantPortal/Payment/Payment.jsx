@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { BASE_URL } from '../../../services/api';
 import barcodeImg from '../../../assets/barcode.png';
+import Loader from '../../Loader/Loader';
+
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -41,6 +43,7 @@ const Payment = () => {
   const [payments, setPayments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState({ open: false, month: null, amount: 0, monthIndex: null });
+  const [advancedModal, setAdvancedModal] = useState({ open: false, month: "", monthIndex: null });
   const [processing, setProcessing] = useState(false);
   const [alert, setAlert] = useState({ open: false, message: "" });
   const [barcodeImage, setBarcodeImage] = useState(null);
@@ -142,7 +145,8 @@ const Payment = () => {
     return payments.some(p =>
       p.monthIndex === monthIndex &&
       new Date(p.paymentDate).getFullYear() === currentYear &&
-      p.status === 'success'
+      p.status === 'success' &&
+      !p.isAdvanced // Ignore advanced payments in main grid
     );
   };
 
@@ -156,9 +160,20 @@ const Payment = () => {
     setBarcodePreview(null);
   };
 
+  const openAdvancedModal = () => {
+    setAdvancedModal({
+      open: true,
+      month: "",
+      monthIndex: null
+    });
+    setBarcodeImage(null);
+    setBarcodePreview(null);
+  };
+
   const closeModal = () => {
     setProcessing(false);
     setModal({ open: false, month: null, amount: 0, monthIndex: null });
+    setAdvancedModal({ open: false, month: "", monthIndex: null });
     setBarcodeImage(null);
     setBarcodePreview(null);
     setAlert({ open: false, message: "" });
@@ -286,18 +301,61 @@ const Payment = () => {
     }
   };
 
+  const handleSubmitAdvancedPayment = async () => {
+    if (!barcodeImage || !advancedModal.month) {
+      setAlert({
+        open: true,
+        message: 'Please select a month and upload payment screenshot'
+      });
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const token = localStorage.getItem('token');
+      
+      const formData = new FormData();
+      formData.append('barcodeImage', barcodeImage);
+      formData.append('month', advancedModal.month);
+      // For advanced, generic index or parsed from month name (simplified here)
+      const mIndex = monthNames.indexOf(advancedModal.month);
+      formData.append('monthIndex', mIndex >= 0 ? mIndex : 99); 
+      formData.append('amount', 0); // Amount handle by backend/admin
+      formData.append('isAdvanced', 'true');
+
+      const response = await fetch(`${BASE_URL}/api/payments/submit`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+
+      if (response.ok) {
+        setAlert({
+          open: true,
+          message: `✅ Advanced booking submitted for ${advancedModal.month}! Admin will verify soon.`
+        });
+        fetchUserAndPayments();
+        setTimeout(closeModal, 2000);
+      } else {
+        throw new Error('Failed to submit advanced payment');
+      }
+    } catch (error) {
+      console.error('Advanced payment error:', error);
+      setAlert({
+        open: true,
+        message: 'Error submitting advanced payment. Please try again.'
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const handleAlertClose = () => setAlert({ open: false, message: "" });
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-cyan-500/30 border-t-cyan-500 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg font-semibold">Loading...</p>
-        </div>
-      </div>
-    );
+    return <Loader text="LOADING PAYMENTS" />;
   }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
@@ -335,7 +393,7 @@ const Payment = () => {
         </div>
 
         {/* Payment Calendar */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100">
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 mb-12">
           <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
             Year {currentYear}
           </h3>
@@ -349,7 +407,8 @@ const Payment = () => {
               const pendingPayment = payments.find(p =>
                 p.monthIndex === index &&
                 new Date(p.paymentDate).getFullYear() === currentYear &&
-                p.status === 'pending'
+                p.status === 'pending' &&
+                !p.isAdvanced // Ignore advanced payments in main grid
               );
 
               // Can only pay if: not paid, not pending, and (current month or past month)
@@ -448,6 +507,67 @@ const Payment = () => {
                 </div>
               );
             })}
+          </div>
+        </div>
+
+
+
+        {/* Advanced Booking Box */}
+        <div className="mb-8">
+          <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-2xl border-2 border-indigo-200 p-6 relative overflow-hidden group hover:border-indigo-400 transition-all shadow-lg">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full -mr-16 -mt-16 group-hover:bg-indigo-500/20 transition-all"></div>
+            
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+              <div className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl shadow-lg animate-bounce">
+                  🚀
+                </div>
+                <div>
+                  <h3 className="text-2xl font-bold text-gray-900">Advanced Booking</h3>
+                  <p className="text-indigo-600 font-medium">Pre-pay for upcoming months & secure your stay</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                {payments.filter(p => p.isAdvanced).length === 0 && (
+                  <button
+                    onClick={openAdvancedModal}
+                    className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 transform hover:-translate-y-1"
+                  >
+                    <span>💸</span> Pay In Advance
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* List of Advanced Payments */}
+            {payments.filter(p => p.isAdvanced).length > 0 && (
+              <div className="mt-6 pt-6 border-t border-indigo-200">
+                <h4 className="font-bold text-indigo-900 mb-4">Your Advanced Bookings</h4>
+                <div className="flex flex-wrap gap-3">
+                  {payments.filter(p => p.isAdvanced).map((payment, idx) => (
+                    <div key={idx} className="bg-white px-4 py-2 rounded-lg border border-indigo-100 shadow-sm flex items-center gap-3">
+                      <span className="font-bold text-indigo-700">{payment.month}</span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        payment.status === 'success' ? 'bg-emerald-100 text-emerald-700' : 
+                        payment.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                      }`}>
+                        {payment.status === 'success' ? 'Approved' : payment.status === 'pending' ? 'Pending' : 'Rejected'}
+                      </span>
+                      {payment.barcodeImage && (
+                        <button 
+                          onClick={() => setFullScreenImage(payment.barcodeImage)}
+                          className="text-indigo-600 hover:text-indigo-800"
+                          title="View Receipt"
+                        >
+                          👁️
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -630,6 +750,75 @@ const Payment = () => {
               <p className="text-xs text-gray-400 text-center mt-4">
                 By submitting, you confirm that you have made the payment via barcode
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Advanced Payment Modal */}
+      {advancedModal.open && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white rounded-3xl w-full max-w-md shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-indigo-900">Advanced Booking</h3>
+                <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">✕</button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Select Month</label>
+                  <select
+                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                    value={advancedModal.month}
+                    onChange={(e) => setAdvancedModal({...advancedModal, month: e.target.value})}
+                  >
+                    <option value="">Select a Month</option>
+                    {monthNames.map((m) => (
+                      <option key={m} value={m}>{m} {new Date().getFullYear() + (monthNames.indexOf(m) < new Date().getMonth() ? 1 : 0)}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="bg-indigo-50 p-4 rounded-xl text-center border-2 border-indigo-100">
+                  <img src={barcodeImg} alt="QR Code" className="w-32 h-32 mx-auto mb-2" />
+                  <p className="text-xs text-indigo-600 font-medium">Scan to Pay</p>
+                </div>
+
+                <div className="border-2 border-dashed border-indigo-200 rounded-xl p-4 text-center hover:border-indigo-400 transition-colors">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleBarcodeChange}
+                    className="hidden"
+                    id="adv-upload"
+                  />
+                  <label htmlFor="adv-upload" className="cursor-pointer block">
+                     {barcodePreview ? (
+                      <img src={barcodePreview} className="max-h-32 mx-auto rounded-lg" />
+                    ) : (
+                      <div className="py-4">
+                        <span className="text-3xl block mb-2">📤</span>
+                        <span className="text-indigo-600 font-semibold">Upload Receipt</span>
+                      </div>
+                    )}
+                  </label>
+                </div>
+
+                <button
+                  onClick={handleSubmitAdvancedPayment}
+                  disabled={processing || !advancedModal.month || !barcodeImage}
+                  className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition disabled:opacity-50"
+                >
+                  {processing ? 'Submitting...' : 'Submit Advanced Booking'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
