@@ -113,9 +113,13 @@ router.post('/login', async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    // Check if trying to access admin portal
+    // Check for role-loginType mismatch
     if (loginType === 'admin' && user.role !== 'admin') {
-      return res.status(403).json({ error: 'Access denied. Admin only.' });
+      return res.status(403).json({ error: 'Access denied. Please use Tenant Login.' });
+    }
+
+    if (loginType === 'tenant' && user.role === 'admin') {
+      return res.status(403).json({ error: 'Access denied. Please use Admin Login.' });
     }
 
     // Verify password
