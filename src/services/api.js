@@ -149,6 +149,7 @@ export const rejectTenant = async (tenantId) => {
 export const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('user');
+  sessionStorage.setItem('hasShownSplash', 'true'); // Prevent splash after logout
 };
 
 // Check if user is authenticated

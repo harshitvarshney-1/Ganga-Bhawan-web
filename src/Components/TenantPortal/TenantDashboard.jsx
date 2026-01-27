@@ -19,7 +19,8 @@ const TenantDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/');
+    sessionStorage.setItem('hasShownSplash', 'true');
+    navigate('/login');
   };
 
   useEffect(() => {

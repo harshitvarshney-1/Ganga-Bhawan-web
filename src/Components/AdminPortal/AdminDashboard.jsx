@@ -22,8 +22,18 @@ const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSel
     <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 overflow-hidden">
       <div className="p-6">
         <div className="flex items-start gap-4 mb-6">
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl flex-shrink-0 shadow-lg">
-            {tenant.fullName.charAt(0).toUpperCase()}
+          <div className="w-14 h-14 rounded-xl overflow-hidden bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white font-bold text-xl flex-shrink-0 shadow-lg">
+            {tenant.profilePicture ? (
+              <img 
+                src={tenant.profilePicture.startsWith('data:') || tenant.profilePicture.startsWith('http') 
+                  ? tenant.profilePicture 
+                  : `${BASE_URL}/${tenant.profilePicture}`} 
+                alt={tenant.fullName} 
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              tenant.fullName.charAt(0).toUpperCase()
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-bold text-gray-900 mb-1 truncate">{tenant.fullName}</h3>
@@ -392,7 +402,8 @@ const AdminDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    navigate('/');
+    sessionStorage.setItem('hasShownSplash', 'true');
+    navigate('/login');
   };
 
   useEffect(() => {
