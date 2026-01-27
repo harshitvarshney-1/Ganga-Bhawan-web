@@ -237,6 +237,7 @@ const Payment = () => {
       formData.append('barcodeImage', barcodeImage);
       formData.append('month', modal.month);
       formData.append('monthIndex', modal.monthIndex);
+      formData.append('amount', "0"); // Amount to be handled by admin/backend logic
 
       const response = await fetch(`${BASE_URL}/api/payments/submit`, {
         method: 'POST',

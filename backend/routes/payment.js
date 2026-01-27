@@ -50,8 +50,12 @@ router.post('/submit', auth, upload.single('barcodeImage'), async (req, res) => 
   try {
     const { month, monthIndex, amount } = req.body;
 
+    // Log for debugging
+    console.log('Payment submission data received:', { month, monthIndex, amount });
+
     // Validate input
-    if (!month || monthIndex === undefined || !amount) {
+    // Using more robust check for amount to allow "0" or 0
+    if (!month || monthIndex === undefined || (amount === undefined || amount === null || amount === '')) {
       return res.status(400).json({
         success: false,
         error: 'Missing required fields: month, monthIndex, amount'
