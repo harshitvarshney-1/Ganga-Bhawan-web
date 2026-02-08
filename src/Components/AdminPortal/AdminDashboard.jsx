@@ -485,13 +485,15 @@ const AdminDashboard = () => {
       const pendingRes = await fetch(`${BASE_URL}/api/admin/pending-tenants`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const pendingData = await pendingRes.json();
+      const pendingDataRaw = await pendingRes.json();
+      const pendingData = Array.isArray(pendingDataRaw) ? pendingDataRaw : [];
       setPendingTenants(pendingData);
 
       const approvedRes = await fetch(`${BASE_URL}/api/admin/approved-tenants`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const approvedData = await approvedRes.json();
+      const approvedDataRaw = await approvedRes.json();
+      const approvedData = Array.isArray(approvedDataRaw) ? approvedDataRaw : [];
       setApprovedTenants(approvedData);
 
       const total = pendingData.length + approvedData.length;
