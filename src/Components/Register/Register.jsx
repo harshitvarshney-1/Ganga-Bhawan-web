@@ -83,9 +83,16 @@ export default function Register() {
   };
 
   const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type !== 'application/pdf') {
+      setError('Only PDF files are allowed.');
+      e.target.value = ''; // Reset file input
+      return;
+    }
+    setError('');
     setFiles({
       ...files,
-      [e.target.name]: e.target.files[0],
+      [e.target.name]: file,
     });
   };
 
@@ -354,16 +361,16 @@ export default function Register() {
 
           {/* Aadhaar Upload */}
           <div>
-            <label className="block text-gray-300 mb-2">Upload Aadhaar (Photo or PDF)</label>
+            <label className="block text-gray-300 mb-2">Upload Aadhaar (PDF only)</label>
             <input
               type="file"
               name="aadhaarFile"
               onChange={handleFileChange}
-              accept="image/*,application/pdf"
+              accept="application/pdf"
               required
               className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
             />
-            <p className="text-gray-400 text-xs mt-1">Please upload a single file (Image or PDF) containing both sides of your Aadhaar.</p>
+            <p className="text-gray-400 text-xs mt-1">Please upload a single PDF file containing both sides of your Aadhaar.</p>
           </div>
 
 
