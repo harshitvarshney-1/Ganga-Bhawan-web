@@ -35,6 +35,12 @@ export const loginUser = async (req, res) => {
       });
     }
 
+    if (user.isDisabled) {
+      return res.status(403).json({
+        error: 'Your account has been disabled by the admin. Please contact support.'
+      });
+    }
+
     const token = jwt.sign(
       {
         userId: user._id,

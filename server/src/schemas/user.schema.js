@@ -50,21 +50,14 @@ export const userSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-  aadhaarFile: {
+  aadhaarFront: {
     type: String
   },
-  aadhaarFileData: {
-    data: Buffer,
-    contentType: String,
-    filename: String
+  aadhaarBack: {
+    type: String
   },
   profilePicture: {
     type: String
-  },
-  profilePictureData: {
-    data: Buffer,
-    contentType: String,
-    filename: String
   },
   role: {
     type: String,
@@ -72,6 +65,10 @@ export const userSchema = new mongoose.Schema({
     default: 'tenant'
   },
   isApproved: {
+    type: Boolean,
+    default: false
+  },
+  isDisabled: {
     type: Boolean,
     default: false
   },

@@ -1,4 +1,5 @@
 import User from '../../models/user.model.js';
+import { uploadToCloudinary } from '../../infra/cloudinary.js';
 
 export const updateTenantProfile = async (req, res) => {
   try {
@@ -29,12 +30,17 @@ export const updateTenantProfile = async (req, res) => {
     if (permanentAddress) user.permanentAddress = permanentAddress;
 
     if (req.file) {
-      user.profilePicture = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-      user.profilePictureData = {
-        data: req.file.buffer,
-        contentType: req.file.mimetype,
-        filename: req.file.originalname
-      };
+      try {
+        console.log('Uploading profile picture to Cloudinary...');
+        const result = await uploadToCloudinary(req.file.buffer, 'profiles', req.file.mimetype);
+        user.profilePicture = result.secure_url;
+        console.log('Profile picture uploaded successfully:', result.secure_url);
+      } catch (cloudinaryError) {
+        console.error('Cloudinary upload error:', cloudinaryError);
+        // We choose to continue or return error based on importance. 
+        // For profile update, failing the image upload might be critical enough to return error.
+        return res.status(500).json({ error: 'Failed to upload image. Please check storage configuration.' });
+      }
     }
 
     await user.save();

@@ -6,7 +6,11 @@ import { logoutUser } from '../../controllers/auth/logout.controller.js';
 
 const router = express.Router();
 
-router.post('/register', upload.fields([{ name: 'aadhaarFile', maxCount: 1 }]), registerUser);
+router.post('/register', upload.fields([
+  { name: 'aadhaarFront', maxCount: 1 },
+  { name: 'aadhaarBack', maxCount: 1 },
+  { name: 'profilePicture', maxCount: 1 }
+]), registerUser);
 router.post('/login', loginUser);
 router.post('/logout', logoutUser);
 

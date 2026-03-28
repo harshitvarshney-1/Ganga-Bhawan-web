@@ -5,7 +5,10 @@ import {
   getApprovedTenants,
   approveTenant,
   rejectTenant,
-  deleteTenant
+  deleteTenant,
+  getDisabledTenants,
+  disableTenant,
+  enableTenant
 } from '../../controllers/admin/tenant.controller.js';
 import {
   getPaymentsSummary,
@@ -15,7 +18,8 @@ import {
   getTenantPayments,
   deletePayment,
   resetTenantPassword,
-  getTenantAadhaar
+  quickApprovePayment,
+  quickRejectPayment
 } from '../../controllers/admin/payment.controller.js';
 
 const router = express.Router();
@@ -38,6 +42,9 @@ router.get('/approved-tenants', isAdmin, getApprovedTenants);
 router.post('/approve-tenant/:id', isAdmin, approveTenant);
 router.delete('/reject-tenant/:id', isAdmin, rejectTenant);
 router.delete('/delete-tenant/:id', isAdmin, deleteTenant);
+router.get('/disabled-tenants', isAdmin, getDisabledTenants);
+router.post('/disable-tenant/:id', isAdmin, disableTenant);
+router.post('/enable-tenant/:id', isAdmin, enableTenant);
 
 // Payment Management Routes
 router.get('/payments-summary', isAdmin, getPaymentsSummary);
@@ -49,7 +56,11 @@ router.delete('/delete-payment/:paymentId', isAdmin, deletePayment);
 
 // Other Admin Routes
 router.post('/reset-password/:tenantId', isAdmin, resetTenantPassword);
-// This one has custom auth inside logic
-router.get('/tenant-aadhaar/:id', getTenantAadhaar);
+
+
+// ─── One-click approve/reject from email (no portal login needed) ───────────
+// These are public endpoints — security is ensured by the signed JWT in the URL.
+router.get('/quick-approve', quickApprovePayment);
+router.get('/quick-reject',  quickRejectPayment);
 
 export default router;

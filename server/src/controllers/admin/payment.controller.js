@@ -3,6 +3,10 @@ import User from '../../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { currentConfig } from '../../config/env.js';
+import { sendEmail, getPaymentApprovalEmailTemplate, getPasswordResetEmailTemplate } from '../../utils/email.util.js';
+
+// Secret used only for quick-approve links (separate from user JWT secret)
+const QUICK_SECRET = process.env.QUICK_APPROVE_SECRET || (currentConfig.jwtSecret + '_quick');
 
 export const getPaymentsSummary = async (req, res) => {
   try {
@@ -100,9 +104,25 @@ export const approvePayment = async (req, res) => {
 
     await payment.save();
 
+    // Send payment approval email
+    try {
+      const tenant = await User.findById(payment.userId);
+      if (tenant) {
+        const emailHtml = getPaymentApprovalEmailTemplate(tenant.fullName, payment.month, payment.paymentDate);
+        await sendEmail({
+          to: tenant.email,
+          subject: `Payment Successful - ${payment.month} Bill Approved`,
+          html: emailHtml
+        });
+        console.log(`✅ Payment approval email sent to ${tenant.email} for ${payment.month}`);
+      }
+    } catch (emailError) {
+      console.error('❌ Failed to send payment approval email:', emailError);
+    }
+
     res.json({
       success: true,
-      message: 'Payment approved successfully',
+      message: 'Payment approved successfully. Confirmation email sent.',
       payment
     });
   } catch (error) {
@@ -189,9 +209,22 @@ export const resetTenantPassword = async (req, res) => {
     tenant.password = hashedPassword;
     await tenant.save();
 
+    // Send password reset email
+    try {
+      const emailHtml = getPasswordResetEmailTemplate(tenant.fullName, newPassword);
+      await sendEmail({
+        to: tenant.email,
+        subject: 'Login Password Updated - Ganga Bhawan',
+        html: emailHtml
+      });
+      console.log(`✅ Password reset email sent to ${tenant.email}`);
+    } catch (emailError) {
+      console.error('❌ Failed to send password reset email:', emailError);
+    }
+
     res.json({
       success: true,
-      message: `Password for ${tenant.fullName} has been updated successfully.`
+      message: `Password for ${tenant.fullName} has been updated successfully. Tenant has been notified via email.`
     });
   } catch (error) {
     console.error('Error resetting password:', error);
@@ -199,28 +232,134 @@ export const resetTenantPassword = async (req, res) => {
   }
 };
 
-export const getTenantAadhaar = async (req, res) => {
+
+
+// ─── One-Click Approve from Email ───────────────────────────────────────────
+export const quickApprovePayment = async (req, res) => {
   try {
-    const token = req.query.token || (req.headers['authorization']?.startsWith('Bearer ') ? req.headers['authorization'].split(' ')[1] : null);
+    const { token } = req.query;
+    if (!token) return res.status(400).send(htmlPage('❌ Invalid Link', 'No token provided.', 'error'));
 
-    if (!token) {
-      return res.status(401).json({ error: 'No token, authorization denied' });
+    let decoded;
+    try {
+      decoded = jwt.verify(token, QUICK_SECRET);
+    } catch {
+      return res.status(400).send(htmlPage('❌ Link Expired', 'This approval link has expired or is invalid. Please use the Admin Portal.', 'error'));
     }
 
-    const decoded = jwt.verify(token, currentConfig.jwtSecret);
-    if (decoded.role !== 'admin' && decoded.userId !== req.params.id) {
-      return res.status(403).json({ error: 'Access denied' });
+    if (decoded.action !== 'approve') {
+      return res.status(400).send(htmlPage('❌ Invalid Action', 'This link is not for approving payments.', 'error'));
     }
 
-    const tenant = await User.findById(req.params.id);
-    if (!tenant || !tenant.aadhaarFileData || !tenant.aadhaarFileData.data) {
-      return res.status(404).json({ error: 'Aadhaar file not found' });
+    const payment = await Payment.findById(decoded.paymentId);
+    if (!payment) return res.status(404).send(htmlPage('❌ Not Found', 'Payment record not found.', 'error'));
+    if (payment.status !== 'pending') {
+      return res.send(htmlPage(
+        payment.status === 'success' ? '✅ Already Approved' : '❌ Payment Rejected',
+        `This payment is already marked as <strong>${payment.status}</strong>. No action needed.`,
+        payment.status === 'success' ? 'success' : 'warn'
+      ));
     }
 
-    res.set('Content-Type', tenant.aadhaarFileData.contentType || 'image/jpeg');
-    res.send(tenant.aadhaarFileData.data);
+    payment.status = 'success';
+    payment.approvedAt = new Date();
+    payment.approvedViaEmail = true;
+    await payment.save();
+
+    // Notify tenant
+    try {
+      const tenant = await User.findById(payment.userId);
+      if (tenant) {
+        const emailHtml = getPaymentApprovalEmailTemplate(tenant.fullName, payment.month, payment.paymentDate);
+        await sendEmail({
+          to: tenant.email,
+          subject: `✅ Payment Approved - ${payment.month}`,
+          html: emailHtml
+        });
+      }
+    } catch (e) {
+      console.error('Email to tenant failed:', e);
+    }
+
+    return res.send(htmlPage('✅ Payment Approved!', `The payment for <strong>${payment.month}</strong> has been approved. A confirmation email has been sent to the tenant.`, 'success'));
   } catch (error) {
-    console.error('Error serving Aadhaar file:', error);
-    res.status(500).json({ error: 'Server error serving file' });
+    console.error('Quick approve error:', error);
+    return res.status(500).send(htmlPage('❌ Server Error', 'Something went wrong. Please use the Admin Portal.', 'error'));
   }
 };
+
+// ─── One-Click Reject from Email ────────────────────────────────────────────
+export const quickRejectPayment = async (req, res) => {
+  try {
+    const { token } = req.query;
+    if (!token) return res.status(400).send(htmlPage('❌ Invalid Link', 'No token provided.', 'error'));
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, QUICK_SECRET);
+    } catch {
+      return res.status(400).send(htmlPage('❌ Link Expired', 'This reject link has expired or is invalid. Please use the Admin Portal.', 'error'));
+    }
+
+    if (decoded.action !== 'reject') {
+      return res.status(400).send(htmlPage('❌ Invalid Action', 'This link is not for rejecting payments.', 'error'));
+    }
+
+    const payment = await Payment.findById(decoded.paymentId);
+    if (!payment) return res.status(404).send(htmlPage('❌ Not Found', 'Payment record not found.', 'error'));
+    if (payment.status !== 'pending') {
+      return res.send(htmlPage(
+        '⚠️ Already Processed',
+        `This payment is already marked as <strong>${payment.status}</strong>. No action needed.`,
+        'warn'
+      ));
+    }
+
+    payment.status = 'rejected';
+    payment.approvedAt = new Date();
+    payment.approvedViaEmail = true;
+    await payment.save();
+
+    return res.send(htmlPage('❌ Payment Rejected', `The payment for <strong>${payment.month}</strong> has been rejected. The tenant will need to re-submit.`, 'warn'));
+  } catch (error) {
+    console.error('Quick reject error:', error);
+    return res.status(500).send(htmlPage('❌ Server Error', 'Something went wrong. Please use the Admin Portal.', 'error'));
+  }
+};
+
+// ─── Helper to generate quick-approve/reject tokens ─────────────────────────
+export const generateQuickTokens = (paymentId) => {
+  const approveToken = jwt.sign({ paymentId: paymentId.toString(), action: 'approve' }, QUICK_SECRET, { expiresIn: '48h' });
+  const rejectToken  = jwt.sign({ paymentId: paymentId.toString(), action: 'reject'  }, QUICK_SECRET, { expiresIn: '48h' });
+  return { approveToken, rejectToken };
+};
+
+// ─── Simple HTML response page (no React needed — email click lands here) ───
+function htmlPage(title, message, type) {
+  const colors = {
+    success: { bg: '#f0fdf4', border: '#bbf7d0', icon: '#16a34a', btn: '#16a34a' },
+    error:   { bg: '#fef2f2', border: '#fecaca', icon: '#dc2626', btn: '#dc2626' },
+    warn:    { bg: '#fffbeb', border: '#fde68a', icon: '#d97706', btn: '#d97706' },
+  };
+  const c = colors[type] || colors.warn;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} — Ganga Bhawan</title></head>
+<body style="font-family:'Segoe UI',sans-serif;background:#f8fafc;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;">
+  <div style="max-width:480px;width:90%;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 10px 40px rgba(0,0,0,0.08);">
+    <div style="background:#0f172a;padding:28px 36px;">
+      <p style="color:#818cf8;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin:0 0 4px;">Ganga Bhawan Admin</p>
+      <h1 style="color:#fff;font-size:20px;font-weight:800;margin:0;">${title}</h1>
+    </div>
+    <div style="padding:32px 36px;">
+      <div style="background:${c.bg};border:1px solid ${c.border};border-radius:10px;padding:20px 24px;margin-bottom:24px;">
+        <p style="margin:0;color:#1f2937;font-size:15px;line-height:1.6;">${message}</p>
+      </div>
+      <a href="${currentConfig.clientUrl}/login" style="display:inline-block;background:${c.btn};color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;">Go to Admin Portal</a>
+    </div>
+    <div style="border-top:1px solid #f1f5f9;padding:16px 36px;background:#f8fafc;">
+      <p style="font-size:11px;color:#9ca3af;margin:0;text-align:center;">Ganga Bhawan (Hariom) | Mathura, UP</p>
+    </div>
+  </div>
+</body></html>`;
+}
