@@ -17,7 +17,7 @@ export const config = {
       port: process.env.EMAIL_PORT || 587,
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
-      from: process.env.EMAIL_FROM || '"Ganga Bhawan" <harshitvarshney822@gmail.com>'
+      from: process.env.EMAIL_FROM || '"Ganga Bhawan" <gangabhawan.service@gmail.com>'
     }
   },
   production: {
