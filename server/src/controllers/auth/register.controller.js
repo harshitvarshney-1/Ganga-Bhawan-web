@@ -28,7 +28,7 @@ export const registerUser = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // ─── Sequential Cloudinary Uploads (Graceful Fallback) ──────────────────────────
+    // ─── Sequential Cloudinary Uploads (Strict Mode) ──────────────────────────
     let aadhaarFrontUrl = null;
     let aadhaarBackUrl = null;
     let profilePictureUrl = null;
@@ -37,25 +37,39 @@ export const registerUser = async (req, res) => {
       if (req.files) {
         // 1. Aadhaar Front
         if (req.files['aadhaarFront']?.[0]) {
+          console.log('[Auth] Uploading Aadhaar Front...');
           const result = await uploadToCloudinary(req.files['aadhaarFront'][0].buffer, 'aadhaar_cards', req.files['aadhaarFront'][0].mimetype);
+          if (result.secure_url === "upload_failed") throw new Error('Aadhaar Front upload failed');
           aadhaarFrontUrl = result.secure_url;
         }
 
         // 2. Aadhaar Back
         if (req.files['aadhaarBack']?.[0]) {
+          console.log('[Auth] Uploading Aadhaar Back...');
           const result = await uploadToCloudinary(req.files['aadhaarBack'][0].buffer, 'aadhaar_cards', req.files['aadhaarBack'][0].mimetype);
+          if (result.secure_url === "upload_failed") throw new Error('Aadhaar Back upload failed');
           aadhaarBackUrl = result.secure_url;
         }
 
         // 3. Profile Picture
         if (req.files['profilePicture']?.[0]) {
+          console.log('[Auth] Uploading Profile Photo...');
           const result = await uploadToCloudinary(req.files['profilePicture'][0].buffer, 'profile_photos', req.files['profilePicture'][0].mimetype);
+          if (result.secure_url === "upload_failed") throw new Error('Profile Photo upload failed');
           profilePictureUrl = result.secure_url;
         }
       }
+
+      // Final check: Since they are required on the frontend, if they are null here, something is wrong
+      if (!aadhaarFrontUrl || !aadhaarBackUrl || !profilePictureUrl) {
+        throw new Error('Some documents failed to upload. Please try again.');
+      }
+
     } catch (uploadError) {
-      // This catch is mostly redundant now as uploadToCloudinary returns 'upload_failed' instead of throwing
-      console.error('⚠️ File upload process encountered an error, using fallback:', uploadError.message);
+      console.error('❌ Document upload failed, aborting registration:', uploadError.message);
+      return res.status(500).json({ 
+        error: `Failed to upload documents: ${uploadError.message}. Please check your connection and try again.` 
+      });
     }
 
     const newUser = new User({
