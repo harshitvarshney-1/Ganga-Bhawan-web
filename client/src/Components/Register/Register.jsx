@@ -114,40 +114,55 @@ export default function Register() {
         useWebWorker: true
       };
 
-      // Create FormData object
-      const data = new FormData();
-      
-      // Append all text fields
-      Object.keys(formData).forEach(key => {
-        data.append(key, formData[key]);
-      });
-      
-      // ⚡ Compress and Append files
+      // 🚀 Step 1: Aadhaar Front
+      let aadhaarFront = null;
       if (files.aadhaarFront) {
-        const compressed = await imageCompression(files.aadhaarFront, compressionOptions);
-        data.append('aadhaarFront', compressed);
+        console.log('📡 Compressing Aadhaar Front...');
+        aadhaarFront = await imageCompression(files.aadhaarFront, compressionOptions);
       }
+      
+      // 🚀 Step 2: Aadhaar Back
+      let aadhaarBack = null;
       if (files.aadhaarBack) {
-        const compressed = await imageCompression(files.aadhaarBack, compressionOptions);
-        data.append('aadhaarBack', compressed);
+        console.log('📡 Compressing Aadhaar Back...');
+        aadhaarBack = await imageCompression(files.aadhaarBack, compressionOptions);
       }
+      
+      // 🚀 Step 3: Profile Photo
+      let profilePicture = null;
       if (files.profilePicture) {
-        const compressed = await imageCompression(files.profilePicture, compressionOptions);
-        data.append('profilePicture', compressed);
+        console.log('📡 Compressing Profile Photo...');
+        profilePicture = await imageCompression(files.profilePicture, compressionOptions);
       }
 
-      // 🚀 Use Axios for Progress Tracking & Reliability
-      const result = await axios.post(`${window.location.origin.includes('localhost') ? 'http://localhost:5000' : ''}/api/auth/register`, data, {
+      // Create FormData object
+      const data = new FormData();
+      Object.keys(formData).forEach(key => data.append(key, formData[key]));
+      
+      if (aadhaarFront) data.append('aadhaarFront', aadhaarFront);
+      if (aadhaarBack) data.append('aadhaarBack', aadhaarBack);
+      if (profilePicture) data.append('profilePicture', profilePicture);
+
+      // 🌐 Determine API URL correctly
+      const baseUrl = window.location.origin.includes('localhost') ? 'http://localhost:5000' : '';
+      
+      console.log('🚀 Sending registration request to server...');
+      
+      // 🚀 Use Axios with a VERY long timeout (10 mins) for slow 3G connections
+      const result = await axios.post(`${baseUrl}/api/auth/register`, data, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
-        timeout: 300000, // 5 minutes for slow 3G
+        timeout: 600000, // 10 minutes - give the server plenty of time to process retries
         onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          console.log(`📡 Upload Progress: ${percentCompleted}%`);
+          if (progressEvent.total) {
+            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+            console.log(`📡 Network Uploading: ${percentCompleted}%`);
+          }
         }
       });
       
+      console.log('✅ Server response:', result.data);
       alert(result.data.message);
       navigate('/login', { replace: true });
       

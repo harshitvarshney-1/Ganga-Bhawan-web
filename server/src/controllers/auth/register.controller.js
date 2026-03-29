@@ -37,23 +37,27 @@ export const registerUser = async (req, res) => {
       if (req.files) {
         // 1. Aadhaar Front
         if (req.files['aadhaarFront']?.[0]) {
-          console.log('[Auth] Uploading Aadhaar Front...');
+          console.log('[Auth] Step 1/3: Aadhaar Front...');
           const result = await uploadToCloudinary(req.files['aadhaarFront'][0].buffer, 'aadhaar_cards', req.files['aadhaarFront'][0].mimetype);
           if (result.secure_url === "upload_failed") throw new Error('Aadhaar Front upload failed');
           aadhaarFrontUrl = result.secure_url;
+          
+          await new Promise(r => setTimeout(r, 5000)); // 5s break
         }
 
         // 2. Aadhaar Back
         if (req.files['aadhaarBack']?.[0]) {
-          console.log('[Auth] Uploading Aadhaar Back...');
+          console.log('[Auth] Step 2/3: Aadhaar Back...');
           const result = await uploadToCloudinary(req.files['aadhaarBack'][0].buffer, 'aadhaar_cards', req.files['aadhaarBack'][0].mimetype);
           if (result.secure_url === "upload_failed") throw new Error('Aadhaar Back upload failed');
           aadhaarBackUrl = result.secure_url;
+          
+          await new Promise(r => setTimeout(r, 5000)); // 5s break
         }
 
         // 3. Profile Picture
         if (req.files['profilePicture']?.[0]) {
-          console.log('[Auth] Uploading Profile Photo...');
+          console.log('[Auth] Step 3/3: Profile Photo...');
           const result = await uploadToCloudinary(req.files['profilePicture'][0].buffer, 'profile_photos', req.files['profilePicture'][0].mimetype);
           if (result.secure_url === "upload_failed") throw new Error('Profile Photo upload failed');
           profilePictureUrl = result.secure_url;
