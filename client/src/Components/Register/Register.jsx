@@ -3,9 +3,43 @@ import { useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import imageCompression from 'browser-image-compression';
-import { registerTenantAPI } from '../../../infra/auth/auth.api';
 import { authAtom, userAtom } from '../../../shared/hooks/store/auth.atom';
+import { API_URL } from '../../../infra/config';
 import Loader from '../../../shared/components/atoms/Loader/Loader';
+
+/**
+ * Upload a single file directly to Cloudinary (bypasses backend completely).
+ * This avoids Vercel's 10-60s serverless function timeout.
+ */
+const uploadToCloudinaryDirect = async (file, folder, apiBaseUrl) => {
+  // Step 1: Get signature from our backend (this is fast, just JSON)
+  const signRes = await axios.post(`${apiBaseUrl}/api/cloudinary/sign`, { folder });
+  const { signature, timestamp, cloudName, apiKey, folder: signedFolder } = signRes.data;
+
+  // Step 2: Compress image before upload
+  const compressionOptions = { maxSizeMB: 0.8, maxWidthOrHeight: 1920, useWebWorker: true };
+  let uploadFile = file;
+  if (file.type.startsWith('image/')) {
+    uploadFile = await imageCompression(file, compressionOptions);
+  }
+
+  // Step 3: Upload directly to Cloudinary (no backend timeout risk!)
+  const formData = new FormData();
+  formData.append('file', uploadFile);
+  formData.append('api_key', apiKey);
+  formData.append('timestamp', timestamp);
+  formData.append('signature', signature);
+  formData.append('folder', signedFolder);
+  formData.append('resource_type', 'auto');
+
+  const cloudRes = await axios.post(
+    `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
+    formData,
+    { timeout: 300000 } // 5 min timeout for very slow network
+  );
+
+  return cloudRes.data.secure_url;
+};
 
 export default function Register() {
   const navigate = useNavigate();
@@ -31,150 +65,150 @@ export default function Register() {
     aadhaarBack: null,
     profilePicture: null,
   });
-  
+
+  const [uploadStatus, setUploadStatus] = useState({
+    aadhaarFront: null,   // null | 'uploading' | 'done' | 'error'
+    aadhaarBack: null,
+    profilePicture: null,
+  });
+
+  const [uploadedUrls, setUploadedUrls] = useState({
+    aadhaarFront: null,
+    aadhaarBack: null,
+    profilePicture: null,
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Calculate DOB constraints
   const today = new Date();
   const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split('T')[0];
   const minDate = "1995-01-01";
-  
-  // Redirect to dashboard if already logged in
+
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+
+  // Redirect if already logged in
   useEffect(() => {
     if (authState.isAuthenticated && authState.token) {
-      if (userState.role === 'admin') {
-        navigate('/admin-dashboard', { replace: true });
-      } else {
-        navigate('/tenant-dashboard', { replace: true });
-      }
+      navigate(userState.role === 'admin' ? '/admin-dashboard' : '/tenant-dashboard', { replace: true });
     }
   }, [navigate, authState, userState]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Numeric only validation for specific fields
     const numericFields = ['mobileNumber', 'fatherPhone', 'motherPhone', 'aadhaarNumber'];
-    if (numericFields.includes(name)) {
-      const numericValue = value.replace(/\D/g, ''); // Remove non-digits
-      setFormData({
-        ...formData,
-        [name]: numericValue,
-      });
-      return;
-    }
-
     setFormData({
       ...formData,
-      [name]: value,
+      [name]: numericFields.includes(name) ? value.replace(/\D/g, '') : value,
     });
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     const { name } = e.target;
+    if (!file) return;
 
-    if (file) {
-      const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-      if (!allowedImageTypes.includes(file.type)) {
-        setError(`Only JPG and PNG images are allowed for ${name === 'profilePicture' ? 'profile photo' : 'Aadhaar photos'}.`);
-        e.target.value = ''; // Reset file input
-        return;
-      }
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedImageTypes.includes(file.type)) {
+      setError(`Only JPG and PNG images are allowed.`);
+      e.target.value = '';
+      return;
     }
 
     setError('');
-    setFiles({
-      ...files,
-      [name]: file,
-    });
+    setFiles(prev => ({ ...prev, [name]: file }));
+    setUploadedUrls(prev => ({ ...prev, [name]: null }));
+    setUploadStatus(prev => ({ ...prev, [name]: 'uploading' }));
+
+    // Determine folder
+    const folderMap = {
+      aadhaarFront: 'aadhaar_cards',
+      aadhaarBack: 'aadhaar_cards',
+      profilePicture: 'profile_photos',
+    };
+
+    try {
+      console.log(`[Upload] Uploading ${name} directly to Cloudinary...`);
+      const url = await uploadToCloudinaryDirect(file, folderMap[name], apiBaseUrl);
+      console.log(`[Upload] ✅ ${name} done: ${url}`);
+      setUploadedUrls(prev => ({ ...prev, [name]: url }));
+      setUploadStatus(prev => ({ ...prev, [name]: 'done' }));
+    } catch (err) {
+      console.error(`[Upload] ❌ ${name} failed:`, err.message);
+      setUploadStatus(prev => ({ ...prev, [name]: 'error' }));
+      setError(`Failed to upload ${name}. Please try selecting the file again.`);
+    }
+  };
+
+  const handleRetryUpload = (name) => {
+    // Reset and prompt user to reselect
+    setUploadStatus(prev => ({ ...prev, [name]: null }));
+    setUploadedUrls(prev => ({ ...prev, [name]: null }));
+    document.getElementById(`file-${name}`).click();
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
     setError('');
 
-    // Email Validation Regex
+    // Email Validation
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    
     if (!emailRegex.test(formData.email)) {
       setError('Please enter a valid email address.');
-      setLoading(false);
       return;
     }
 
+    // DOB Validation
+    if (formData.dateOfBirth) {
+      const dob = new Date(formData.dateOfBirth);
+      const ageLimit = new Date();
+      ageLimit.setFullYear(ageLimit.getFullYear() - 18);
+      if (dob > ageLimit) { setError('Tenant must be at least 18 years old.'); return; }
+      if (dob < new Date(minDate)) { setError('Date of Birth cannot be earlier than 1995.'); return; }
+    }
+
+    // Ensure all files are uploaded
+    if (!uploadedUrls.aadhaarFront || !uploadedUrls.aadhaarBack || !uploadedUrls.profilePicture) {
+      setError('Please wait for all documents to finish uploading before submitting.');
+      return;
+    }
+
+    // Check for any upload errors
+    if (uploadStatus.aadhaarFront === 'error' || uploadStatus.aadhaarBack === 'error' || uploadStatus.profilePicture === 'error') {
+      setError('Some documents failed to upload. Please retry the failed ones before submitting.');
+      return;
+    }
+
+    setLoading(true);
     try {
-      // 📦 Image Compression Options
-      const compressionOptions = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1920,
-        useWebWorker: true
-      };
-
-      // 🚀 Step 1: Aadhaar Front
-      let aadhaarFront = null;
-      if (files.aadhaarFront) {
-        console.log('📡 Compressing Aadhaar Front...');
-        aadhaarFront = await imageCompression(files.aadhaarFront, compressionOptions);
-      }
-      
-      // 🚀 Step 2: Aadhaar Back
-      let aadhaarBack = null;
-      if (files.aadhaarBack) {
-        console.log('📡 Compressing Aadhaar Back...');
-        aadhaarBack = await imageCompression(files.aadhaarBack, compressionOptions);
-      }
-      
-      // 🚀 Step 3: Profile Photo
-      let profilePicture = null;
-      if (files.profilePicture) {
-        console.log('📡 Compressing Profile Photo...');
-        profilePicture = await imageCompression(files.profilePicture, compressionOptions);
-      }
-
-      // Create FormData object
-      const data = new FormData();
-      Object.keys(formData).forEach(key => data.append(key, formData[key]));
-      
-      if (aadhaarFront) data.append('aadhaarFront', aadhaarFront);
-      if (aadhaarBack) data.append('aadhaarBack', aadhaarBack);
-      if (profilePicture) data.append('profilePicture', profilePicture);
-
-      // 🌐 Determine API URL correctly
-      const baseUrl = window.location.origin.includes('localhost') ? 'http://localhost:5000' : '';
-      
-      console.log('🚀 Sending registration request to server...');
-      
-      // 🚀 Use Axios with a VERY long timeout (10 mins) for slow 3G connections
-      const result = await axios.post(`${baseUrl}/api/auth/register`, data, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        timeout: 600000, // 10 minutes - give the server plenty of time to process retries
-        onUploadProgress: (progressEvent) => {
-          if (progressEvent.total) {
-            const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            console.log(`📡 Network Uploading: ${percentCompleted}%`);
-          }
-        }
+      // Just send JSON — no file handling needed on backend!
+      const response = await axios.post(`${apiBaseUrl}/api/auth/register`, {
+        ...formData,
+        aadhaarFrontUrl: uploadedUrls.aadhaarFront,
+        aadhaarBackUrl: uploadedUrls.aadhaarBack,
+        profilePictureUrl: uploadedUrls.profilePicture,
+      }, {
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 30000, // 30 seconds is plenty — just saving to DB
       });
-      
-      console.log('✅ Server response:', result.data);
-      alert(result.data.message);
+
+      alert(response.data.message);
       navigate('/login', { replace: true });
-      
     } catch (err) {
       console.error('Registration Error:', err);
-      const errorMessage = err.response?.data?.error || err.message || 'Registration failed';
-      setError(errorMessage);
+      setError(err.response?.data?.error || err.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
+  const getStatusIcon = (status) => {
+    if (status === 'uploading') return <span className="text-yellow-400 text-xs ml-2 animate-pulse">⏳ Uploading...</span>;
+    if (status === 'done') return <span className="text-green-400 text-xs ml-2">✅ Uploaded</span>;
+    if (status === 'error') return <span className="text-red-400 text-xs ml-2">❌ Failed</span>;
+    return null;
+  };
 
   return (
     <>
@@ -201,8 +235,12 @@ export default function Register() {
                 <span className="text-4xl text-gray-400">👤</span>
               )}
             </div>
-            <label className="block text-gray-300 mb-2 font-bold text-sm">Profile Photo (Required)</label>
+            <label className="block text-gray-300 mb-2 font-bold text-sm">
+              Profile Photo (Required)
+              {getStatusIcon(uploadStatus.profilePicture)}
+            </label>
             <input
+              id="file-profilePicture"
               type="file"
               name="profilePicture"
               onChange={handleFileChange}
@@ -210,59 +248,39 @@ export default function Register() {
               required
               className="w-full max-w-xs text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-400/10 file:text-cyan-400 hover:file:bg-cyan-400/20 transition-all"
             />
+            {uploadStatus.profilePicture === 'error' && (
+              <button type="button" onClick={() => handleRetryUpload('profilePicture')} className="text-cyan-400 text-xs mt-2 underline">
+                Retry Upload
+              </button>
+            )}
           </div>
 
           {/* Full Name */}
           <div>
             <label className="block text-gray-300 mb-2">Full Name (as per ID)</label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              required
+            <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required
               className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="Enter your full name"
-            />
+              placeholder="Enter your full name" />
           </div>
 
           {/* Email */}
           <div>
             <label className="block text-gray-300 mb-2">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
+            <input type="email" name="email" value={formData.email} onChange={handleChange} required
               className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="your@email.com"
-            />
+              placeholder="your@email.com" />
           </div>
 
           {/* Password */}
           <div>
             <label className="block text-gray-300 mb-2">Password</label>
             <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
+              <input type={showPassword ? "text" : "password"} name="password" value={formData.password} onChange={handleChange} required
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12"
-                placeholder="Create a strong password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition"
-              >
-                {showPassword ? (
-                  <span title="Hide Password">🔒</span>
-                ) : (
-                  <span title="Show Password">👁️</span>
-                )}
+                placeholder="Create a strong password" />
+              <button type="button" onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition">
+                {showPassword ? <span title="Hide">🔒</span> : <span title="Show">👁️</span>}
               </button>
             </div>
           </div>
@@ -270,43 +288,24 @@ export default function Register() {
           {/* Mobile Number */}
           <div>
             <label className="block text-gray-300 mb-2">Mobile Number</label>
-            <input
-              type="tel"
-              name="mobileNumber"
-              value={formData.mobileNumber}
-              onChange={handleChange}
-              required
-              pattern="[0-9]{10}"
+            <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange} required pattern="[0-9]{10}"
               className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="10-digit number"
-            />
+              placeholder="10-digit number" />
           </div>
 
           {/* Father's Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-gray-300 mb-2">Father's Name</label>
-              <input
-                type="text"
-                name="fatherName"
-                value={formData.fatherName}
-                onChange={handleChange}
-                required
+              <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange} required
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                placeholder="Father's name"
-              />
+                placeholder="Father's name" />
             </div>
             <div>
               <label className="block text-gray-300 mb-2">Father's Phone No.</label>
-              <input
-                type="tel"
-                name="fatherPhone"
-                value={formData.fatherPhone}
-                onChange={handleChange}
-                pattern="[0-9]{10}"
+              <input type="tel" name="fatherPhone" value={formData.fatherPhone} onChange={handleChange} pattern="[0-9]{10}"
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                placeholder="10-digit number"
-              />
+                placeholder="10-digit number" />
             </div>
           </div>
 
@@ -314,26 +313,15 @@ export default function Register() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-gray-300 mb-2">Mother's Name</label>
-              <input
-                type="text"
-                name="motherName"
-                value={formData.motherName}
-                onChange={handleChange}
+              <input type="text" name="motherName" value={formData.motherName} onChange={handleChange}
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                placeholder="Mother's name"
-              />
+                placeholder="Mother's name" />
             </div>
             <div>
               <label className="block text-gray-300 mb-2">Mother's Phone No.</label>
-              <input
-                type="tel"
-                name="motherPhone"
-                value={formData.motherPhone}
-                onChange={handleChange}
-                pattern="[0-9]{10}"
+              <input type="tel" name="motherPhone" value={formData.motherPhone} onChange={handleChange} pattern="[0-9]{10}"
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                placeholder="10-digit number"
-              />
+                placeholder="10-digit number" />
             </div>
           </div>
 
@@ -341,26 +329,14 @@ export default function Register() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-gray-300 mb-2">Date of Birth</label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleChange}
-                required
-                min={minDate}
-                max={eighteenYearsAgo}
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              />
+              <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required
+                min={minDate} max={eighteenYearsAgo}
+                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400" />
             </div>
             <div>
               <label className="block text-gray-300 mb-2">Gender</label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              >
+              <select name="gender" value={formData.gender} onChange={handleChange} required
+                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400">
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -372,37 +348,28 @@ export default function Register() {
           {/* Permanent Address */}
           <div>
             <label className="block text-gray-300 mb-2">Permanent Address</label>
-            <textarea
-              name="permanentAddress"
-              value={formData.permanentAddress}
-              onChange={handleChange}
-              required
-              rows="3"
+            <textarea name="permanentAddress" value={formData.permanentAddress} onChange={handleChange} required rows="3"
               className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="Enter your complete address"
-            />
+              placeholder="Enter your complete address" />
           </div>
 
           {/* Aadhaar Number */}
           <div>
             <label className="block text-gray-300 mb-2">Aadhaar Card Number</label>
-            <input
-              type="text"
-              name="aadhaarNumber"
-              value={formData.aadhaarNumber}
-              onChange={handleChange}
-              required
-              pattern="[0-9]{12}"
+            <input type="text" name="aadhaarNumber" value={formData.aadhaarNumber} onChange={handleChange} required pattern="[0-9]{12}"
               className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="12-digit Aadhaar number"
-            />
+              placeholder="12-digit Aadhaar number" />
           </div>
 
           {/* Aadhaar Upload Sections */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-gray-300 mb-2">Aadhaar Front Photo</label>
+              <label className="block text-gray-300 mb-2">
+                Aadhaar Front Photo
+                {getStatusIcon(uploadStatus.aadhaarFront)}
+              </label>
               <input
+                id="file-aadhaarFront"
                 type="file"
                 name="aadhaarFront"
                 onChange={handleFileChange}
@@ -410,11 +377,20 @@ export default function Register() {
                 required
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
-              <p className="text-gray-400 text-xs mt-1">Upload JPG or PNG photo.</p>
+              {uploadStatus.aadhaarFront === 'error' && (
+                <button type="button" onClick={() => handleRetryUpload('aadhaarFront')} className="text-cyan-400 text-xs mt-1 underline">
+                  Retry Upload
+                </button>
+              )}
+              <p className="text-gray-400 text-xs mt-1">Upload JPG or PNG photo. Uploaded immediately on selection.</p>
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">Aadhaar Back Photo</label>
+              <label className="block text-gray-300 mb-2">
+                Aadhaar Back Photo
+                {getStatusIcon(uploadStatus.aadhaarBack)}
+              </label>
               <input
+                id="file-aadhaarBack"
                 type="file"
                 name="aadhaarBack"
                 onChange={handleFileChange}
@@ -422,26 +398,30 @@ export default function Register() {
                 required
                 className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
-              <p className="text-gray-400 text-xs mt-1">Upload JPG or PNG photo.</p>
+              {uploadStatus.aadhaarBack === 'error' && (
+                <button type="button" onClick={() => handleRetryUpload('aadhaarBack')} className="text-cyan-400 text-xs mt-1 underline">
+                  Retry Upload
+                </button>
+              )}
+              <p className="text-gray-400 text-xs mt-1">Upload JPG or PNG photo. Uploaded immediately on selection.</p>
             </div>
           </div>
-
 
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || uploadStatus.aadhaarFront === 'uploading' || uploadStatus.aadhaarBack === 'uploading' || uploadStatus.profilePicture === 'uploading'}
             className="w-full bg-cyan-400 text-gray-900 font-bold py-3 rounded hover:bg-cyan-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Registering...' : 'Register Now'}
+            {loading ? 'Registering...' : 
+             (uploadStatus.aadhaarFront === 'uploading' || uploadStatus.aadhaarBack === 'uploading' || uploadStatus.profilePicture === 'uploading')
+              ? 'Uploading Documents...' : 'Register Now'}
           </button>
         </form>
 
         <p className="text-gray-400 text-center mt-6">
           Already have an account?{' '}
-          <a href="/login" className="text-cyan-400 hover:underline">
-            Login here
-          </a>
+          <a href="/login" className="text-cyan-400 hover:underline">Login here</a>
         </p>
       </div>
     </div>
