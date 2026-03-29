@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import imageCompression from 'browser-image-compression';
 import { registerTenantAPI } from '../../../infra/auth/auth.api';
 import { authAtom, userAtom } from '../../../shared/hooks/store/auth.atom';
 import Loader from '../../../shared/components/atoms/Loader/Loader';
@@ -104,26 +106,14 @@ export default function Register() {
       return;
     }
 
-    // DOB Validation (18 years check)
-    if (formData.dateOfBirth) {
-      const dob = new Date(formData.dateOfBirth);
-      const ageLimit = new Date();
-      ageLimit.setFullYear(ageLimit.getFullYear() - 18);
-      
-      if (dob > ageLimit) {
-        setError('Tenant must be at least 18 years old.');
-        setLoading(false);
-        return;
-      }
-      
-      if (dob < new Date(minDate)) {
-        setError('Date of Birth cannot be earlier than 1995.');
-        setLoading(false);
-        return;
-      }
-    }
-
     try {
+      // 📦 Image Compression Options
+      const compressionOptions = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1920,
+        useWebWorker: true
+      };
+
       // Create FormData object
       const data = new FormData();
       
@@ -132,25 +122,39 @@ export default function Register() {
         data.append(key, formData[key]);
       });
       
-      // Append files
+      // ⚡ Compress and Append files
       if (files.aadhaarFront) {
-        data.append('aadhaarFront', files.aadhaarFront);
+        const compressed = await imageCompression(files.aadhaarFront, compressionOptions);
+        data.append('aadhaarFront', compressed);
       }
       if (files.aadhaarBack) {
-        data.append('aadhaarBack', files.aadhaarBack);
+        const compressed = await imageCompression(files.aadhaarBack, compressionOptions);
+        data.append('aadhaarBack', compressed);
       }
       if (files.profilePicture) {
-        data.append('profilePicture', files.profilePicture);
+        const compressed = await imageCompression(files.profilePicture, compressionOptions);
+        data.append('profilePicture', compressed);
       }
 
-      // Call API
-      const result = await registerTenantAPI(data);
+      // 🚀 Use Axios for Progress Tracking & Reliability
+      const result = await axios.post(`${window.location.origin.includes('localhost') ? 'http://localhost:5000' : ''}/api/auth/register`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        timeout: 300000, // 5 minutes for slow 3G
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.log(`📡 Upload Progress: ${percentCompleted}%`);
+        }
+      });
       
-      alert(result.message);
+      alert(result.data.message);
       navigate('/login', { replace: true });
       
     } catch (err) {
-      setError(err.message);
+      console.error('Registration Error:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Registration failed';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

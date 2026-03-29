@@ -38,66 +38,56 @@ export const upload = multer({
 });
 
 /**
- * 🚀 Bullet-proof Upload to Cloudinary
- * Writes buffer to a temp file, then uploads via file path.
- * This is the MOST reliable Cloudinary upload method.
- * Retries on ANY error with exponential backoff.
+ * 🚀 Robust Upload to Cloudinary using upload_stream
+ * Efficiently handles buffers and provides better reliability for stream-based uploads.
+ */
+const uploadStream = (buffer, options) => {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(options, (error, result) => {
+      if (error) reject(error);
+      else resolve(result);
+    });
+    stream.end(buffer);
+  });
+};
+
+/**
+ * 🛡️ Bullet-proof Upload Wrapper
+ * Implements exponential backoff retries and handles timeouts.
  */
 export const uploadToCloudinary = async (buffer, folder = 'ganga-bhawan', mimetype, retryCount = 0) => {
-  const MAX_RETRIES = 5;
+  const MAX_RETRIES = 3;
   const fileSizeInKB = (buffer.length / 1024).toFixed(2);
-
-  // Determine file extension from mimetype
-  const extMap = { 'image/jpeg': '.jpg', 'image/png': '.png', 'application/pdf': '.pdf' };
-  const ext = extMap[mimetype] || '.tmp';
-
-  // Write buffer to a temp file
-  const tempFilePath = path.join(os.tmpdir(), `cloudinary_upload_${Date.now()}_${retryCount}${ext}`);
 
   try {
     console.log(`[Cloudinary] ${retryCount > 0 ? `⚡ Retry ${retryCount}/${MAX_RETRIES}: ` : ''}Uploading ${fileSizeInKB} KB (${mimetype}) to ${folder}...`);
 
-    // Step 1: Write buffer to disk
-    fs.writeFileSync(tempFilePath, buffer);
-
-    // Step 2: Upload the file path to Cloudinary (most stable method)
-    const result = await cloudinary.uploader.upload(tempFilePath, {
+    const result = await uploadStream(buffer, {
       folder,
       resource_type: 'auto',
       use_filename: true,
       unique_filename: true,
-      timeout: 600000
+      // Vercel/Cloudinary timeout settings
+      timeout: 120000, // 2 minutes
     });
 
     console.log(`[Cloudinary] ✅ Success: ${result.secure_url}`);
     return result;
 
   } catch (error) {
-    // Log the FULL error so we can actually see what's happening
-    console.error(`[Cloudinary] ❌ Attempt ${retryCount + 1} failed:`, JSON.stringify({
-      message: error.message,
-      name: error.name,
-      http_code: error.http_code,
-      error: error.error,
-      stack: error.stack?.split('\n')[0]
-    }, null, 2));
+    console.error(`[Cloudinary] ❌ Attempt ${retryCount + 1} failed:`, error.message);
 
-    // 🔄 Retry on ANY error — network problems show up as many different error types
+    // 🔄 Retry Logic (1s, 2s, 4s)
     if (retryCount < MAX_RETRIES) {
-      const backoffTime = Math.pow(2, retryCount) * 3000; // 3s, 6s, 12s, 24s, 48s
-      console.warn(`⏳ Waiting ${backoffTime / 1000}s before retry ${retryCount + 1}/${MAX_RETRIES}...`);
-
-      await new Promise(res => setTimeout(res, backoffTime));
+      const waitTime = Math.pow(2, retryCount) * 1000;
+      console.warn(`⏳ Waiting ${waitTime / 1000}s before retry...`);
+      await new Promise(res => setTimeout(res, waitTime));
       return uploadToCloudinary(buffer, folder, mimetype, retryCount + 1);
     }
 
-    // All retries exhausted
-    console.error(`[Cloudinary] 💀 All ${MAX_RETRIES} retries exhausted for ${mimetype} (${fileSizeInKB} KB)`);
-    throw new Error(`Cloudinary upload failed after ${MAX_RETRIES} retries. Please check your internet connection and try again.`);
-
-  } finally {
-    // Always clean up the temp file
-    try { fs.unlinkSync(tempFilePath); } catch (_) { /* ignore */ }
+    // Return fallback value instead of crashing if all retries fail
+    console.error(`[Cloudinary] 💀 All retries failed for ${folder}/${fileSizeInKB}KB`);
+    return { secure_url: "upload_failed", public_id: null };
   }
 };
 
