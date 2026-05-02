@@ -9,25 +9,33 @@ import { currentConfig } from '../../config/env.js';
 export const getCloudinarySignature = (req, res) => {
   try {
     const { folder } = req.body;
+    
+    if (!currentConfig.cloudinary.apiSecret) {
+      console.error('[Cloudinary Sign] ❌ CLOUDINARY_API_SECRET is missing in environment variables!');
+      return res.status(500).json({ error: 'Server configuration error' });
+    }
+
     const timestamp = Math.round(new Date().getTime() / 1000);
 
-    const params = {
+    // Only sign essential parameters to avoid signature mismatches
+    const paramsToSign = {
       timestamp,
       folder: folder || 'ganga-bhawan',
-      resource_type: 'auto',
     };
 
     const signature = cloudinary.utils.api_sign_request(
-      params,
+      paramsToSign,
       currentConfig.cloudinary.apiSecret
     );
+
+    console.log(`[Cloudinary Sign] ✅ Generated signature for folder: ${paramsToSign.folder}`);
 
     res.json({
       signature,
       timestamp,
       cloudName: currentConfig.cloudinary.cloudName,
       apiKey: currentConfig.cloudinary.apiKey,
-      folder: params.folder,
+      folder: paramsToSign.folder,
     });
   } catch (error) {
     console.error('[Cloudinary Sign] Error:', error.message);
