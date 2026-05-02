@@ -11,10 +11,14 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// CORS configuration
+// CORS configuration — allow any origin (required for credentials + cross-origin)
 const corsOptions = {
-  origin: currentConfig.clientUrl || '*',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: (origin, callback) => {
+    // Allow all origins (including Vercel preview URLs, custom domains, etc.)
+    callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 };
 
