@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import imageCompression from 'browser-image-compression';
+import { motion, AnimatePresence } from 'framer-motion';
 import { authAtom, userAtom } from '../../../shared/hooks/store/auth.atom';
 import { API_URL } from '../../../infra/config';
 import Loader from '../../../shared/components/atoms/Loader/Loader';
+import { AlertCircle, X } from 'lucide-react';
 
 /**
  * Upload a single file directly to Cloudinary (bypasses backend completely).
@@ -87,6 +89,14 @@ export default function Register() {
   const minDate = "1995-01-01";
 
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '';
+  const errorRef = useRef(null);
+
+  // Auto-scroll to error when it occurs
+  useEffect(() => {
+    if (error) {
+      errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [error]);
 
   // Redirect if already logged in
   useEffect(() => {
@@ -219,11 +229,30 @@ export default function Register() {
           Tenant Registration Form
         </h2>
 
-        {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-400 p-3 rounded mb-4">
-            {error}
-          </div>
-        )}
+        <AnimatePresence>
+          {error && (
+            <motion.div
+              ref={errorRef}
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-red-500/10 border border-red-500/50 text-red-400 p-4 rounded-xl mb-6 flex items-start gap-3 shadow-lg shadow-red-900/20"
+            >
+              <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+              <div className="flex-grow">
+                <p className="font-bold text-sm mb-1">Registration Error</p>
+                <p className="text-sm opacity-90">{error}</p>
+              </div>
+              <button 
+                onClick={() => setError('')}
+                className="text-red-400 hover:text-red-300 transition-colors p-1"
+                type="button"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Profile Picture Section */}
