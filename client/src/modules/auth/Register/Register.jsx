@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAtomValue } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { registerTenantAPI } from '../../../infra/auth/auth.api';
+import { uploadToCloudinaryDirect } from '../../../infra/cloudinary';
 import { authAtom, userAtom } from '../../../shared/hooks/store/auth.atom';
 import Loader from '../../../shared/components/atoms/Loader/Loader';
 
@@ -25,6 +26,18 @@ export default function Register() {
   });
   
   const [files, setFiles] = useState({
+    aadhaarFront: null,
+    aadhaarBack: null,
+    profilePicture: null,
+  });
+
+  const [uploadStatus, setUploadStatus] = useState({
+    aadhaarFront: null,   // null | 'uploading' | 'done' | 'error'
+    aadhaarBack: null,
+    profilePicture: null,
+  });
+
+  const [uploadedUrls, setUploadedUrls] = useState({
     aadhaarFront: null,
     aadhaarBack: null,
     profilePicture: null,
@@ -70,24 +83,50 @@ export default function Register() {
     });
   };
 
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files[0];
     const { name } = e.target;
 
-    if (file) {
-      const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-      if (!allowedImageTypes.includes(file.type)) {
-        setError(`Only JPG and PNG images are allowed for ${name === 'profilePicture' ? 'profile photo' : 'Aadhaar photos'}.`);
-        e.target.value = ''; // Reset file input
-        return;
-      }
+    if (!file) return;
+
+    // Validation
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedImageTypes.includes(file.type)) {
+      setError(`Only JPG and PNG images are allowed for ${name === 'profilePicture' ? 'profile photo' : 'Aadhaar photos'}.`);
+      e.target.value = '';
+      return;
     }
 
     setError('');
-    setFiles({
-      ...files,
-      [name]: file,
-    });
+    setFiles(prev => ({ ...prev, [name]: file }));
+    setUploadedUrls(prev => ({ ...prev, [name]: null }));
+    setUploadStatus(prev => ({ ...prev, [name]: 'uploading' }));
+
+    // Determine folder
+    const folderMap = {
+      aadhaarFront: 'aadhaar_cards',
+      aadhaarBack: 'aadhaar_cards',
+      profilePicture: 'profile_photos',
+    };
+
+    try {
+      console.log(`[Upload] Uploading ${name} to Cloudinary...`);
+      const url = await uploadToCloudinaryDirect(file, folderMap[name]);
+      console.log(`[Upload] ✅ ${name} success: ${url}`);
+      setUploadedUrls(prev => ({ ...prev, [name]: url }));
+      setUploadStatus(prev => ({ ...prev, [name]: 'done' }));
+    } catch (err) {
+      console.error(`[Upload] ❌ ${name} failed:`, err);
+      setUploadStatus(prev => ({ ...prev, [name]: 'error' }));
+      setError(`Failed to upload ${name === 'profilePicture' ? 'profile photo' : 'Aadhaar photo'}. Please try again.`);
+    }
+  };
+
+  const getStatusIcon = (status) => {
+    if (status === 'uploading') return <span className="text-yellow-400 text-xs ml-2 animate-pulse font-medium">⏳ Uploading...</span>;
+    if (status === 'done') return <span className="text-green-400 text-xs ml-2 font-medium">✅ Uploaded</span>;
+    if (status === 'error') return <span className="text-red-400 text-xs ml-2 font-medium">❌ Failed</span>;
+    return null;
   };
 
   const handleSubmit = async (e) => {
@@ -123,28 +162,29 @@ export default function Register() {
       }
     }
 
-    try {
-      // Create FormData object
-      const data = new FormData();
-      
-      // Append all text fields
-      Object.keys(formData).forEach(key => {
-        data.append(key, formData[key]);
-      });
-      
-      // Append files
-      if (files.aadhaarFront) {
-        data.append('aadhaarFront', files.aadhaarFront);
-      }
-      if (files.aadhaarBack) {
-        data.append('aadhaarBack', files.aadhaarBack);
-      }
-      if (files.profilePicture) {
-        data.append('profilePicture', files.profilePicture);
-      }
+    // Check if all files are uploaded
+    const allFilesUploaded = uploadedUrls.aadhaarFront && uploadedUrls.aadhaarBack && uploadedUrls.profilePicture;
+    if (!allFilesUploaded) {
+      setError('Please wait for all documents to finish uploading before registering.');
+      setLoading(false);
+      return;
+    }
 
-      // Call API
-      const result = await registerTenantAPI(data);
+    // Check for upload errors
+    if (uploadStatus.aadhaarFront === 'error' || uploadStatus.aadhaarBack === 'error' || uploadStatus.profilePicture === 'error') {
+      setError('Some documents failed to upload. Please re-select the failed files.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Send JSON payload with URLs
+      const result = await registerTenantAPI({
+        ...formData,
+        aadhaarFrontUrl: uploadedUrls.aadhaarFront,
+        aadhaarBackUrl: uploadedUrls.aadhaarBack,
+        profilePictureUrl: uploadedUrls.profilePicture,
+      });
       
       alert(result.message);
       navigate('/login', { replace: true });
@@ -182,7 +222,10 @@ export default function Register() {
                 <span className="text-4xl text-gray-400">👤</span>
               )}
             </div>
-            <label className="block text-gray-300 mb-2 font-bold text-sm">Profile Photo (Required)</label>
+            <label className="block text-gray-300 mb-2 font-bold text-sm">
+              Profile Photo (Required)
+              {getStatusIcon(uploadStatus.profilePicture)}
+            </label>
             <input
               type="file"
               name="profilePicture"
@@ -382,7 +425,10 @@ export default function Register() {
           {/* Aadhaar Upload Sections */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-gray-300 mb-2">Aadhaar Front Photo</label>
+              <label className="block text-gray-300 mb-2">
+                Aadhaar Front Photo
+                {getStatusIcon(uploadStatus.aadhaarFront)}
+              </label>
               <input
                 type="file"
                 name="aadhaarFront"
@@ -394,7 +440,10 @@ export default function Register() {
               <p className="text-gray-400 text-xs mt-1">Upload JPG or PNG photo.</p>
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">Aadhaar Back Photo</label>
+              <label className="block text-gray-300 mb-2">
+                Aadhaar Back Photo
+                {getStatusIcon(uploadStatus.aadhaarBack)}
+              </label>
               <input
                 type="file"
                 name="aadhaarBack"
@@ -411,10 +460,12 @@ export default function Register() {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || uploadStatus.aadhaarFront === 'uploading' || uploadStatus.aadhaarBack === 'uploading' || uploadStatus.profilePicture === 'uploading'}
             className="w-full bg-cyan-400 text-gray-900 font-bold py-3 rounded hover:bg-cyan-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Registering...' : 'Register Now'}
+            {loading ? 'Registering...' : 
+             (uploadStatus.aadhaarFront === 'uploading' || uploadStatus.aadhaarBack === 'uploading' || uploadStatus.profilePicture === 'uploading')
+              ? 'Uploading Documents...' : 'Register Now'}
           </button>
         </form>
 

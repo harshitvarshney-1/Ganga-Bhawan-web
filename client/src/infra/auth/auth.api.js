@@ -1,9 +1,12 @@
 import { API_URL, getAuthHeaders } from '../config';
 
-export const registerTenantAPI = async (formData) => {
+export const registerTenantAPI = async (userData) => {
   const response = await fetch(`${API_URL}/auth/register`, {
     method: 'POST',
-    body: formData,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(userData),
   });
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || 'Registration failed');
