@@ -13,21 +13,28 @@ import { AlertCircle, X } from 'lucide-react';
  * Upload a single file directly to Cloudinary (bypasses backend completely).
  * This avoids Vercel's 10-60s serverless function timeout.
  */
-const uploadToCloudinaryDirect = async (file, folder, apiBaseUrl) => {
-  // Step 1: Get signature from our backend (this is fast, just JSON)
-  const signRes = await axios.post(`${apiBaseUrl}/api/cloudinary/sign`, { folder });
+const uploadToCloudinaryDirect = async (file, folder, apiBaseUrl, onProgress) => {
+  // Step 1 & 2: Parallelize signature request and image compression (saves 1-2s)
+  const [signRes, compressedFile] = await Promise.all([
+    axios.post(`${apiBaseUrl}/api/cloudinary/sign`, { 
+      folder, 
+      fileType: file.type 
+    }),
+    file.type.startsWith('image/') 
+      ? imageCompression(file, { 
+          maxSizeMB: 0.8, 
+          maxWidthOrHeight: 1920, 
+          useWebWorker: true,
+          fileType: 'image/webp' // WebP is ~30% smaller
+        })
+      : Promise.resolve(file)
+  ]);
+
   const { signature, timestamp, cloudName, apiKey, folder: signedFolder } = signRes.data;
 
-  // Step 2: Compress image before upload
-  const compressionOptions = { maxSizeMB: 0.8, maxWidthOrHeight: 1920, useWebWorker: true };
-  let uploadFile = file;
-  if (file.type.startsWith('image/')) {
-    uploadFile = await imageCompression(file, compressionOptions);
-  }
-
-  // Step 3: Upload directly to Cloudinary (no backend timeout risk!)
+  // Step 3: Upload directly to Cloudinary with progress tracking
   const formData = new FormData();
-  formData.append('file', uploadFile);
+  formData.append('file', compressedFile);
   formData.append('api_key', apiKey);
   formData.append('timestamp', timestamp);
   formData.append('signature', signature);
@@ -37,7 +44,13 @@ const uploadToCloudinaryDirect = async (file, folder, apiBaseUrl) => {
   const cloudRes = await axios.post(
     `https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`,
     formData,
-    { timeout: 300000 } // 5 min timeout for very slow network
+    { 
+      timeout: 300000,
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+        if (onProgress) onProgress(percentCompleted);
+      }
+    }
   );
 
   return cloudRes.data.secure_url;
@@ -78,6 +91,12 @@ export default function Register() {
     aadhaarFront: null,
     aadhaarBack: null,
     profilePicture: null,
+  });
+
+  const [uploadProgress, setUploadProgress] = useState({
+    aadhaarFront: 0,
+    aadhaarBack: 0,
+    profilePicture: 0,
   });
 
   const [loading, setLoading] = useState(false);
@@ -140,7 +159,9 @@ export default function Register() {
 
     try {
       console.log(`[Upload] Uploading ${name} directly to Cloudinary...`);
-      const url = await uploadToCloudinaryDirect(file, folderMap[name], apiBaseUrl);
+      const url = await uploadToCloudinaryDirect(file, folderMap[name], apiBaseUrl, (progress) => {
+        setUploadProgress(prev => ({ ...prev, [name]: progress }));
+      });
       console.log(`[Upload] ✅ ${name} done: ${url}`);
       setUploadedUrls(prev => ({ ...prev, [name]: url }));
       setUploadStatus(prev => ({ ...prev, [name]: 'done' }));
@@ -213,8 +234,16 @@ export default function Register() {
     }
   };
 
-  const getStatusIcon = (status) => {
-    if (status === 'uploading') return <span className="text-yellow-400 text-xs ml-2 animate-pulse">⏳ Uploading...</span>;
+  const getStatusIcon = (status, name) => {
+    if (status === 'uploading') {
+      const progress = uploadProgress[name] || 0;
+      return (
+        <span className="text-yellow-400 text-xs ml-2 inline-flex items-center gap-1">
+          <span className="animate-pulse">⏳</span>
+          {progress}%
+        </span>
+      );
+    }
     if (status === 'done') return <span className="text-green-400 text-xs ml-2">✅ Uploaded</span>;
     if (status === 'error') return <span className="text-red-400 text-xs ml-2">❌ Failed</span>;
     return null;
@@ -266,7 +295,7 @@ export default function Register() {
             </div>
             <label className="block text-gray-300 mb-2 font-bold text-sm">
               Profile Photo (Required)
-              {getStatusIcon(uploadStatus.profilePicture)}
+              {getStatusIcon(uploadStatus.profilePicture, 'profilePicture')}
             </label>
             <input
               id="file-profilePicture"
@@ -395,7 +424,7 @@ export default function Register() {
             <div>
               <label className="block text-gray-300 mb-2">
                 Aadhaar Front Photo
-                {getStatusIcon(uploadStatus.aadhaarFront)}
+                {getStatusIcon(uploadStatus.aadhaarFront, 'aadhaarFront')}
               </label>
               <input
                 id="file-aadhaarFront"
@@ -416,7 +445,7 @@ export default function Register() {
             <div>
               <label className="block text-gray-300 mb-2">
                 Aadhaar Back Photo
-                {getStatusIcon(uploadStatus.aadhaarBack)}
+                {getStatusIcon(uploadStatus.aadhaarBack, 'aadhaarBack')}
               </label>
               <input
                 id="file-aadhaarBack"
