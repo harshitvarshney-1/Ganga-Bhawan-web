@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import User from '../../models/user.model.js';
 
+// Registration handler - Now strictly using direct Cloudinary URLs from frontend
 export const registerUser = async (req, res) => {
   try {
     const {
