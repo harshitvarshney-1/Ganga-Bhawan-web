@@ -3,6 +3,8 @@ import User from '../../models/user.model.js';
 
 // Registration handler - Now strictly using direct Cloudinary URLs from frontend
 export const registerUser = async (req, res) => {
+  console.log('--- REGISTRATION ATTEMPT START ---');
+  console.log('Body keys:', Object.keys(req.body));
   try {
     const {
       fullName, email, password, mobileNumber,
