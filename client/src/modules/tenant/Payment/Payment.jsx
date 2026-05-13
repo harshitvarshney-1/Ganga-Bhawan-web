@@ -6,6 +6,7 @@ import barcodeImg from '../../../assets/barcode.jpeg';
 import Loader from '../../../shared/components/atoms/Loader/Loader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CreditCard, CheckCircle2, Clock, Calendar, Rocket, Image as ImageIcon, UploadCloud, X, AlertCircle } from 'lucide-react';
+import { uploadToCloudinaryDirect } from '../../../infra/cloudinary';
 
 const monthNames = [
   "January", "February", "March", "April", "May", "June",
@@ -158,10 +159,15 @@ const Payment = () => {
 
   const isMonthPaid = (monthIndex) => {
     return payments.some(p =>
-      p.monthIndex === monthIndex &&
-      new Date(p.paymentDate).getFullYear() === currentYear &&
-      p.status === 'success' &&
-      !p.isAdvanced // Ignore advanced payments in main grid
+      (p.monthIndex === monthIndex || (p.monthIndices && p.monthIndices.includes(monthIndex))) &&
+      p.status === 'success'
+    );
+  };
+
+  const isMonthPending = (monthIndex) => {
+    return payments.some(p =>
+      (p.monthIndex === monthIndex || (p.monthIndices && p.monthIndices.includes(monthIndex))) &&
+      p.status === 'pending'
     );
   };
 
@@ -175,12 +181,19 @@ const Payment = () => {
     setBarcodePreview(null);
   };
 
-  const openAdvancedModal = () => {
+  const openAdvancedModal = (monthIndex) => {
     setAdvancedModal({
       open: true,
-      month: "",
-      monthIndex: null
+      month: monthNames[monthIndex] || "",
+      monthIndex: monthIndex
     });
+    setBarcodeImage(null);
+    setBarcodePreview(null);
+  };
+
+  const [multiModal, setMultiModal] = useState({ open: false, selectedMonths: [] });
+  const openMultiModal = () => {
+    setMultiModal({ open: true, selectedMonths: [] });
     setBarcodeImage(null);
     setBarcodePreview(null);
   };
@@ -189,6 +202,7 @@ const Payment = () => {
     setProcessing(false);
     setModal({ open: false, month: null, amount: 0, monthIndex: null });
     setAdvancedModal({ open: false, month: "", monthIndex: null });
+    setMultiModal({ open: false, selectedMonths: [] });
     setBarcodeImage(null);
     setBarcodePreview(null);
     setAlert({ open: false, message: "" });
@@ -248,20 +262,24 @@ const Payment = () => {
         return;
       }
 
-      const formData = new FormData();
-      formData.append('barcodeImage', barcodeImage);
-      formData.append('month', modal.month);
-      formData.append('monthIndex', modal.monthIndex);
-      formData.append('amount', "0"); // Final amount is verified/assigned by the admin after receipt review
+      // Step 1: Upload to Cloudinary (Direct from Client)
+      console.log('[Payment] Uploading receipt to Cloudinary...');
+      const barcodeImageUrl = await uploadToCloudinaryDirect(barcodeImage, 'payments');
 
+      // Step 2: Submit to Backend
       const response = await fetch(`${API_URL}/payments/submit`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
         },
-        body: formData
+        body: JSON.stringify({
+          barcodeImageUrl, // Send the Cloudinary URL
+          month: modal.month,
+          monthIndex: modal.monthIndex,
+          amount: "0"
+        })
       }).catch(() => {
-        // Handle network errors gracefully
         throw new Error('NETWORK_ERROR');
       });
 
@@ -273,7 +291,6 @@ const Payment = () => {
       }
 
       const data = await response.json().catch(() => {
-        // If JSON parsing fails, assume success if status was ok
         return { success: true };
       });
       
@@ -318,10 +335,14 @@ const Payment = () => {
   };
 
   const handleSubmitAdvancedPayment = async () => {
-    if (!barcodeImage || !advancedModal.month) {
+    // Check if it's Multi-month or Single Advanced
+    const isMultiMode = multiModal.open;
+    const selectedMonths = isMultiMode ? multiModal.selectedMonths : [advancedModal.month];
+
+    if (!barcodeImage || (isMultiMode && selectedMonths.length === 0) || (!isMultiMode && !advancedModal.month)) {
       setAlert({
         open: true,
-        message: 'Please select a month and upload payment screenshot'
+        message: 'Please select month(s) and upload payment screenshot'
       });
       return;
     }
@@ -330,36 +351,48 @@ const Payment = () => {
     try {
       const token = auth.token;
       
-      const formData = new FormData();
-      formData.append('barcodeImage', barcodeImage);
-      formData.append('month', advancedModal.month);
-      // For advanced, generic index or parsed from month name (simplified here)
-      const mIndex = monthNames.indexOf(advancedModal.month);
-      formData.append('monthIndex', mIndex >= 0 ? mIndex : 99); 
-      formData.append('amount', "0"); 
-      formData.append('isAdvanced', 'true');
+      // Step 1: Upload to Cloudinary (Direct from Client)
+      console.log(`[Payment] Uploading ${isMultiMode ? 'multi' : 'single'} receipt to Cloudinary...`);
+      const barcodeImageUrl = await uploadToCloudinaryDirect(barcodeImage, 'payments');
 
+      // Prepare payload
+      const selectedData = selectedMonths.map(m => ({
+        month: m,
+        monthIndex: monthNames.indexOf(m)
+      }));
+
+      // Step 2: Submit to Backend
+      // NOTE: For bulk rent, we set isAdvanced: false so it updates the main calendar
       const response = await fetch(`${API_URL}/payments/submit`, {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
-        body: formData
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          barcodeImageUrl,
+          selectedMonths: selectedData,
+          amount: "0",
+          isAdvanced: !isMultiMode // Only single 'Pay in Advance' counts as Advanced (Security)
+        })
       });
 
       if (response.ok) {
         setAlert({
           open: true,
-          message: `Advanced booking submitted for ${advancedModal.month}! Admin will verify soon.`
+          message: `Booking submitted for ${selectedMonths.join(', ')}! Admin will verify soon.`
         });
         fetchUserAndPayments();
         setTimeout(closeModal, 2000);
       } else {
-        throw new Error('Failed to submit advanced payment');
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to submit advanced payment');
       }
     } catch (error) {
       console.error('Advanced payment error:', error);
       setAlert({
         open: true,
-        message: 'Error submitting advanced payment. Please try again.'
+        message: error.message || 'Error submitting advanced payment. Please try again.'
       });
     } finally {
       setProcessing(false);
@@ -435,20 +468,38 @@ const Payment = () => {
               <p className="text-indigo-100 text-sm font-medium">Pre-pay for coming months to avoid late fees</p>
             </div>
             
-            {payments.filter(p => p.isAdvanced).length === 0 ? (
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={openAdvancedModal}
-                className="whitespace-nowrap px-6 py-3.5 bg-white text-indigo-600 hover:bg-slate-50 font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2 self-start sm:self-center"
-              >
-                Pay in Advance
-              </motion.button>
+            {payments.filter(p => p.isAdvanced && p.status !== 'rejected').length === 0 ? (
+              <div className="flex gap-3 self-start sm:self-center flex-wrap">
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => openAdvancedModal()}
+                  className="whitespace-nowrap px-6 py-3.5 bg-white text-indigo-600 hover:bg-slate-50 font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2"
+                >
+                  Pay in Advance
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={openMultiModal}
+                  className="whitespace-nowrap px-6 py-3.5 bg-indigo-400 text-white hover:bg-indigo-300 font-bold rounded-2xl shadow-lg transition-all border border-white/30 flex items-center gap-2"
+                >
+                  Bulk Payment (Multi-Month)
+                </motion.button>
+              </div>
             ) : (
               <div className="flex gap-2 flex-wrap self-start sm:self-center">
-                {payments.filter(p => p.isAdvanced).map((payment, idx) => (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={openMultiModal}
+                  className="whitespace-nowrap px-4 py-2 bg-white/20 backdrop-blur-md text-white font-bold rounded-xl border border-white/20 transition-all text-xs"
+                >
+                  + Add Bulk
+                </motion.button>
+                {payments.filter(p => p.isAdvanced && p.status !== 'rejected').map((payment, idx) => (
                   <div key={idx} className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 flex items-center gap-3">
-                    <span className="font-bold">{payment.month}</span>
+                    <span className="font-bold text-sm">{payment.month}</span>
                     <span className={`w-2 h-2 rounded-full ${
                       payment.status === 'success' ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]' : 
                       payment.status === 'pending' ? 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]' : 'bg-rose-400'
@@ -475,25 +526,15 @@ const Payment = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 relative z-10">
           {monthNames.map((month, index) => {
             const isPaid = isMonthPaid(index);
+            const pendingPayment = isMonthPending(index);
             const isCurrent = index === currentMonth;
             const isPast = index < currentMonth;
+            const canPay = !isPaid && !pendingPayment;
             
-            const pendingPayment = payments.find(p =>
-              p.monthIndex === index &&
-              new Date(p.paymentDate).getFullYear() === currentYear &&
-              p.status === 'pending' && !p.isAdvanced
-            );
-
-            const canPay = !isPaid && !pendingPayment && (isCurrent || isPast);
-
-            // Determine styling
-            let baseStyle = "border-slate-100 bg-slate-50 text-slate-400";
-            let iconStyle = "bg-slate-200 text-slate-400";
-            let tagStyle = "";
-            let tagText = "";
-
+            let baseStyle, iconStyle, tagStyle, tagText;
+            
             if (isPaid) {
-              baseStyle = "border-emerald-100 bg-emerald-50 text-emerald-900";
+              baseStyle = "border-emerald-100 bg-emerald-50/50 text-emerald-900";
               iconStyle = "bg-emerald-500 text-white shadow-emerald-500/30 shadow-lg";
               tagStyle = "bg-emerald-100 text-emerald-700";
               tagText = "Paid";
@@ -515,6 +556,8 @@ const Payment = () => {
             } else {
               tagStyle = "bg-slate-200 text-slate-500";
               tagText = "Upcoming";
+              baseStyle = "border-slate-100 bg-white text-slate-400 opacity-60";
+              iconStyle = "bg-slate-100 text-slate-300";
             }
 
             return (
@@ -649,6 +692,24 @@ const Payment = () => {
              currentMonth={currentMonth}
            />
         )}
+
+        {multiModal.open && (
+           <PaymentModal 
+             title="Bulk Payment (Multi-Month)"
+             closeModal={closeModal}
+             barcodeImg={barcodeImg}
+             handleBarcodeChange={handleBarcodeChange}
+             barcodePreview={barcodePreview}
+             handleSubmit={handleSubmitAdvancedPayment} // Reusing the batch handler
+             processing={processing}
+             barcodeImage={barcodeImage}
+             isMulti={true}
+             multiModal={multiModal}
+             setMultiModal={setMultiModal}
+             monthNames={monthNames}
+             isMonthPaid={isMonthPaid}
+           />
+        )}
         
         {fullScreenImage && (
           <motion.div 
@@ -675,7 +736,8 @@ const Payment = () => {
 // Reusable Modal Component for Payment & Advanced
 const PaymentModal = ({ 
   title, closeModal, barcodeImg, handleBarcodeChange, barcodePreview, 
-  handleSubmit, processing, barcodeImage, isAdvanced, advancedModal, setAdvancedModal, monthNames 
+  handleSubmit, processing, barcodeImage, isAdvanced, advancedModal, setAdvancedModal, 
+  monthNames, isMulti, multiModal, setMultiModal, isMonthPaid
 }) => {
   return (
     <motion.div 
@@ -718,6 +780,37 @@ const PaymentModal = ({
             </div>
           )}
 
+          {isMulti && (
+            <div className="mb-6">
+              <label className="block text-sm font-bold text-slate-700 mb-3">Select Months</label>
+              <div className="grid grid-cols-2 gap-2">
+                {monthNames.map((m) => {
+                  const mIdx = monthNames.indexOf(m);
+                  const isAlreadyPaid = isMonthPaid(mIdx);
+                  const isSelected = multiModal.selectedMonths.includes(m);
+                  return (
+                    <button
+                      key={m}
+                      disabled={isAlreadyPaid}
+                      onClick={() => {
+                        const current = multiModal.selectedMonths;
+                        if (current.includes(m)) {
+                          setMultiModal({...multiModal, selectedMonths: current.filter(x => x !== m)});
+                        } else {
+                          setMultiModal({...multiModal, selectedMonths: [...current, m]});
+                        }
+                      }}
+                      className={`p-3 rounded-xl border text-left transition-all ${isAlreadyPaid ? 'bg-slate-50 opacity-50' : isSelected ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-slate-200'}`}
+                    >
+                      <span className="text-xs font-bold block">{m}</span>
+                      <span className="text-[10px] text-slate-400">{new Date().getFullYear() + (mIdx < new Date().getMonth() ? 1 : 0)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           <div className="bg-indigo-50/50 rounded-2xl p-5 mb-6 border border-indigo-100 text-center">
             <div className="inline-block p-2 bg-white rounded-xl shadow-sm mb-3">
               <img src={barcodeImg} alt="QR Code" className="w-64 h-64 object-contain" />
@@ -752,7 +845,7 @@ const PaymentModal = ({
         <div className="p-6 border-t border-slate-100 bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-10 shrink-0">
           <button
             onClick={handleSubmit}
-            disabled={processing || !barcodeImage || (isAdvanced && !advancedModal?.month)}
+            disabled={processing || !barcodeImage || (isAdvanced && !advancedModal.month) || (isMulti && multiModal.selectedMonths.length === 0)}
             className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {processing ? (

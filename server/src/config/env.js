@@ -41,6 +41,4 @@ export const config = {
 };
 
 const env = process.env.NODE_ENV || 'development';
-console.log(env);
 export const currentConfig = config[env];
-console.log(currentConfig);

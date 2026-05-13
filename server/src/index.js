@@ -15,14 +15,13 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://gangabhawan.vercel.app',
-];
+  process.env.CLIENT_URL,
+].filter(Boolean); // Remove null/undefined
 
 const corsOptions = {
   origin: function (origin, callback) {
-    console.log('CORS Origin:', origin);
     // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin || allowedOrigins.some(o => origin.startsWith(o)) || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       console.warn('Blocked by CORS:', origin);
@@ -41,8 +40,6 @@ app.options('*', cors(corsOptions));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static uploads if still needed
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
 
 // Database Connection
 connectDB().catch(err => {

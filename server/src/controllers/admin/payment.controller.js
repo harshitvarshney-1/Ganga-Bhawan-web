@@ -253,6 +253,7 @@ export const quickApprovePayment = async (req, res) => {
 
     const payment = await Payment.findById(decoded.paymentId);
     if (!payment) return res.status(404).send(htmlPage('❌ Not Found', 'Payment record not found.', 'error'));
+    
     if (payment.status !== 'pending') {
       return res.send(htmlPage(
         payment.status === 'success' ? '✅ Already Approved' : '❌ Payment Rejected',
@@ -261,19 +262,31 @@ export const quickApprovePayment = async (req, res) => {
       ));
     }
 
-    payment.status = 'success';
-    payment.approvedAt = new Date();
-    payment.approvedViaEmail = true;
-    await payment.save();
+    // Identify batch: All pending payments from same user with same barcode image
+    const batch = await Payment.find({
+      userId: payment.userId,
+      barcodeImage: payment.barcodeImage,
+      status: 'pending'
+    });
+
+    const monthSummary = batch.map(p => p.month).join(', ');
+
+    // Approve all in batch
+    for (const p of batch) {
+      p.status = 'success';
+      p.approvedAt = new Date();
+      p.approvedViaEmail = true;
+      await p.save();
+    }
 
     // Notify tenant
     try {
       const tenant = await User.findById(payment.userId);
       if (tenant) {
-        const emailHtml = getPaymentApprovalEmailTemplate(tenant.fullName, payment.month, payment.paymentDate);
+        const emailHtml = getPaymentApprovalEmailTemplate(tenant.fullName, monthSummary, payment.paymentDate);
         await sendEmail({
           to: tenant.email,
-          subject: `✅ Payment Approved - ${payment.month}`,
+          subject: `✅ Payment Approved - ${monthSummary}`,
           html: emailHtml
         });
       }
@@ -281,7 +294,7 @@ export const quickApprovePayment = async (req, res) => {
       console.error('Email to tenant failed:', e);
     }
 
-    return res.send(htmlPage('✅ Payment Approved!', `The payment for <strong>${payment.month}</strong> has been approved. A confirmation email has been sent to the tenant.`, 'success'));
+    return res.send(htmlPage('✅ Batch Approved!', `All payments for <strong>${monthSummary}</strong> have been approved. A confirmation email has been sent to the tenant.`, 'success'));
   } catch (error) {
     console.error('Quick approve error:', error);
     return res.status(500).send(htmlPage('❌ Server Error', 'Something went wrong. Please use the Admin Portal.', 'error'));
@@ -315,12 +328,22 @@ export const quickRejectPayment = async (req, res) => {
       ));
     }
 
-    payment.status = 'rejected';
-    payment.approvedAt = new Date();
-    payment.approvedViaEmail = true;
-    await payment.save();
+    // Identify batch
+    const batch = await Payment.find({
+      userId: payment.userId,
+      barcodeImage: payment.barcodeImage,
+      status: 'pending'
+    });
 
-    return res.send(htmlPage('❌ Payment Rejected', `The payment for <strong>${payment.month}</strong> has been rejected. The tenant will need to re-submit.`, 'warn'));
+    const monthSummary = batch.map(p => p.month).join(', ');
+
+    // Reject all in batch
+    for (const p of batch) {
+      p.status = 'rejected';
+      await p.save();
+    }
+
+    return res.send(htmlPage('❌ Batch Rejected', `Payments for <strong>${monthSummary}</strong> have been rejected. The tenant will need to re-submit.`, 'error'));
   } catch (error) {
     console.error('Quick reject error:', error);
     return res.status(500).send(htmlPage('❌ Server Error', 'Something went wrong. Please use the Admin Portal.', 'error'));

@@ -7,6 +7,6 @@ import { getPaymentHistory } from '../../controllers/payment/history.controller.
 const router = express.Router();
 
 router.get('/history', authMiddleware, getPaymentHistory);
-router.post('/submit', authMiddleware, upload.single('barcodeImage'), submitPayment);
+router.post('/submit', authMiddleware, submitPayment);
 
 export default router;

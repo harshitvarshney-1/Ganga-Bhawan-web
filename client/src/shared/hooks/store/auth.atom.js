@@ -1,15 +1,42 @@
 import { atom } from 'jotai';
 
-// Auth State - Stores the access token in memory
-export const authAtom = atom({
+// Helper to get initial state from localStorage
+const getStorageItem = (key, defaultValue) => {
+  const stored = localStorage.getItem(key);
+  if (!stored) return defaultValue;
+  try {
+    return JSON.parse(stored);
+  } catch (e) {
+    return defaultValue;
+  }
+};
+
+// Auth State - Persists in localStorage
+const initialAuth = getStorageItem('auth', {
   token: null,
   isAuthenticated: false,
 });
 
-// User State - Stores the user profile/role
-export const userAtom = atom({
+export const authAtom = atom(
+  initialAuth,
+  (get, set, update) => {
+    set(authAtom, update);
+    localStorage.setItem('auth', JSON.stringify(update));
+  }
+);
+
+// User State - Persists in localStorage
+const initialUser = getStorageItem('user', {
   id: null,
   name: null,
   email: null,
-  role: null, // e.g., 'admin', 'tenant'
+  role: null,
 });
+
+export const userAtom = atom(
+  initialUser,
+  (get, set, update) => {
+    set(userAtom, update);
+    localStorage.setItem('user', JSON.stringify(update));
+  }
+);

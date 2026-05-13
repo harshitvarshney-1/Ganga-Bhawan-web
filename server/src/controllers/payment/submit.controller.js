@@ -7,88 +7,69 @@ import { uploadToCloudinary } from '../../infra/cloudinary.js';
 
 export const submitPayment = async (req, res) => {
   try {
-    const { month, monthIndex, amount } = req.body;
+    const { month, monthIndex, amount, barcodeImageUrl, isAdvanced, selectedMonths } = req.body;
 
-    console.log('Payment submission data received:', { month, monthIndex, amount });
+    const isBulk = Array.isArray(selectedMonths) && selectedMonths.length > 0;
 
-    if (!month || monthIndex === undefined || (amount === undefined || amount === null || amount === '')) {
-      return res.status(400).json({
-        success: false,
-        error: 'Missing required fields: month, monthIndex, amount'
-      });
+    // Validation
+    if (!isBulk && (!month || monthIndex === undefined)) {
+      return res.status(400).json({ success: false, error: 'Missing month details' });
     }
-
-    if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        error: 'Barcode image is required'
-      });
+    if (!barcodeImageUrl) {
+      return res.status(400).json({ success: false, error: 'Receipt image is required' });
     }
 
     const userId = req.user.userId || req.user.id;
-
     if (!userId) {
-      return res.status(401).json({
-        success: false,
-        error: 'User ID not found in token'
-      });
+      return res.status(401).json({ success: false, error: 'Unauthorized' });
     }
 
-    const existingPayment = await Payment.findOne({
+    // Prepare combined data
+    let finalMonth = month;
+    let finalMonthIndices = [parseInt(monthIndex)];
+
+    if (isBulk) {
+      finalMonth = selectedMonths.map(m => m.month).join(', ');
+      finalMonthIndices = selectedMonths.map(m => parseInt(m.monthIndex));
+    }
+
+    // Check for overlap: Is any of these months already paid?
+    const existing = await Payment.findOne({
       userId: userId,
-      month: month,
-      monthIndex: parseInt(monthIndex),
-      isAdvanced: req.body.isAdvanced === 'true' || req.body.isAdvanced === true,
-      status: { $in: ['pending', 'success'] }
+      status: { $in: ['pending', 'success'] },
+      $or: [
+        { monthIndex: { $in: finalMonthIndices } },
+        { monthIndices: { $in: finalMonthIndices } }
+      ]
     });
 
-    if (existingPayment) {
-      return res.status(400).json({
-        success: false,
-        error: 'Payment already submitted for this month'
-      });
-    }
-
-    // ─── Cloudinary Upload ───────────────────────────────────────────────────
-    let imageUrl = null;
-    try {
-      if (req.file) {
-        console.log('Uploading barcode image to Cloudinary...');
-        const result = await uploadToCloudinary(req.file.buffer, 'payments', req.file.mimetype);
-        imageUrl = result.secure_url;
-        console.log('Cloudinary upload successful:', imageUrl);
-      }
-    } catch (cloudinaryError) {
-      console.error('Cloudinary upload error:', cloudinaryError);
-      return res.status(500).json({
-        success: false,
-        error: 'Failed to upload image to storage. Please check Cloudinary credentials.'
+    if (existing) {
+      return res.status(400).json({ 
+        success: false, 
+        error: `One or more months in this selection are already submitted or paid.` 
       });
     }
 
     const payment = new Payment({
       userId: userId,
-      month: month,
-      monthIndex: parseInt(monthIndex),
-      amount: parseFloat(amount),
-      isAdvanced: req.body.isAdvanced === 'true' || req.body.isAdvanced === true,
-      barcodeImage: imageUrl,
+      month: finalMonth,
+      monthIndex: finalMonthIndices[0], // First month as primary
+      monthIndices: finalMonthIndices,   // Full list for tracking
+      amount: parseFloat(amount) || 0,
+      isAdvanced: isAdvanced === true || isAdvanced === 'true',
+      barcodeImage: barcodeImageUrl,
       status: 'pending',
       paymentDate: new Date()
     });
 
     await payment.save();
 
-    // ─── Send Notification Email to Admin ────────────────────────────────────
+    // ─── Admin Notification ──────────────────────────────────────────────────
     try {
       const tenant = await User.findById(userId);
       if (tenant) {
-        // Generate secure 1-click approve/reject URLs
         const { approveToken, rejectToken } = generateQuickTokens(payment._id);
-        
-        // We use the server's public URL/host. In prod, ensure this points to your backend.
         const baseUrl = process.env.API_URL || 'http://localhost:5000/api';
-        
         const approveUrl = `${baseUrl}/admin/quick-approve?token=${approveToken}`;
         const rejectUrl  = `${baseUrl}/admin/quick-reject?token=${rejectToken}`;
 
@@ -98,33 +79,22 @@ export const submitPayment = async (req, res) => {
           payment.month,
           payment.paymentDate,
           approveUrl,
-          rejectUrl
+          rejectUrl,
+          barcodeImageUrl
         );
 
         await sendEmail({
-          to: currentConfig.email.user, // Send to the admin's email (defined in env)
-          subject: `ACTION REQUIRED: New Payment Receipt from ${tenant.fullName} - ${payment.month}`,
+          to: currentConfig.email.user,
+          subject: `ACTION REQUIRED: Payment from ${tenant.fullName} (${payment.month})`,
           html: emailHtml
         });
-        
-        console.log(`✅ Admin notification email sent for payment ${payment._id}`);
       }
-    } catch (emailError) {
-      console.error('❌ Failed to send admin payment notification email:', emailError);
-      // We don't throw - payment is still saved successfully
-    }
+    } catch (e) { console.error('Admin email failed:', e); }
 
-    res.json({
-      success: true,
-      message: 'Payment submitted successfully. Waiting for admin approval.',
-      payment
-    });
+    res.json({ success: true, message: 'Payment submitted successfully', payment });
 
   } catch (error) {
     console.error('Payment submission error:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message || 'Failed to submit payment'
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 };

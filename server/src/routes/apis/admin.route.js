@@ -24,6 +24,12 @@ import {
 
 const router = express.Router();
 
+// ─── One-click approve/reject from email (no portal login needed) ───────────
+// These must be ABOVE authMiddleware to allow access from email links.
+// Security is handled by the JWT token in the query string.
+router.get('/quick-approve', quickApprovePayment);
+router.get('/quick-reject',  quickRejectPayment);
+
 // Middleware to check if user is admin
 const isAdmin = (req, res, next) => {
   if (req.user.role !== 'admin') {
@@ -57,10 +63,5 @@ router.delete('/delete-payment/:paymentId', isAdmin, deletePayment);
 // Other Admin Routes
 router.post('/reset-password/:tenantId', isAdmin, resetTenantPassword);
 
-
-// ─── One-click approve/reject from email (no portal login needed) ───────────
-// These are public endpoints — security is ensured by the signed JWT in the URL.
-router.get('/quick-approve', quickApprovePayment);
-router.get('/quick-reject',  quickRejectPayment);
 
 export default router;

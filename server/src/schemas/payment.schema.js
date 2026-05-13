@@ -10,9 +10,13 @@ export const paymentSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  monthIndex: {
+  monthIndex: { // Keeping for backward compatibility (optional)
     type: Number,
-    required: true
+    required: false
+  },
+  monthIndices: { // Array for multi-month payments
+    type: [Number],
+    default: []
   },
   amount: {
     type: Number,

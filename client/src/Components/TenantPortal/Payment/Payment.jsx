@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BASE_URL } from '../../../services/api';
 import barcodeImg from '../../../assets/barcode.png';
 import Loader from '../../Loader/Loader';
+import { uploadToCloudinaryDirect } from '../../../infra/cloudinary';
 
 
 const monthNames = [
@@ -143,10 +144,15 @@ const Payment = () => {
 
   const isMonthPaid = (monthIndex) => {
     return payments.some(p =>
-      p.monthIndex === monthIndex &&
-      new Date(p.paymentDate).getFullYear() === currentYear &&
-      p.status === 'success' &&
-      !p.isAdvanced // Ignore advanced payments in main grid
+      (p.monthIndex === monthIndex || (p.monthIndices && p.monthIndices.includes(monthIndex))) &&
+      p.status === 'success'
+    );
+  };
+
+  const isMonthPending = (monthIndex) => {
+    return payments.some(p =>
+      (p.monthIndex === monthIndex || (p.monthIndices && p.monthIndices.includes(monthIndex))) &&
+      p.status === 'pending'
     );
   };
 
@@ -170,10 +176,18 @@ const Payment = () => {
     setBarcodePreview(null);
   };
 
+  const [multiModal, setMultiModal] = useState({ open: false, selectedMonths: [] });
+  const openMultiModal = () => {
+    setMultiModal({ open: true, selectedMonths: [] });
+    setBarcodeImage(null);
+    setBarcodePreview(null);
+  };
+
   const closeModal = () => {
     setProcessing(false);
     setModal({ open: false, month: null, amount: 0, monthIndex: null });
     setAdvancedModal({ open: false, month: "", monthIndex: null });
+    setMultiModal({ open: false, selectedMonths: [] });
     setBarcodeImage(null);
     setBarcodePreview(null);
     setAlert({ open: false, message: "" });
@@ -302,6 +316,61 @@ const Payment = () => {
     }
   };
 
+  const handleSubmitBulkPayment = async () => {
+    if (!barcodeImage || multiModal.selectedMonths.length === 0) {
+      setAlert({
+        open: true,
+        message: 'Please select month(s) and upload payment screenshot'
+      });
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const token = localStorage.getItem('token');
+      
+      // Step 1: Upload to Cloudinary
+      const barcodeImageUrl = await uploadToCloudinaryDirect(barcodeImage, 'payments');
+
+      // Step 2: Prepare payload
+      const selectedData = multiModal.selectedMonths.map(m => ({
+        month: m,
+        monthIndex: monthNames.indexOf(m)
+      }));
+
+      const response = await fetch(`${BASE_URL}/api/payments/submit`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          barcodeImageUrl,
+          selectedMonths: selectedData,
+          amount: "0",
+          isAdvanced: false
+        })
+      });
+
+      if (response.ok) {
+        setAlert({
+          open: true,
+          message: `✅ Bulk payment submitted for ${multiModal.selectedMonths.join(', ')}! Admin will verify soon.`
+        });
+        fetchUserAndPayments();
+        setTimeout(closeModal, 2000);
+      } else {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to submit bulk payment');
+      }
+    } catch (error) {
+      console.error('Bulk payment error:', error);
+      setAlert({ open: true, message: error.message || 'Error submitting payment' });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const handleSubmitAdvancedPayment = async () => {
     if (!barcodeImage || !advancedModal.month) {
       setAlert({
@@ -404,13 +473,8 @@ const Payment = () => {
               const isCurrent = index === currentMonth;
               const isPast = index < currentMonth;
               
-              // Check if payment is pending (use monthIndex = month payment is FOR, not submit date)
-              const pendingPayment = payments.find(p =>
-                p.monthIndex === index &&
-                new Date(p.paymentDate).getFullYear() === currentYear &&
-                p.status === 'pending' &&
-                !p.isAdvanced // Ignore advanced payments in main grid
-              );
+              // Check if payment is pending
+              const pendingPayment = isMonthPending(index);
 
               // Can only pay if: not paid, not pending, and (current month or past month)
               const canPay = !isPaid && !pendingPayment && (isCurrent || isPast);
@@ -530,14 +594,18 @@ const Payment = () => {
               </div>
 
               <div className="flex items-center gap-4">
-                {payments.filter(p => p.isAdvanced).length === 0 && (
-                  <button
-                    onClick={openAdvancedModal}
-                    className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 transform hover:-translate-y-1"
-                  >
-                    <span>💸</span> Pay In Advance
-                  </button>
-                )}
+                <button
+                  onClick={openAdvancedModal}
+                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 transform hover:-translate-y-1"
+                >
+                  <span>💸</span> Pay In Advance
+                </button>
+                <button
+                  onClick={openMultiModal}
+                  className="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 transform hover:-translate-y-1"
+                >
+                  <span>📦</span> Bulk Payment
+                </button>
               </div>
             </div>
 
@@ -820,6 +888,90 @@ const Payment = () => {
                   {processing ? 'Submitting...' : 'Submit Advanced Booking'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Multi-Month Bulk Modal */}
+      {multiModal.open && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white rounded-3xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold text-cyan-900">Bulk Payment</h3>
+                <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">✕</button>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-bold text-gray-700 mb-3">Select Months to Pay</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {monthNames.map((m) => {
+                    const mIdx = monthNames.indexOf(m);
+                    const isAlreadyPaid = isMonthPaid(mIdx) || isMonthPending(mIdx);
+                    const isSelected = multiModal.selectedMonths.includes(m);
+                    return (
+                      <button
+                        key={m}
+                        disabled={isAlreadyPaid}
+                        onClick={() => {
+                          const current = multiModal.selectedMonths;
+                          if (isSelected) {
+                            setMultiModal({...multiModal, selectedMonths: current.filter(x => x !== m)});
+                          } else {
+                            setMultiModal({...multiModal, selectedMonths: [...current, m]});
+                          }
+                        }}
+                        className={`p-3 rounded-xl border text-left transition-all ${
+                          isAlreadyPaid ? 'bg-slate-50 opacity-50 cursor-not-allowed' : 
+                          isSelected ? 'bg-cyan-50 border-cyan-500 shadow-sm' : 'bg-white border-slate-200 hover:border-cyan-300'
+                        }`}
+                      >
+                        <span className="text-xs font-bold block">{m}</span>
+                        <span className="text-[10px] text-slate-400">{currentYear + (mIdx < currentMonth ? 1 : 0)}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="bg-cyan-50 p-4 rounded-xl text-center border-2 border-cyan-100 mb-6">
+                <img src={barcodeImg} alt="QR Code" className="w-32 h-32 mx-auto mb-2" />
+                <p className="text-xs text-cyan-600 font-medium tracking-wide">SCAN & PAY SECURELY</p>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Upload Receipt</label>
+                <div className="border-2 border-dashed border-cyan-200 rounded-xl p-4 text-center hover:border-cyan-400 transition-colors">
+                  <input type="file" accept="image/*" onChange={handleBarcodeChange} className="hidden" id="bulk-upload" />
+                  <label htmlFor="bulk-upload" className="cursor-pointer block">
+                    {barcodePreview ? (
+                      <img src={barcodePreview} className="max-h-32 mx-auto rounded-lg shadow-md" />
+                    ) : (
+                      <div className="py-4">
+                        <span className="text-3xl block mb-2">📤</span>
+                        <span className="text-cyan-600 font-semibold">Upload Payment Receipt</span>
+                      </div>
+                    )}
+                  </label>
+                </div>
+              </div>
+
+              <button
+                onClick={handleSubmitBulkPayment}
+                disabled={processing || multiModal.selectedMonths.length === 0 || !barcodeImage}
+                className="w-full py-4 bg-cyan-600 text-white rounded-xl font-bold shadow-lg hover:bg-cyan-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {processing ? (
+                  <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...</>
+                ) : 'Submit Bulk Payment'}
+              </button>
             </div>
           </div>
         </div>

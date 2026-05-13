@@ -116,7 +116,7 @@ export const getPaymentApprovalEmailTemplate = (fullName, month, date) => {
 };
 
 // ─── Admin: Payment submission notification (with 1-click approve/reject) ───
-export const getAdminPaymentNotificationTemplate = (tenantName, tenantEmail, month, submittedAt, approveUrl, rejectUrl) => {
+export const getAdminPaymentNotificationTemplate = (tenantName, tenantEmail, month, submittedAt, approveUrl, rejectUrl, barcodeImageUrl) => {
   const date = new Date(submittedAt).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'long', year: 'numeric',
     hour: '2-digit', minute: '2-digit'
@@ -134,6 +134,16 @@ export const getAdminPaymentNotificationTemplate = (tenantName, tenantEmail, mon
       <!-- Body -->
       <div style="padding: 32px 40px;">
         <p style="color: #374151; font-size: 15px; margin: 0 0 24px;">A tenant has uploaded a payment receipt and requires your approval.</p>
+
+        <!-- Receipt Preview -->
+        ${barcodeImageUrl ? `
+        <div style="margin-bottom: 28px; text-align: center;">
+          <p style="color: #6b7280; font-size: 12px; font-weight: 700; text-transform: uppercase; margin-bottom: 10px; text-align: left;">Payment Receipt Preview:</p>
+          <div style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px; background: #f8fafc; display: inline-block; max-width: 100%;">
+            <img src="${barcodeImageUrl}" alt="Payment Receipt" style="max-width: 100%; border-radius: 8px; height: auto; max-height: 400px; display: block;" />
+          </div>
+        </div>
+        ` : ''}
 
         <!-- Details Card -->
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px 24px; margin-bottom: 28px;">

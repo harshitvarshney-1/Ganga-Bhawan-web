@@ -63,7 +63,11 @@ const PaymentHistoryModal = ({
               {/* Main Months Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {monthNamesShort.map((month, idx) => {
-                  const payment = tenantPayments.find(p => !p.isAdvanced && p.monthIndex === idx && new Date(p.paymentDate).getFullYear() === currentYear);
+                  const payment = tenantPayments.find(p => 
+                    !p.isAdvanced && 
+                    (p.monthIndex === idx || (p.monthIndices && p.monthIndices.includes(idx))) && 
+                    new Date(p.paymentDate).getFullYear() === currentYear
+                  );
                   const isPaid = payment?.status === 'success';
                   const isPending = payment?.status === 'pending';
                   const isRejected = payment?.status === 'rejected';
@@ -102,7 +106,7 @@ const PaymentHistoryModal = ({
                       </div>
                       <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-70">{label}</p>
                       
-                      {(isPaid || isPending || isRejected) && payment.barcodeImage && (
+                      {(isPaid || isPending || isRejected) && payment?.barcodeImage && (
                         <div className="flex gap-2">
                           <button 
                             onClick={() => setFullScreenImage(payment.barcodeImage)}
@@ -185,6 +189,66 @@ const PaymentHistoryModal = ({
                     )}
                   </div>
                 </div>
+              </div>
+
+              {/* Transaction History List */}
+              <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-sm">
+                <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                  <Clock className="w-6 h-6 text-slate-400" /> Recent Transactions
+                </h3>
+
+                {tenantPayments.length > 0 ? (
+                  <div className="space-y-3">
+                    {[...tenantPayments].sort((a,b) => new Date(b.paymentDate) - new Date(a.paymentDate)).map((payment, index) => {
+                      const isSuccess = payment.status === 'success';
+                      const isPending = payment.status === 'pending';
+                      
+                      return (
+                        <div key={index} className="group flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-50 hover:border-indigo-100 hover:bg-indigo-50/30 transition-all">
+                          <div className="flex items-center gap-4 min-w-0">
+                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                              isSuccess ? 'bg-emerald-50 text-emerald-600' : 
+                              isPending ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
+                            }`}>
+                              {isSuccess ? <CheckCircle2 className="w-6 h-6" /> : isPending ? <Clock className="w-6 h-6" /> : <X className="w-6 h-6" />}
+                            </div>
+                            <div className="min-w-0">
+                              <h5 className="font-bold text-slate-800 text-sm sm:text-base truncate">
+                                {payment.month} <span className="text-slate-400 font-normal text-xs sm:text-sm ml-1">Rent</span>
+                              </h5>
+                              <p className="text-[10px] sm:text-xs text-slate-500 font-medium mt-0.5">
+                                {new Date(payment.paymentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} • {isSuccess ? 'Verified' : isPending ? 'Processing' : 'Declined'}
+                              </p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            {payment.barcodeImage && (
+                              <button 
+                                onClick={() => setFullScreenImage(payment.barcodeImage)}
+                                className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-white transition-all shadow-sm"
+                                title="View Receipt"
+                              >
+                                <ImageIcon className="w-5 h-5" />
+                              </button>
+                            )}
+                            <button 
+                              onClick={() => handleDeletePayment(payment._id, selectedHistoryTenant._id)}
+                              className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-white transition-all shadow-sm"
+                              title="Delete Record"
+                            >
+                              <Trash2 className="w-5 h-5" />
+                            </button>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                    <p className="text-slate-500 font-medium">No transactions found</p>
+                  </div>
+                )}
               </div>
 
               {/* Legend */}
