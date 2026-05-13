@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+const cors = require("cors");
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { currentConfig } from './config/env.js';
@@ -11,18 +11,29 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// CORS configuration — allow any origin (required for credentials + cross-origin)
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow all origins (including Vercel preview URLs, custom domains, etc.)
-    callback(null, true);
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-};
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://gangabhawan.vercel.app",
+];
 
-app.use(cors(corsOptions));
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      console.log("Origin:", origin);
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
+app.options("*", cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
