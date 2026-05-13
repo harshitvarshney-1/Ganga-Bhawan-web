@@ -1,5 +1,5 @@
 import express from 'express';
-const cors = require("cors");
+import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { currentConfig } from './config/env.js';
@@ -11,39 +11,43 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// --- CORS Configuration ---
 const allowedOrigins = [
-  "http://localhost:5173",
-  "https://gangabhawan.vercel.app",
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'https://gangabhawan.vercel.app',
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      console.log("Origin:", origin);
+const corsOptions = {
+  origin: function (origin, callback) {
+    console.log('CORS Origin:', origin);
+    // Allow requests with no origin (mobile apps, curl, Postman, server-to-server)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.warn('Blocked by CORS:', origin);
+      callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
 
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-  })
-);
+app.use(cors(corsOptions));
+// Explicitly handle preflight for all routes
+app.options('*', cors(corsOptions));
 
-app.options("*", cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static uploads if still needed
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
-app.use('/tmp', express.static('/tmp'));
-
 
 // Database Connection
-connectDB();
+connectDB().catch(err => {
+  console.error('Failed to connect to MongoDB on startup:', err.message);
+});
 
 // API Routes
 app.use('/api', routes);
@@ -53,8 +57,14 @@ app.get('/', (req, res) => {
   res.json({ message: 'Backend is running with ES Modules!' });
 });
 
-// Start Server
-if (process.env.NODE_ENV !== 'test') { // Adjust based on your testing setup
+// Global error handler — ensures CORS headers are always present even on errors
+app.use((err, req, res, next) => {
+  console.error('Unhandled Error:', err);
+  res.status(500).json({ error: 'Internal Server Error' });
+});
+
+// Start Server (only when not on Vercel serverless)
+if (process.env.NODE_ENV !== 'test') {
   app.listen(currentConfig.port, () => {
     console.log(`🚀 Server running on port ${currentConfig.port} in ${process.env.NODE_ENV || 'development'} mode`);
   });
