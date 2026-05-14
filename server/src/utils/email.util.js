@@ -1,71 +1,95 @@
 import nodemailer from 'nodemailer';
 import dns from 'dns';
-import { currentConfig } from '../config/env.js';
 
-// --- SENIOR DEVOPS FIX: Force IPv4 globally for this process ---
-if (dns.setDefaultResultOrder) {
-  dns.setDefaultResultOrder('ipv4first');
-}
+const dnsPromises = dns.promises;
 
-const transporterConfig = {
-  host: currentConfig.email.host,
-  port: currentConfig.email.port,
-  secure: currentConfig.email.port === 465, // true for 465, false for other ports
-  auth: {
-    user: currentConfig.email.user,
-    pass: currentConfig.email.pass,
-  },
-  tls: { 
-    rejectUnauthorized: false,
-    minVersion: 'TLSv1.2'
-  },
-  connectionTimeout: 30000, // 30 seconds
-  greetingTimeout: 30000,
-  socketTimeout: 30000,
-  family: 4, // Force IPv4 to avoid ENETUNREACH errors with IPv6-unfriendly networks
-};
+let cachedTransporter = null;
 
-// Fallback to Gmail SMTP if host is undefined or not a Gmail host
-if (!transporterConfig.host || !transporterConfig.host.includes('gmail.com')) {
-  // Prefer Gmail when using a Gmail user email address
-  if (transporterConfig.auth.user && transporterConfig.auth.user.toLowerCase().includes('gmail.com')) {
-    transporterConfig.host = 'smtp.gmail.com';
-    transporterConfig.port = 465;
-    transporterConfig.secure = true;
+// ─── Core: Create Transporter with DNS pre-resolution + port fallback ───────
+async function createTransporter() {
+  if (cachedTransporter) return cachedTransporter;
+
+  // Step 1: Force IPv4 DNS resolution for smtp.gmail.com
+  let smtpHost = 'smtp.gmail.com';
+  try {
+    const addresses = await dnsPromises.resolve4('smtp.gmail.com');
+    smtpHost = addresses[0]; // Use direct IPv4 address
+    console.log(`[SMTP] IPv4 resolved: ${smtpHost}`);
+  } catch (err) {
+    console.warn('[SMTP] DNS resolve4 failed, falling back to hostname:', err.message);
   }
+
+  const auth = {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  };
+
+  // Step 2: Try port 465 (SSL) first, then 587 (STARTTLS)
+  const configs = [
+    {
+      host: smtpHost,
+      port: 465,
+      secure: true,
+      auth,
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 15000,
+    },
+    {
+      host: smtpHost,
+      port: 587,
+      secure: false,
+      auth,
+      tls: { rejectUnauthorized: false, ciphers: 'SSLv3' },
+      connectionTimeout: 15000,
+      greetingTimeout: 15000,
+      socketTimeout: 15000,
+    },
+  ];
+
+  for (const config of configs) {
+    try {
+      const transporter = nodemailer.createTransport(config);
+      await transporter.verify();
+      console.log(`[SMTP] ✅ Connected on port ${config.port}`);
+      cachedTransporter = transporter;
+      return transporter;
+    } catch (err) {
+      console.warn(`[SMTP] ❌ Port ${config.port} failed: ${err.message}`);
+    }
+  }
+
+  throw new Error('[SMTP] All configs failed. Check credentials and network.');
 }
 
-
-
-const transporter = nodemailer.createTransport(transporterConfig);
-
+// ─── Verify (called on startup) ──────────────────────────────────────────────
 export const verifyEmailConnection = async () => {
   try {
-    await transporter.verify();
-    console.log('✅ SMTP Connection: READY');
+    await createTransporter();
     return true;
   } catch (error) {
-    console.error('❌ SMTP Connection: FAILED');
-    console.error('Reason:', error.message);
+    console.error('❌ SMTP Connection: FAILED —', error.message);
     return false;
   }
 };
 
+// ─── Send Email ───────────────────────────────────────────────────────────────
 export const sendEmail = async ({ to, subject, html }) => {
   try {
-    const info = await transporter.sendMail({
-      from: currentConfig.email.from,
-      to,
-      subject,
-      html,
-    });
-    console.log('📧 Email Sent Successfully: %s', info.messageId);
+    const transporter = await createTransporter();
+    const from = process.env.EMAIL_FROM || `"Ganga Bhawan" <${process.env.EMAIL_USER}>`;
+    const info = await transporter.sendMail({ from, to, subject, html });
+    console.log('📧 Email Sent Successfully:', info.messageId);
     return info;
   } catch (error) {
     console.error('❌ Email Delivery Error:', error.message);
+    cachedTransporter = null; // Reset cache so next attempt retries
     throw error;
   }
 };
+
+// ─── Email Templates ──────────────────────────────────────────────────────────
 
 export const getWelcomeEmailTemplate = (fullName, email) => {
   return `
@@ -100,7 +124,6 @@ export const getPaymentApprovalEmailTemplate = (fullName, month, date) => {
   const submissionDate = new Date(date).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'long', year: 'numeric'
   });
-
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
       <h2 style="color: #111827; text-align: center;">Rent Payment Received</h2>
