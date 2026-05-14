@@ -25,7 +25,18 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    if (!origin || allowedOrigins.some(o => origin.startsWith(o)) || allowedOrigins.includes(origin)) {
+    // 1. Allow if no origin (like mobile apps)
+    if (!origin) return callback(null, true);
+
+    // 2. Normalize URLs (remove trailing slashes) for comparison
+    const normalizedOrigin = origin.replace(/\/$/, '');
+    const isAllowed = allowedOrigins.some(o => {
+      if (!o) return false;
+      const normalizedAllowed = o.replace(/\/$/, '');
+      return normalizedOrigin === normalizedAllowed || normalizedOrigin.startsWith(normalizedAllowed);
+    });
+
+    if (isAllowed) {
       callback(null, true);
     } else {
       console.warn('Blocked by CORS:', origin);
