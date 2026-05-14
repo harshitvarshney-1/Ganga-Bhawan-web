@@ -3,27 +3,24 @@ import dns from 'dns';
 import { currentConfig } from '../config/env.js';
 
 // --- SENIOR DEVOPS FIX: Force IPv4 globally for this process ---
-// This prevents the 'ENETUNREACH' and 'ETIMEDOUT' issues where Node tries IPv6 first
 if (dns.setDefaultResultOrder) {
   dns.setDefaultResultOrder('ipv4first');
 }
 
-// Optimized transporter using 'service' instead of manual host/port
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
     user: currentConfig.email.user,
     pass: currentConfig.email.pass,
   },
-  pool: true, // Use connection pooling for better performance
+  pool: true,
   maxConnections: 5,
   maxMessages: 100,
   tls: {
-    rejectUnauthorized: false // Bypass self-signed cert issues on proxies
+    rejectUnauthorized: false
   }
 });
 
-// --- CRITICAL: Verify connection on startup ---
 export const verifyEmailConnection = async () => {
   try {
     await transporter.verify();
@@ -52,7 +49,6 @@ export const sendEmail = async ({ to, subject, html }) => {
   }
 };
 
-// Templates remain same as before
 export const getWelcomeEmailTemplate = (fullName, email) => {
   return `
     <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
@@ -68,11 +64,55 @@ export const getWelcomeEmailTemplate = (fullName, email) => {
   `;
 };
 
-// Template functions for payment approval and other notifications...
+export const getPasswordResetEmailTemplate = (fullName, newPassword) => {
+  return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #4f46e5; text-align: center;">Password Updated</h2>
+      <p>Dear <strong>${fullName}</strong>,</p>
+      <p>Your login password has been updated by the admin.</p>
+      <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
+        <p style="margin: 5px 0;"><strong>New Password:</strong> <span style="font-size: 18px; font-weight: bold; color: #4f46e5;">${newPassword}</span></p>
+      </div>
+      <p style="font-size: 12px; color: #6b7280; text-align: center;">Automated message - Please do not reply.</p>
+    </div>
+  `;
+};
+
 export const getPaymentApprovalEmailTemplate = (fullName, month, date) => {
-  return `<!-- Template Content -->`; // Same as before
+  const submissionDate = new Date(date).toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  return `
+    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+      <h2 style="color: #111827; text-align: center;">Rent Payment Received</h2>
+      <p>Dear <strong>${fullName}</strong>,</p>
+      <p>Your rent payment for <strong>${month}</strong> has been approved.</p>
+      <div style="background-color: #f9fafb; padding: 20px; border-radius: 12px; border: 1px solid #f3f4f6; margin: 25px 0;">
+         <p><strong>Month:</strong> ${month}</p>
+         <p><strong>Date:</strong> ${submissionDate}</p>
+         <p><strong>Status:</strong> APPROVED</p>
+      </div>
+      <p style="font-size: 12px; color: #9ca3af; text-align: center;">Ganga Bhawan (Hariom)</p>
+    </div>
+  `;
 };
 
 export const getAdminPaymentNotificationTemplate = (tenantName, tenantEmail, month, submittedAt, approveUrl, rejectUrl, barcodeImageUrl) => {
-  return `<!-- Template Content -->`; // Same as before
+  return `
+    <div style="font-family: sans-serif; max-width: 620px; margin: auto; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden;">
+      <div style="background: #0f172a; padding: 20px; color: white;">
+        <h1>New Payment Receipt</h1>
+      </div>
+      <div style="padding: 20px;">
+        <p><strong>Tenant:</strong> ${tenantName} (${tenantEmail})</p>
+        <p><strong>Month:</strong> ${month}</p>
+        ${barcodeImageUrl ? `<img src="${barcodeImageUrl}" style="max-width: 100%; border-radius: 8px;" />` : ''}
+        <div style="margin-top: 20px;">
+          <a href="${approveUrl}" style="background: #4f46e5; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">Approve</a>
+          <a href="${rejectUrl}" style="color: #dc2626; margin-left: 20px;">Reject</a>
+        </div>
+      </div>
+    </div>
+  `;
 };
