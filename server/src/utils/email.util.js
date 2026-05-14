@@ -10,22 +10,14 @@ if (dns.setDefaultResultOrder) {
 const transporter = nodemailer.createTransport({
   host: currentConfig.email.host,
   port: currentConfig.email.port,
-  secure: false, // false for port 587
-  requireTLS: true, // Force STARTTLS
+  secure: false, // true for 465, false for 587
   auth: {
     user: currentConfig.email.user,
     pass: currentConfig.email.pass,
   },
   tls: {
-    rejectUnauthorized: false,
-    minVersion: 'TLSv1.2'
-  },
-  family: 4, // Force IPv4
-  connectionTimeout: 20000, // Increase timeout to 20s
-  greetingTimeout: 20000,
-  socketTimeout: 20000,
-  logger: true, // Log to console
-  debug: true   // Include SMTP traffic in logs
+    rejectUnauthorized: false
+  }
 });
 
 export const verifyEmailConnection = async () => {
