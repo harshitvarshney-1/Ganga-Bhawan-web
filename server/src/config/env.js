@@ -13,12 +13,12 @@ export const config = {
       apiSecret: process.env.CLOUDINARY_API_SECRET || 'asdf'
     },
     email: {
-      // Brevo SMTP relay (STARTTLS on port 587)
-      host: (process.env.EMAIL_HOST || 'smtp-relay.brevo.com').trim(),
-      port: Number((process.env.EMAIL_PORT || '587').trim()),
+      // Default to Gmail SMTP for better compatibility
+      host: (process.env.EMAIL_HOST || 'smtp.gmail.com').trim(),
+      port: Number((process.env.EMAIL_PORT || '465').trim()),
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
-      from: process.env.EMAIL_FROM || '"Ganga Bhawan" <gangabhawan.service@gmail.com>'
+      from: process.env.EMAIL_FROM || `"Ganga Bhawan" <${process.env.EMAIL_USER}>`
     }
   },
   production: {
@@ -32,8 +32,8 @@ export const config = {
       apiSecret: process.env.CLOUDINARY_API_SECRET
     },
     email: {
-      host: process.env.EMAIL_HOST || 'smtp-relay.brevo.com',
-      port: process.env.EMAIL_PORT || 587,
+      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+      port: Number(process.env.EMAIL_PORT || 465),
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
       from: process.env.EMAIL_FROM || `"Ganga Bhawan" <${process.env.EMAIL_USER}>`

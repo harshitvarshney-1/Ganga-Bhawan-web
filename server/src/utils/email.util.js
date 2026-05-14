@@ -7,20 +7,32 @@ if (dns.setDefaultResultOrder) {
   dns.setDefaultResultOrder('ipv4first');
 }
 
-const transporter = nodemailer.createTransport({
+const transporterConfig = {
   host: currentConfig.email.host,
   port: currentConfig.email.port,
-  secure: false, // false for STARTTLS on port 587
-  requireTLS: true,
+  secure: currentConfig.email.port === 465, // true for 465, false for other ports
   auth: {
     user: currentConfig.email.user,
     pass: currentConfig.email.pass,
   },
-  tls: { rejectUnauthorized: false },
-  connectionTimeout: 30000,
+  tls: { 
+    rejectUnauthorized: false,
+    minVersion: 'TLSv1.2'
+  },
+  connectionTimeout: 30000, // 30 seconds
   greetingTimeout: 30000,
   socketTimeout: 30000,
-});
+};
+
+// Optimization: Use Nodemailer's built-in Gmail service if host is Gmail
+if (transporterConfig.host.includes('gmail.com')) {
+  delete transporterConfig.host;
+  delete transporterConfig.port;
+  delete transporterConfig.secure;
+  transporterConfig.service = 'gmail';
+}
+
+const transporter = nodemailer.createTransport(transporterConfig);
 
 export const verifyEmailConnection = async () => {
   try {
