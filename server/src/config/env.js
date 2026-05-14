@@ -1,6 +1,20 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Force Gmail SMTP when using a Gmail address, regardless of env variables.
+// This prevents Brevo (or other stale) env vars from breaking email delivery.
+function getEmailConfig() {
+  const user = process.env.EMAIL_USER || '';
+  const isGmail = user.toLowerCase().includes('gmail.com');
+  return {
+    host: isGmail ? 'smtp.gmail.com' : (process.env.EMAIL_HOST || 'smtp.gmail.com').trim(),
+    port: isGmail ? 465 : Number((process.env.EMAIL_PORT || '465').trim()),
+    user,
+    pass: process.env.EMAIL_PASS,
+    from: process.env.EMAIL_FROM || `"Ganga Bhawan" <${user}>`
+  };
+}
+
 export const config = {
   development: {
     port: process.env.PORT || 9000,
@@ -12,14 +26,7 @@ export const config = {
       apiKey: process.env.CLOUDINARY_API_KEY || 'cvbn',
       apiSecret: process.env.CLOUDINARY_API_SECRET || 'asdf'
     },
-    email: {
-      // Default to Gmail SMTP for better compatibility
-      host: (process.env.EMAIL_HOST || 'smtp.gmail.com').trim(),
-      port: Number((process.env.EMAIL_PORT || '587').trim()),
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-      from: process.env.EMAIL_FROM || `"Ganga Bhawan" <${process.env.EMAIL_USER}>`
-    }
+    email: getEmailConfig()
   },
   production: {
     port: process.env.PORT || 5000,
@@ -31,13 +38,7 @@ export const config = {
       apiKey: process.env.CLOUDINARY_API_KEY,
       apiSecret: process.env.CLOUDINARY_API_SECRET
     },
-    email: {
-      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-      port: Number(process.env.EMAIL_PORT || 465),
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-      from: process.env.EMAIL_FROM || `"Ganga Bhawan" <${process.env.EMAIL_USER}>`
-    }
+    email: getEmailConfig()
   }
 };
 
