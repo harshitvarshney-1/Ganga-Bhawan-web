@@ -13,8 +13,9 @@ export const config = {
       apiSecret: process.env.CLOUDINARY_API_SECRET || 'asdf'
     },
     email: {
-      host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-      port: process.env.EMAIL_PORT || 587,
+      // Brevo SMTP relay (STARTTLS on port 587)
+      host: (process.env.EMAIL_HOST || 'smtp-relay.brevo.com').trim(),
+      port: Number((process.env.EMAIL_PORT || '587').trim()),
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
       from: process.env.EMAIL_FROM || '"Ganga Bhawan" <gangabhawan.service@gmail.com>'
