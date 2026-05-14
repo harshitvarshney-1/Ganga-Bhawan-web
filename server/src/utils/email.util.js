@@ -1,75 +1,58 @@
+import { google } from 'googleapis';
 import nodemailer from 'nodemailer';
-import dns from 'dns';
 
-const dnsPromises = dns.promises;
+const OAuth2 = google.auth.OAuth2;
 
 let cachedTransporter = null;
 
-// ─── Core: Create Transporter with DNS pre-resolution + port fallback ───────
+// ─── Core: Create Transporter using Gmail OAuth2 ────────────────────────────
 async function createTransporter() {
   if (cachedTransporter) return cachedTransporter;
 
-  // Step 1: Force IPv4 DNS resolution for smtp.gmail.com
-  let smtpHost = 'smtp.gmail.com';
+  const oauth2Client = new OAuth2(
+    process.env.GMAIL_CLIENT_ID,
+    process.env.GMAIL_CLIENT_SECRET,
+    'https://developers.google.com/oauthplayground'
+  );
+
+  oauth2Client.setCredentials({
+    refresh_token: process.env.GMAIL_REFRESH_TOKEN,
+  });
+
+  let accessToken;
   try {
-    const addresses = await dnsPromises.resolve4('smtp.gmail.com');
-    smtpHost = addresses[0]; // Use direct IPv4 address
-    console.log(`[SMTP] IPv4 resolved: ${smtpHost}`);
+    const tokenResponse = await oauth2Client.getAccessToken();
+    accessToken = tokenResponse.token;
+    console.log('[Gmail OAuth2] Access token generated successfully');
   } catch (err) {
-    console.warn('[SMTP] DNS resolve4 failed, falling back to hostname:', err.message);
+    console.error('[Gmail OAuth2] Token generation failed:', err.message);
+    throw new Error(`[Gmail OAuth2] Token generation failed: ${err.message}`);
   }
 
-  const auth = {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  };
-
-  // Step 2: Try port 465 (SSL) first, then 587 (STARTTLS)
-  const configs = [
-    {
-      host: smtpHost,
-      port: 465,
-      secure: true,
-      auth,
-      tls: { rejectUnauthorized: false },
-      connectionTimeout: 15000,
-      greetingTimeout: 15000,
-      socketTimeout: 15000,
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      type: 'OAuth2',
+      user: process.env.EMAIL_USER,
+      clientId: process.env.GMAIL_CLIENT_ID,
+      clientSecret: process.env.GMAIL_CLIENT_SECRET,
+      refreshToken: process.env.GMAIL_REFRESH_TOKEN,
+      accessToken: accessToken,
     },
-    {
-      host: smtpHost,
-      port: 587,
-      secure: false,
-      auth,
-      tls: { rejectUnauthorized: false, ciphers: 'SSLv3' },
-      connectionTimeout: 15000,
-      greetingTimeout: 15000,
-      socketTimeout: 15000,
-    },
-  ];
+  });
 
-  for (const config of configs) {
-    try {
-      const transporter = nodemailer.createTransport(config);
-      await transporter.verify();
-      console.log(`[SMTP] ✅ Connected on port ${config.port}`);
-      cachedTransporter = transporter;
-      return transporter;
-    } catch (err) {
-      console.warn(`[SMTP] ❌ Port ${config.port} failed: ${err.message}`);
-    }
-  }
-
-  throw new Error('[SMTP] All configs failed. Check credentials and network.');
+  cachedTransporter = transporter;
+  return transporter;
 }
 
 // ─── Verify (called on startup) ──────────────────────────────────────────────
 export const verifyEmailConnection = async () => {
   try {
     await createTransporter();
+    console.log('✅ Gmail OAuth2: READY');
     return true;
   } catch (error) {
-    console.error('❌ SMTP Connection: FAILED —', error.message);
+    console.error('❌ Gmail OAuth2 Connection: FAILED —', error.message);
     return false;
   }
 };
@@ -79,12 +62,19 @@ export const sendEmail = async ({ to, subject, html }) => {
   try {
     const transporter = await createTransporter();
     const from = process.env.EMAIL_FROM || `"Ganga Bhawan" <${process.env.EMAIL_USER}>`;
-    const info = await transporter.sendMail({ from, to, subject, html });
-    console.log('📧 Email Sent Successfully:', info.messageId);
+    
+    const info = await transporter.sendMail({
+      from,
+      to,
+      subject,
+      html,
+    });
+    
+    console.log('📧 Email Sent Successfully (OAuth2):', info.messageId);
     return info;
   } catch (error) {
-    console.error('❌ Email Delivery Error:', error.message);
-    cachedTransporter = null; // Reset cache so next attempt retries
+    console.error('❌ Email Delivery Error (OAuth2):', error.message);
+    cachedTransporter = null; // Reset cache on failure to retry token generation
     throw error;
   }
 };
