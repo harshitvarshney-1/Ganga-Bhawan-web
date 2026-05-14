@@ -15,7 +15,7 @@ export const config = {
     email: {
       // Default to Gmail SMTP for better compatibility
       host: (process.env.EMAIL_HOST || 'smtp.gmail.com').trim(),
-      port: Number((process.env.EMAIL_PORT || '465').trim()),
+      port: Number((process.env.EMAIL_PORT || '587').trim()),
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS,
       from: process.env.EMAIL_FROM || `"Ganga Bhawan" <${process.env.EMAIL_USER}>`

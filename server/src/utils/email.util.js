@@ -22,16 +22,20 @@ const transporterConfig = {
   connectionTimeout: 30000, // 30 seconds
   greetingTimeout: 30000,
   socketTimeout: 30000,
-  family: 4, // Force IPv4 to avoid ENETUNREACH errors with IPv6
+  family: 4, // Force IPv4 to avoid ENETUNREACH errors with IPv6-unfriendly networks
 };
 
-// Optimization: Use Nodemailer's built-in Gmail service if host is Gmail
-if (transporterConfig.host.includes('gmail.com')) {
-  delete transporterConfig.host;
-  delete transporterConfig.port;
-  delete transporterConfig.secure;
-  transporterConfig.service = 'gmail';
+// Fallback to Gmail SMTP if host is undefined or not a Gmail host
+if (!transporterConfig.host || !transporterConfig.host.includes('gmail.com')) {
+  // Prefer Gmail when using a Gmail user email address
+  if (transporterConfig.auth.user && transporterConfig.auth.user.toLowerCase().includes('gmail.com')) {
+    transporterConfig.host = 'smtp.gmail.com';
+    transporterConfig.port = 465;
+    transporterConfig.secure = true;
+  }
 }
+
+
 
 const transporter = nodemailer.createTransport(transporterConfig);
 
