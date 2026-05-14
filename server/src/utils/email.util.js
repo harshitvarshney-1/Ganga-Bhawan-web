@@ -30,7 +30,9 @@ async function createTransporter() {
   }
 
   const transporter = nodemailer.createTransport({
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true,
     auth: {
       type: 'OAuth2',
       user: process.env.EMAIL_USER,
@@ -39,6 +41,10 @@ async function createTransporter() {
       refreshToken: process.env.GMAIL_REFRESH_TOKEN,
       accessToken: accessToken,
     },
+    family: 4, // CRITICAL: Force IPv4 to avoid ENETUNREACH on Render
+    tls: {
+      rejectUnauthorized: false
+    }
   });
 
   cachedTransporter = transporter;
