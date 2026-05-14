@@ -13,88 +13,59 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// 1. PERFORMANCE: Enable compression to reduce response size
 app.use(compression());
 
-// --- CORS Configuration ---
+// --- ULTIMATE CORS FIX ---
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  currentConfig.clientUrl,
-].filter(Boolean);
+  currentConfig.clientUrl
+].filter(Boolean).map(o => o.replace(/\/$/, ''));
 
-const corsOptions = {
-  origin: function (origin, callback) {
-    // 1. Allow if no origin (like mobile apps)
-    if (!origin) return callback(null, true);
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  const normalizedOrigin = origin ? origin.replace(/\/$/, '') : '';
+  
+  if (allowedOrigins.includes(normalizedOrigin) || !origin) {
+    res.header('Access-Control-Allow-Origin', origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  }
 
-    // 2. Normalize URLs (remove trailing slashes) for comparison
-    const normalizedOrigin = origin.replace(/\/$/, '');
-    const isAllowed = allowedOrigins.some(o => {
-      if (!o) return false;
-      const normalizedAllowed = o.replace(/\/$/, '');
-      return normalizedOrigin === normalizedAllowed || normalizedOrigin.startsWith(normalizedAllowed);
-    });
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  next();
+});
 
-    if (isAllowed) {
-      callback(null, true);
-    } else {
-      console.warn('Blocked by CORS:', origin);
-      callback(null, false);
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+// We still keep the middleware as a secondary layer
+app.use(cors({
+  origin: true, // Reflect request origin
+  credentials: true
+}));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Database Connection
 connectDB().catch(err => {
-  console.error('Failed to connect to MongoDB on startup:', err.message);
+  console.error('Failed to connect to MongoDB:', err.message);
 });
 
-// 2. Health Check & Keep-Alive Ping
-app.get('/ping', (req, res) => {
-  res.status(200).send('pong');
-});
-
-// API Routes
+app.get('/ping', (req, res) => res.status(200).send('pong'));
 app.use('/api', routes);
+app.get('/', (req, res) => res.json({ message: 'Ganga Bhawan API Live' }));
 
-// Test Route
-app.get('/', (req, res) => {
-  res.json({ message: 'Ganga Bhawan API is running (Optimized)' });
-});
-
-// Global error handler
 app.use((err, req, res, next) => {
-  console.error('Unhandled Error:', err);
+  console.error(err);
   res.status(500).json({ error: 'Internal Server Error' });
 });
 
-// Start Server
 if (process.env.NODE_ENV !== 'test') {
-  const server = app.listen(currentConfig.port, () => {
-    console.log(`🚀 Server running on port ${currentConfig.port} in ${process.env.NODE_ENV || 'development'} mode`);
-    
-    // 3. Keep-Alive Mechanism (Self-Ping)
-    // Runs every 14 minutes to prevent Render/Railway free-tier sleep
+  app.listen(currentConfig.port, () => {
+    console.log(`🚀 Server on port ${currentConfig.port}`);
     if (process.env.NODE_ENV === 'production') {
-      const SELF_URL = process.env.SERVER_URL || `http://localhost:${currentConfig.port}`;
-      setInterval(async () => {
-        try {
-          console.log('Self-pinging to keep server alive...');
-          await axios.get(`${SELF_URL}/ping`);
-        } catch (err) {
-          console.error('Self-ping failed:', err.message);
-        }
-      }, 14 * 60 * 1000); // 14 minutes
+      setInterval(() => axios.get(`${currentConfig.serverUrl}/ping`).catch(() => {}), 14 * 60 * 1000);
     }
   });
 }
