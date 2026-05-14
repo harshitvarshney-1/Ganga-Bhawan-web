@@ -22,7 +22,7 @@ export const config = {
   },
   production: {
     port: process.env.PORT || 5000,
-    mongoUri: process.env.MONGO_URI,
+    mongoUri: process.env.MONGODB_URI || process.env.MONGO_URI,
     jwtSecret: process.env.JWT_SECRET,
     clientUrl: process.env.CLIENT_URL,
     cloudinary: {
