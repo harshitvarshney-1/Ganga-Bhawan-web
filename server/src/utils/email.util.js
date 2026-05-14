@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { currentConfig } from '../config/env.js';
 
+// Production-ready transporter with robust settings for Gmail
 const transporter = nodemailer.createTransport({
   host: currentConfig.email.host,
   port: currentConfig.email.port,
@@ -9,6 +10,13 @@ const transporter = nodemailer.createTransport({
     user: currentConfig.email.user,
     pass: currentConfig.email.pass,
   },
+  // TLS settings for production servers (Render/Railway)
+  tls: {
+    rejectUnauthorized: false
+  },
+  connectionTimeout: 10000, // 10 seconds
+  logger: process.env.NODE_ENV === 'production',
+  debug: process.env.NODE_ENV === 'production'
 });
 
 export const sendEmail = async ({ to, subject, html }) => {
@@ -19,10 +27,14 @@ export const sendEmail = async ({ to, subject, html }) => {
       subject,
       html,
     });
-    console.log('Email sent: %s', info.messageId);
+    console.log('✅ Email successfully sent: %s', info.messageId);
     return info;
   } catch (error) {
-    console.error('Error sending email:', error);
+    console.error('❌ CRITICAL EMAIL FAILURE:', error.message);
+    // If it fails, log the full error stack in production for debugging
+    if (process.env.NODE_ENV === 'production') {
+      console.error(error);
+    }
     throw error;
   }
 };
@@ -115,7 +127,6 @@ export const getPaymentApprovalEmailTemplate = (fullName, month, date) => {
   `;
 };
 
-// ─── Admin: Payment submission notification (with 1-click approve/reject) ───
 export const getAdminPaymentNotificationTemplate = (tenantName, tenantEmail, month, submittedAt, approveUrl, rejectUrl, barcodeImageUrl) => {
   const date = new Date(submittedAt).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'long', year: 'numeric',
