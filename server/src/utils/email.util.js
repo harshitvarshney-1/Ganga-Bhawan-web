@@ -8,17 +8,24 @@ if (dns.setDefaultResultOrder) {
 }
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: currentConfig.email.host,
+  port: currentConfig.email.port,
+  secure: false, // false for port 587
+  requireTLS: true, // Force STARTTLS
   auth: {
     user: currentConfig.email.user,
     pass: currentConfig.email.pass,
   },
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100,
   tls: {
-    rejectUnauthorized: false
-  }
+    rejectUnauthorized: false,
+    minVersion: 'TLSv1.2'
+  },
+  family: 4, // Force IPv4
+  connectionTimeout: 20000, // Increase timeout to 20s
+  greetingTimeout: 20000,
+  socketTimeout: 20000,
+  logger: true, // Log to console
+  debug: true   // Include SMTP traffic in logs
 });
 
 export const verifyEmailConnection = async () => {
