@@ -13,58 +13,42 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-app.use(compression());
-
-// --- ULTIMATE CORS FIX ---
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  currentConfig.clientUrl
-].filter(Boolean).map(o => o.replace(/\/$/, ''));
-
+// --- THE "I GIVE UP" CORS FIX (PERMISSIVE MODE) ---
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  const normalizedOrigin = origin ? origin.replace(/\/$/, '') : '';
+  // Always reflect the origin to allow credentials
+  res.header('Access-Control-Allow-Origin', origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS, PATCH');
+  res.header('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Authorization, Origin');
   
-  if (allowedOrigins.includes(normalizedOrigin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  }
-
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
   next();
 });
 
-// We still keep the middleware as a secondary layer
-app.use(cors({
-  origin: true, // Reflect request origin
-  credentials: true
-}));
-
+app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 connectDB().catch(err => {
-  console.error('Failed to connect to MongoDB:', err.message);
+  console.error('MongoDB Error:', err.message);
 });
 
 app.get('/ping', (req, res) => res.status(200).send('pong'));
 app.use('/api', routes);
-app.get('/', (req, res) => res.json({ message: 'Ganga Bhawan API Live' }));
+app.get('/', (req, res) => res.json({ message: 'API is Live' }));
 
 app.use((err, req, res, next) => {
   console.error(err);
-  res.status(500).json({ error: 'Internal Server Error' });
+  res.status(500).json({ error: 'Server Error' });
 });
 
 if (process.env.NODE_ENV !== 'test') {
   app.listen(currentConfig.port, () => {
-    console.log(`🚀 Server on port ${currentConfig.port}`);
-    if (process.env.NODE_ENV === 'production') {
+    console.log(`🚀 Port: ${currentConfig.port}`);
+    if (process.env.NODE_ENV === 'production' && currentConfig.serverUrl) {
       setInterval(() => axios.get(`${currentConfig.serverUrl}/ping`).catch(() => {}), 14 * 60 * 1000);
     }
   });
