@@ -22,6 +22,7 @@ const transporterConfig = {
   connectionTimeout: 30000, // 30 seconds
   greetingTimeout: 30000,
   socketTimeout: 30000,
+  family: 4, // Force IPv4 to avoid ENETUNREACH errors with IPv6
 };
 
 // Optimization: Use Nodemailer's built-in Gmail service if host is Gmail
