@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url';
 import { currentConfig } from './config/env.js';
 import { connectDB } from './infra/mongodb.js';
 import routes from './routes/index.js';
+import { verifyEmailConnection } from './utils/email.util.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,8 +33,11 @@ app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-connectDB().catch(err => {
-  console.error('MongoDB Error:', err.message);
+connectDB().then(() => {
+  // Verify Email connection after DB is up
+  verifyEmailConnection();
+}).catch(err => {
+  console.error('Failed to connect to MongoDB:', err.message);
 });
 
 app.get('/ping', (req, res) => res.status(200).send('pong'));
