@@ -14,8 +14,11 @@ async function createTransporter() {
   // fetching/refreshing the token automatically using the refresh token.
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    port: 587,
+    secure: false, // Use STARTTLS
+    pool: true,   // Reuse connections for better performance
+    maxConnections: 5,
+    maxMessages: 100,
     auth: {
       type: 'OAuth2',
       user: process.env.EMAIL_USER,
@@ -23,7 +26,7 @@ async function createTransporter() {
       clientSecret: process.env.GMAIL_CLIENT_SECRET,
       refreshToken: process.env.GMAIL_REFRESH_TOKEN,
     },
-    family: 4, // CRITICAL: Force IPv4 to avoid ENETUNREACH on Render
+    family: 4, // CRITICAL: Force IPv4 for Render stability
     tls: {
       rejectUnauthorized: false
     }
