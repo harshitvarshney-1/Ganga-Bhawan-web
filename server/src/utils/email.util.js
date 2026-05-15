@@ -1,95 +1,84 @@
 import { google } from 'googleapis';
-import nodemailer from 'nodemailer';
-import dns from 'dns';
 
-const OAuth2 = google.auth.OAuth2;
+let oauth2Client = null;
 
-let cachedTransporter = null;
+// ─── Core: Initialize Gmail API Client ─────────────────────────────────────
+function getGmailClient() {
+  if (oauth2Client) return oauth2Client;
 
-// ─── Core: Create Transporter using Gmail OAuth2 ────────────────────────────
-async function createTransporter() {
-  if (cachedTransporter) return cachedTransporter;
+  oauth2Client = new google.auth.OAuth2(
+    process.env.GMAIL_CLIENT_ID,
+    process.env.GMAIL_CLIENT_SECRET,
+    'http://localhost:5000/oauth2callback' // This doesn't matter for sending, but must exist
+  );
 
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, 
-    pool: true,
-    auth: {
-      type: 'OAuth2',
-      user: process.env.EMAIL_USER,
-      clientId: process.env.GMAIL_CLIENT_ID,
-      clientSecret: process.env.GMAIL_CLIENT_SECRET,
-      refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-    },
-    // ULTIMATE FIX: Force IPv4 at the DNS lookup level
-    lookup: (hostname, options, callback) => {
-      dns.lookup(hostname, { family: 4 }, callback);
-    },
-    connectionTimeout: 20000, // 20 seconds
-    tls: {
-      rejectUnauthorized: false
-    }
+  oauth2Client.setCredentials({
+    refresh_token: process.env.GMAIL_REFRESH_TOKEN
   });
 
-  cachedTransporter = transporter;
-  return transporter;
+  return google.gmail({ version: 'v1', auth: oauth2Client });
 }
 
 // ─── Verify (called on startup) ──────────────────────────────────────────────
 export const verifyEmailConnection = async () => {
   try {
-    const transporter = await createTransporter();
-    await transporter.verify();
-    console.log('✅ Gmail OAuth2: READY');
+    const gmail = getGmailClient();
+    // Verify tokens by getting profile
+    await gmail.users.getProfile({ userId: 'me' });
+    console.log('✅ Gmail API: READY (HTTPS Mode)');
     return true;
   } catch (error) {
-    console.error('❌ Gmail OAuth2 Connection: FAILED —', error.message);
-    cachedTransporter = null;
+    console.error('❌ Gmail API Verification: FAILED —', error.message);
     return false;
   }
 };
 
-// ─── Send Email ───────────────────────────────────────────────────────────────
+// ─── Send Email via Gmail API (HTTPS) ────────────────────────────────────────
 export const sendEmail = async ({ to, subject, html, senderName, senderEmail }) => {
-  let lastError;
-  
-  // Retry logic: try twice to handle transient token issues
-  for (let attempt = 1; attempt <= 2; attempt++) {
-    try {
-      const transporter = await createTransporter();
+  try {
+    const gmail = getGmailClient();
+    
+    // Smart Display Name: Shows "Name (email)" to the owner
+    const displayName = senderName 
+      ? (senderEmail ? `${senderName} (${senderEmail})` : `${senderName} (Ganga Bhawan)`)
+      : "Ganga Bhawan";
       
-      // Smart Display Name: Shows "Name (email)" to the owner
-      const displayName = senderName 
-        ? (senderEmail ? `${senderName} (${senderEmail})` : `${senderName} (Ganga Bhawan)`)
-        : "Ganga Bhawan";
-      
-      const from = `"${displayName}" <${process.env.EMAIL_USER}>`;
-      
-      const info = await transporter.sendMail({
-        from,
-        to,
-        subject,
-        html,
-        replyTo: senderEmail || process.env.EMAIL_USER // Direct reply to tenant
-      });
-      
-      console.log(`📧 Email Sent Successfully [From: ${displayName}]:`, info.messageId);
-      return info;
-    } catch (error) {
-      lastError = error;
-      console.error(`❌ Email Delivery Attempt ${attempt} Failed:`, error.message);
-      
-      if (error.message.includes('OAuth2') || error.message.includes('token') || error.message.includes('grant')) {
-        cachedTransporter = null;
-      }
-      
-      if (attempt === 2) break;
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
-  }
+    const from = `"${displayName}" <${process.env.EMAIL_USER}>`;
+    
+    // Construct RFC822 message (Standard format for Gmail API)
+    const utf8Subject = `=?utf-8?B?${Buffer.from(subject).toString('base64')}?=`;
+    const messageParts = [
+      `From: ${from}`,
+      `To: ${to}`,
+      `Content-Type: text/html; charset=utf-8`,
+      `MIME-Version: 1.0`,
+      `Subject: ${utf8Subject}`,
+      `Reply-To: ${senderEmail || process.env.EMAIL_USER}`,
+      '',
+      html
+    ];
+    const message = messageParts.join('\n');
 
-  throw lastError;
+    // Gmail API requires base64url encoding
+    const encodedMessage = Buffer.from(message)
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+
+    const res = await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: {
+        raw: encodedMessage,
+      },
+    });
+
+    console.log(`📧 Email Sent via HTTPS [To: ${to}]:`, res.data.id);
+    return res.data;
+  } catch (error) {
+    console.error('❌ Gmail API Send FAILED:', error.message);
+    throw error;
+  }
 };
 
 // ─── Email Templates ──────────────────────────────────────────────────────────
