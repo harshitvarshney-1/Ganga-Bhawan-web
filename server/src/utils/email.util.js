@@ -1,5 +1,6 @@
 import { google } from 'googleapis';
 import nodemailer from 'nodemailer';
+import dns from 'dns';
 
 const OAuth2 = google.auth.OAuth2;
 
@@ -9,16 +10,11 @@ let cachedTransporter = null;
 async function createTransporter() {
   if (cachedTransporter) return cachedTransporter;
 
-  // We don't manually fetch the accessToken here anymore.
-  // Instead, we pass the credentials to Nodemailer, and it handles
-  // fetching/refreshing the token automatically using the refresh token.
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
-    secure: false, // Use STARTTLS
-    pool: true,   // Reuse connections for better performance
-    maxConnections: 5,
-    maxMessages: 100,
+    secure: false, 
+    pool: true,
     auth: {
       type: 'OAuth2',
       user: process.env.EMAIL_USER,
@@ -26,7 +22,10 @@ async function createTransporter() {
       clientSecret: process.env.GMAIL_CLIENT_SECRET,
       refreshToken: process.env.GMAIL_REFRESH_TOKEN,
     },
-    family: 4, // CRITICAL: Force IPv4 for Render stability
+    // ULTIMATE FIX: Force IPv4 at the DNS lookup level
+    lookup: (hostname, options, callback) => {
+      dns.lookup(hostname, { family: 4 }, callback);
+    },
     tls: {
       rejectUnauthorized: false
     }
