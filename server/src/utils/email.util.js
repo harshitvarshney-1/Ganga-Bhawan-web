@@ -12,8 +12,8 @@ async function createTransporter() {
 
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, 
+    port: 465,
+    secure: true, 
     pool: true,
     auth: {
       type: 'OAuth2',
@@ -26,6 +26,7 @@ async function createTransporter() {
     lookup: (hostname, options, callback) => {
       dns.lookup(hostname, { family: 4 }, callback);
     },
+    connectionTimeout: 20000, // 20 seconds
     tls: {
       rejectUnauthorized: false
     }
