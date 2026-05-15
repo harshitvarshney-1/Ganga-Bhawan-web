@@ -3,7 +3,7 @@ import User from '../../models/user.model.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { currentConfig } from '../../config/env.js';
-import { sendEmail, getPaymentApprovalEmailTemplate, getPasswordResetEmailTemplate } from '../../utils/email.util.js';
+import { sendEmail, getPaymentApprovalEmailTemplate, getPasswordResetEmailTemplate, getPaymentRejectedEmailTemplate } from '../../utils/email.util.js';
 
 // Secret used only for quick-approve links (separate from user JWT secret)
 const QUICK_SECRET = process.env.QUICK_APPROVE_SECRET || (currentConfig.jwtSecret + '_quick');
@@ -150,6 +150,23 @@ export const rejectPayment = async (req, res) => {
     payment.approvedAt = new Date();
 
     await payment.save();
++
++    // Send payment rejection email
++    try {
++      const tenant = await User.findById(payment.userId);
++      if (tenant) {
++        const emailHtml = getPaymentRejectedEmailTemplate(tenant.fullName, payment.month);
++        sendEmail({
++          to: tenant.email,
++          subject: `Payment Declined - Action Required for ${payment.month}`,
++          html: emailHtml
++        }).catch(e => console.error('Background Reject Email Error:', e));
++        
++        console.log(`❌ Payment rejection triggered for ${tenant.email} for ${payment.month}`);
++      }
++    } catch (emailError) {
++      console.error('❌ Failed to send payment rejection email:', emailError);
++    }
 
     res.json({
       success: true,
@@ -346,6 +363,21 @@ export const quickRejectPayment = async (req, res) => {
     for (const p of batch) {
       p.status = 'rejected';
       await p.save();
+    }
+
+    // Notify tenant of batch rejection
+    try {
+      const tenant = await User.findById(payment.userId);
+      if (tenant) {
+        const emailHtml = getPaymentRejectedEmailTemplate(tenant.fullName, monthSummary);
+        sendEmail({
+          to: tenant.email,
+          subject: `❌ Payment Declined - ${monthSummary}`,
+          html: emailHtml
+        }).catch(e => console.error('Background Batch Reject Email Error:', e));
+      }
+    } catch (e) {
+      console.error('Email to tenant failed:', e);
     }
 
     return res.send(htmlPage('❌ Batch Rejected', `Payments for <strong>${monthSummary}</strong> have been rejected. The tenant will need to re-submit.`, 'error'));

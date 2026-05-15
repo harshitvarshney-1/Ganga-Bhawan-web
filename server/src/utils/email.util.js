@@ -258,3 +258,26 @@ export const getAdminPaymentNotificationTemplate = (tenantName, tenantEmail, mon
   `;
   return wrapInContainer(header, body);
 };
+
+export const getPaymentRejectedEmailTemplate = (fullName, month) => {
+  const header = getEmailHeader('Payment Declined');
+  const body = `
+    <p style="color: #334155; font-family: Arial, sans-serif; font-size: 18px; line-height: 1.6; margin: 0 0 20px 0;">
+      Namaste <strong>${fullName}</strong>,
+    </p>
+    <p style="color: #475569; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+      Your payment proof for <strong>${month}</strong> was declined after verification. This usually happens if the screenshot is unclear or the transaction was not found.
+    </p>
+    <div style="background-color: #fef2f2; border: 1px solid #fecaca; border-radius: 12px; padding: 25px; margin-bottom: 30px;">
+      <p style="color: #991b1b; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600; margin: 0 0 10px 0; text-align: center;">Action Required</p>
+      <p style="color: #b91c1c; font-family: Arial, sans-serif; font-size: 15px; line-height: 1.5; margin: 0; text-align: center;">
+        Please log in to the portal and <strong>re-upload a valid payment screenshot</strong> for this month.
+      </p>
+    </div>
+    <div style="text-align: center;">
+      <a href="${process.env.CLIENT_URL}" style="background-color: #ef4444; color: #ffffff; display: inline-block; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; padding: 16px 32px; text-decoration: none; border-radius: 8px;">Go to Portal</a>
+    </div>
+  `;
+  return wrapInContainer(header, body);
+};
+
