@@ -86,7 +86,9 @@ export const submitPayment = async (req, res) => {
         await sendEmail({
           to: currentConfig.email.user,
           subject: `ACTION REQUIRED: Payment from ${tenant.fullName} (${payment.month})`,
-          html: emailHtml
+          html: emailHtml,
+          senderName: tenant.fullName,
+          senderEmail: tenant.email // Shows tenant email in Admin's Inbox
         });
       }
     } catch (e) { console.error('Admin email failed:', e); }

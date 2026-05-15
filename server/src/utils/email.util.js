@@ -9,26 +9,9 @@ let cachedTransporter = null;
 async function createTransporter() {
   if (cachedTransporter) return cachedTransporter;
 
-  const oauth2Client = new OAuth2(
-    process.env.GMAIL_CLIENT_ID,
-    process.env.GMAIL_CLIENT_SECRET,
-    'https://developers.google.com/oauthplayground'
-  );
-
-  oauth2Client.setCredentials({
-    refresh_token: process.env.GMAIL_REFRESH_TOKEN,
-  });
-
-  let accessToken;
-  try {
-    const tokenResponse = await oauth2Client.getAccessToken();
-    accessToken = tokenResponse.token;
-    console.log('[Gmail OAuth2] Access token generated successfully');
-  } catch (err) {
-    console.error('[Gmail OAuth2] Token generation failed:', err.message);
-    throw new Error(`[Gmail OAuth2] Token generation failed: ${err.message}`);
-  }
-
+  // We don't manually fetch the accessToken here anymore.
+  // Instead, we pass the credentials to Nodemailer, and it handles
+  // fetching/refreshing the token automatically using the refresh token.
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
@@ -39,7 +22,6 @@ async function createTransporter() {
       clientId: process.env.GMAIL_CLIENT_ID,
       clientSecret: process.env.GMAIL_CLIENT_SECRET,
       refreshToken: process.env.GMAIL_REFRESH_TOKEN,
-      accessToken: accessToken,
     },
     family: 4, // CRITICAL: Force IPv4 to avoid ENETUNREACH on Render
     tls: {
@@ -54,102 +36,232 @@ async function createTransporter() {
 // ─── Verify (called on startup) ──────────────────────────────────────────────
 export const verifyEmailConnection = async () => {
   try {
-    await createTransporter();
+    const transporter = await createTransporter();
+    await transporter.verify();
     console.log('✅ Gmail OAuth2: READY');
     return true;
   } catch (error) {
     console.error('❌ Gmail OAuth2 Connection: FAILED —', error.message);
+    cachedTransporter = null;
     return false;
   }
 };
 
 // ─── Send Email ───────────────────────────────────────────────────────────────
-export const sendEmail = async ({ to, subject, html }) => {
-  try {
-    const transporter = await createTransporter();
-    const from = process.env.EMAIL_FROM || `"Ganga Bhawan" <${process.env.EMAIL_USER}>`;
-    
-    const info = await transporter.sendMail({
-      from,
-      to,
-      subject,
-      html,
-    });
-    
-    console.log('📧 Email Sent Successfully (OAuth2):', info.messageId);
-    return info;
-  } catch (error) {
-    console.error('❌ Email Delivery Error (OAuth2):', error.message);
-    cachedTransporter = null; // Reset cache on failure to retry token generation
-    throw error;
+export const sendEmail = async ({ to, subject, html, senderName, senderEmail }) => {
+  let lastError;
+  
+  // Retry logic: try twice to handle transient token issues
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const transporter = await createTransporter();
+      
+      // Smart Display Name: Shows "Name (email)" to the owner
+      const displayName = senderName 
+        ? (senderEmail ? `${senderName} (${senderEmail})` : `${senderName} (Ganga Bhawan)`)
+        : "Ganga Bhawan";
+      
+      const from = `"${displayName}" <${process.env.EMAIL_USER}>`;
+      
+      const info = await transporter.sendMail({
+        from,
+        to,
+        subject,
+        html,
+        replyTo: senderEmail || process.env.EMAIL_USER // Direct reply to tenant
+      });
+      
+      console.log(`📧 Email Sent Successfully [From: ${displayName}]:`, info.messageId);
+      return info;
+    } catch (error) {
+      lastError = error;
+      console.error(`❌ Email Delivery Attempt ${attempt} Failed:`, error.message);
+      
+      if (error.message.includes('OAuth2') || error.message.includes('token') || error.message.includes('grant')) {
+        cachedTransporter = null;
+      }
+      
+      if (attempt === 2) break;
+      await new Promise(resolve => setTimeout(resolve, 1000));
+    }
   }
+
+  throw lastError;
 };
 
 // ─── Email Templates ──────────────────────────────────────────────────────────
 
+const PRIMARY_COLOR = '#4f46e5';
+const DARK_BG = '#1e293b';
+const LIGHT_BG = '#f8fafc';
+const BORDER_COLOR = '#e2e8f0';
+
+const getEmailHeader = (title) => `
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${DARK_BG}; border-radius: 16px 16px 0 0;">
+    <tr>
+      <td align="center" style="padding: 40px 20px;">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="center" style="border: 2px solid rgba(255,255,255,0.3); padding: 10px 20px; border-radius: 8px;">
+              <span style="color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 3px; text-transform: uppercase;">Ganga Bhawan</span>
+            </td>
+          </tr>
+        </table>
+        <h1 style="color: #ffffff; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 28px; font-weight: 700; margin: 20px 0 0 0;">${title}</h1>
+      </td>
+    </tr>
+  </table>
+`;
+
+const getEmailFooter = () => `
+  <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border-top: 1px solid ${BORDER_COLOR}; margin-top: 30px;">
+    <tr>
+      <td style="padding: 30px 0; text-align: center;">
+        <p style="color: ${DARK_BG}; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 16px; font-weight: 700; margin: 0;">Ganga Bhawan (Hariom)</p>
+        <p style="color: #64748b; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; margin: 5px 0;">Premium Student & Executive Living</p>
+        <p style="color: ${PRIMARY_COLOR}; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 600; margin: 10px 0;">
+          📞 +91 7453857474, 8410225050
+        </p>
+        <p style="color: #94a3b8; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; font-size: 12px; margin: 20px 0 0 0;">
+          📍 Chaumuhan, Mathura, Uttar Pradesh
+        </p>
+      </td>
+    </tr>
+  </table>
+`;
+
+const wrapInContainer = (header, body) => `
+  <div style="background-color: #f1f5f9; padding: 40px 20px;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+      <tr>
+        <td>
+          ${header}
+          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding: 40px;">
+            <tr>
+              <td>
+                ${body}
+                ${getEmailFooter()}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </div>
+`;
+
 export const getWelcomeEmailTemplate = (fullName, email) => {
-  return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-      <h2 style="color: #4f46e5; text-align: center;">Welcome to Ganga Bhawan!</h2>
-      <p>Dear <strong>${fullName}</strong>,</p>
-      <p>We are excited to inform you that your registration for <strong>Ganga Bhawan (Hariom)</strong> has been approved!</p>
-      <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-        <p style="margin: 5px 0;"><strong>Username:</strong> ${email}</p>
-        <p style="margin: 5px 0;"><strong>Password:</strong> Your registered password</p>
-      </div>
-      <p style="font-size: 12px; color: #6b7280; text-align: center;">Automated message - Please do not reply.</p>
+  const header = getEmailHeader('Registration Approved');
+  const body = `
+    <p style="color: #334155; font-family: Arial, sans-serif; font-size: 18px; line-height: 1.6; margin: 0 0 20px 0;">
+      Namaste <strong>${fullName}</strong>,
+    </p>
+    <p style="color: #475569; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+      Welcome to <strong>Ganga Bhawan</strong>! We are pleased to inform you that your registration has been successfully verified and approved by the management.
+    </p>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${LIGHT_BG}; border-radius: 12px; border: 1px solid ${BORDER_COLOR}; margin-bottom: 30px;">
+      <tr>
+        <td style="padding: 25px;">
+          <p style="color: #64748b; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px;">Your Account Access</p>
+          <p style="color: #1e293b; font-family: Arial, sans-serif; font-size: 15px; margin: 0 0 5px 0;"><strong>Username:</strong> ${email}</p>
+          <p style="color: #1e293b; font-family: Arial, sans-serif; font-size: 15px; margin: 0;"><strong>Password:</strong> Your registered password</p>
+        </td>
+      </tr>
+    </table>
+    <div style="text-align: center;">
+      <a href="${process.env.CLIENT_URL}" style="background-color: ${PRIMARY_COLOR}; color: #ffffff; display: inline-block; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; padding: 16px 32px; text-decoration: none; border-radius: 8px;">Login to Portal</a>
     </div>
   `;
+  return wrapInContainer(header, body);
 };
 
 export const getPasswordResetEmailTemplate = (fullName, newPassword) => {
-  return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-      <h2 style="color: #4f46e5; text-align: center;">Password Updated</h2>
-      <p>Dear <strong>${fullName}</strong>,</p>
-      <p>Your login password has been updated by the admin.</p>
-      <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
-        <p style="margin: 5px 0;"><strong>New Password:</strong> <span style="font-size: 18px; font-weight: bold; color: #4f46e5;">${newPassword}</span></p>
-      </div>
-      <p style="font-size: 12px; color: #6b7280; text-align: center;">Automated message - Please do not reply.</p>
+  const header = getEmailHeader('Security Update');
+  const body = `
+    <p style="color: #334155; font-family: Arial, sans-serif; font-size: 18px; line-height: 1.6; margin: 0 0 20px 0;">
+      Hello <strong>${fullName}</strong>,
+    </p>
+    <p style="color: #475569; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+      Your account password has been reset by the administrator. Please use the temporary password below to sign in and update your security settings.
+    </p>
+    <div style="background-color: #fff7ed; border: 2px dashed #fb923c; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 30px;">
+      <p style="color: #9a3412; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; margin: 0 0 10px 0; text-transform: uppercase;">New Temporary Password</p>
+      <p style="color: ${PRIMARY_COLOR}; font-family: Courier New, Courier, monospace; font-size: 32px; font-weight: 800; margin: 0; letter-spacing: 4px;">${newPassword}</p>
     </div>
+    <p style="color: #ef4444; font-family: Arial, sans-serif; font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 30px;">
+      ⚠️ Please change this password immediately after logging in.
+    </p>
   `;
+  return wrapInContainer(header, body);
 };
 
 export const getPaymentApprovalEmailTemplate = (fullName, month, date) => {
   const submissionDate = new Date(date).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'long', year: 'numeric'
   });
-  return `
-    <div style="font-family: sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-      <h2 style="color: #111827; text-align: center;">Rent Payment Received</h2>
-      <p>Dear <strong>${fullName}</strong>,</p>
-      <p>Your rent payment for <strong>${month}</strong> has been approved.</p>
-      <div style="background-color: #f9fafb; padding: 20px; border-radius: 12px; border: 1px solid #f3f4f6; margin: 25px 0;">
-         <p><strong>Month:</strong> ${month}</p>
-         <p><strong>Date:</strong> ${submissionDate}</p>
-         <p><strong>Status:</strong> APPROVED</p>
-      </div>
-      <p style="font-size: 12px; color: #9ca3af; text-align: center;">Ganga Bhawan (Hariom)</p>
-    </div>
+  const header = getEmailHeader('Payment Approved');
+  const body = `
+    <p style="color: #334155; font-family: Arial, sans-serif; font-size: 18px; line-height: 1.6; margin: 0 0 20px 0;">
+      Dear <strong>${fullName}</strong>,
+    </p>
+    <p style="color: #475569; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
+      Your rent payment has been verified and recorded. Thank you for your continued cooperation.
+    </p>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0; margin-bottom: 30px;">
+      <tr>
+        <td style="padding: 25px;">
+          <table border="0" cellpadding="0" cellspacing="0" width="100%">
+            <tr>
+              <td style="color: #166534; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600; padding-bottom: 10px;">Month:</td>
+              <td align="right" style="color: #166534; font-family: Arial, sans-serif; font-size: 16px; font-weight: 800; padding-bottom: 10px;">${month}</td>
+            </tr>
+            <tr>
+              <td style="color: #166534; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600;">Approved On:</td>
+              <td align="right" style="color: #166534; font-family: Arial, sans-serif; font-size: 16px; font-weight: 800;">${submissionDate}</td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    <p style="color: #64748b; font-family: Arial, sans-serif; font-size: 14px; text-align: center; margin-bottom: 0;">
+      You can download your receipt from the tenant portal.
+    </p>
   `;
+  return wrapInContainer(header, body);
 };
 
 export const getAdminPaymentNotificationTemplate = (tenantName, tenantEmail, month, submittedAt, approveUrl, rejectUrl, barcodeImageUrl) => {
-  return `
-    <div style="font-family: sans-serif; max-width: 620px; margin: auto; border: 1px solid #e5e7eb; border-radius: 16px; overflow: hidden;">
-      <div style="background: #0f172a; padding: 20px; color: white;">
-        <h1>New Payment Receipt</h1>
+  const header = getEmailHeader('New Payment Receipt');
+  const body = `
+    <p style="color: #475569; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+      A tenant has submitted a new rent payment proof for your review.
+    </p>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${LIGHT_BG}; border-radius: 12px; border: 1px solid ${BORDER_COLOR}; margin-bottom: 30px;">
+      <tr>
+        <td style="padding: 25px;">
+          <p style="color: #64748b; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; margin: 0 0 5px 0; text-transform: uppercase;">Tenant</p>
+          <p style="color: #1e293b; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; margin: 0 0 20px 0;">${tenantName} (${tenantEmail})</p>
+          <p style="color: #64748b; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; margin: 0 0 5px 0; text-transform: uppercase;">Rent Month</p>
+          <p style="color: #1e293b; font-family: Arial, sans-serif; font-size: 18px; font-weight: 800; margin: 0;">${month}</p>
+        </td>
+      </tr>
+    </table>
+    ${barcodeImageUrl ? `
+      <div style="margin-bottom: 30px; text-align: center;">
+        <img src="${barcodeImageUrl}" width="100%" style="max-width: 400px; border-radius: 8px; border: 1px solid ${BORDER_COLOR};" />
       </div>
-      <div style="padding: 20px;">
-        <p><strong>Tenant:</strong> ${tenantName} (${tenantEmail})</p>
-        <p><strong>Month:</strong> ${month}</p>
-        ${barcodeImageUrl ? `<img src="${barcodeImageUrl}" style="max-width: 100%; border-radius: 8px;" />` : ''}
-        <div style="margin-top: 20px;">
-          <a href="${approveUrl}" style="background: #4f46e5; color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none;">Approve</a>
-          <a href="${rejectUrl}" style="color: #dc2626; margin-left: 20px;">Reject</a>
-        </div>
-      </div>
-    </div>
+    ` : ''}
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr>
+        <td width="48%">
+          <a href="${approveUrl}" style="background-color: #10b981; color: #ffffff; display: block; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; padding: 15px; text-decoration: none; border-radius: 8px; text-align: center;">APPROVE</a>
+        </td>
+        <td width="4%">&nbsp;</td>
+        <td width="48%">
+          <a href="${rejectUrl}" style="background-color: #ef4444; color: #ffffff; display: block; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; padding: 15px; text-decoration: none; border-radius: 8px; text-align: center;">REJECT</a>
+        </td>
+      </tr>
+    </table>
   `;
+  return wrapInContainer(header, body);
 };
