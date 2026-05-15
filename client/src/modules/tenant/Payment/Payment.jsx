@@ -525,6 +525,13 @@ const Payment = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 relative z-10">
           {monthNames.map((month, index) => {
+            // Get registration month (defaults to current month if not found)
+            const regDate = user?.createdAt ? new Date(user.createdAt) : new Date();
+            const regMonth = regDate.getMonth();
+            
+            // Only show months from registration month onwards
+            if (index < regMonth) return null;
+
             const isPaid = isMonthPaid(index);
             const pendingPayment = isMonthPending(index);
             const isCurrent = index === currentMonth;
