@@ -150,23 +150,23 @@ export const rejectPayment = async (req, res) => {
     payment.approvedAt = new Date();
 
     await payment.save();
-+
-+    // Send payment rejection email
-+    try {
-+      const tenant = await User.findById(payment.userId);
-+      if (tenant) {
-+        const emailHtml = getPaymentRejectedEmailTemplate(tenant.fullName, payment.month);
-+        sendEmail({
-+          to: tenant.email,
-+          subject: `Payment Declined - Action Required for ${payment.month}`,
-+          html: emailHtml
-+        }).catch(e => console.error('Background Reject Email Error:', e));
-+        
-+        console.log(`❌ Payment rejection triggered for ${tenant.email} for ${payment.month}`);
-+      }
-+    } catch (emailError) {
-+      console.error('❌ Failed to send payment rejection email:', emailError);
-+    }
+
+    // Send payment rejection email
+    try {
+      const tenant = await User.findById(payment.userId);
+      if (tenant) {
+        const emailHtml = getPaymentRejectedEmailTemplate(tenant.fullName, payment.month);
+        sendEmail({
+          to: tenant.email,
+          subject: `Payment Declined - Action Required for ${payment.month}`,
+          html: emailHtml
+        }).catch(e => console.error('Background Reject Email Error:', e));
+        
+        console.log(`❌ Payment rejection triggered for ${tenant.email} for ${payment.month}`);
+      }
+    } catch (emailError) {
+      console.error('❌ Failed to send payment rejection email:', emailError);
+    }
 
     res.json({
       success: true,
