@@ -40,19 +40,14 @@ export const approveTenant = async (req, res) => {
       return res.status(404).json({ error: 'Tenant not found' });
     }
 
-    // Send Welcome Email
-    try {
-      const emailHtml = getWelcomeEmailTemplate(tenant.fullName, tenant.email);
-      await sendEmail({
-        to: tenant.email,
-        subject: 'Registration Approved - Welcome to Ganga Bhawan!',
-        html: emailHtml
-      });
-      console.log(`✅ Welcome email sent to ${tenant.email}`);
-    } catch (emailError) {
-      console.error('❌ Failed to send welcome email:', emailError);
-      // We don't return error here because the tenant IS approved in DB
-    }
+    // Send Welcome Email in background to keep UI fast
+    sendEmail({
+      to: tenant.email,
+      subject: 'Registration Approved - Welcome to Ganga Bhawan!',
+      html: emailHtml
+    }).catch(emailError => console.error('❌ Background Welcome Email Failed:', emailError));
+    
+    console.log(`✅ Welcome email triggered for ${tenant.email}`);
 
     res.json({
       success: true,

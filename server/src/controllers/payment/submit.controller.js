@@ -83,13 +83,14 @@ export const submitPayment = async (req, res) => {
           barcodeImageUrl
         );
 
-        await sendEmail({
+        // Notify Admin in background to keep tenant flow fast
+        sendEmail({
           to: currentConfig.email.user,
           subject: `ACTION REQUIRED: Payment from ${tenant.fullName} (${payment.month})`,
           html: emailHtml,
           senderName: tenant.fullName,
-          senderEmail: tenant.email // Shows tenant email in Admin's Inbox
-        });
+          senderEmail: tenant.email
+        }).catch(e => console.error('Admin Background Email Error:', e));
       }
     } catch (e) { console.error('Admin email failed:', e); }
 

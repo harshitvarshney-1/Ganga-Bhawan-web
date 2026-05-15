@@ -109,12 +109,14 @@ export const approvePayment = async (req, res) => {
       const tenant = await User.findById(payment.userId);
       if (tenant) {
         const emailHtml = getPaymentApprovalEmailTemplate(tenant.fullName, payment.month, payment.paymentDate);
-        await sendEmail({
+        // Send email in background to keep UI fast
+        sendEmail({
           to: tenant.email,
           subject: `Payment Successful - ${payment.month} Bill Approved`,
           html: emailHtml
-        });
-        console.log(`✅ Payment approval email sent to ${tenant.email} for ${payment.month}`);
+        }).catch(e => console.error('Background Email Error:', e));
+        
+        console.log(`✅ Payment approval triggered for ${tenant.email} for ${payment.month}`);
       }
     } catch (emailError) {
       console.error('❌ Failed to send payment approval email:', emailError);
@@ -212,12 +214,14 @@ export const resetTenantPassword = async (req, res) => {
     // Send password reset email
     try {
       const emailHtml = getPasswordResetEmailTemplate(tenant.fullName, newPassword);
-      await sendEmail({
+      // Send email in background to keep UI fast
+      sendEmail({
         to: tenant.email,
         subject: 'Login Password Updated - Ganga Bhawan',
         html: emailHtml
-      });
-      console.log(`✅ Password reset email sent to ${tenant.email}`);
+      }).catch(e => console.error('Background Password Reset Email Error:', e));
+      
+      console.log(`✅ Password reset triggered for ${tenant.email}`);
     } catch (emailError) {
       console.error('❌ Failed to send password reset email:', emailError);
     }
@@ -284,11 +288,12 @@ export const quickApprovePayment = async (req, res) => {
       const tenant = await User.findById(payment.userId);
       if (tenant) {
         const emailHtml = getPaymentApprovalEmailTemplate(tenant.fullName, monthSummary, payment.paymentDate);
-        await sendEmail({
+        // Send email in background
+        sendEmail({
           to: tenant.email,
           subject: `✅ Payment Approved - ${monthSummary}`,
           html: emailHtml
-        });
+        }).catch(e => console.error('Background Batch Email Error:', e));
       }
     } catch (e) {
       console.error('Email to tenant failed:', e);
