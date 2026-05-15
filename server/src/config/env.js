@@ -30,9 +30,10 @@ export const config = {
   },
   production: {
     port: process.env.PORT || 5000,
-    mongoUri: process.env.MONGODB_URI || process.env.MONGO_URI,
+    mongoUri: process.env.MONGODB_URI || process.env.MONGO_URI || process.env.MONGODB_URL,
     jwtSecret: process.env.JWT_SECRET,
-    clientUrl: process.env.CLIENT_URL,
+    clientUrl: process.env.CLIENT_URL || process.env.FRONTEND_URL,
+    apiUrl: process.env.API_URL || process.env.SERVER_URL,
     cloudinary: {
       cloudName: process.env.CLOUDINARY_CLOUD_NAME,
       apiKey: process.env.CLOUDINARY_API_KEY,
