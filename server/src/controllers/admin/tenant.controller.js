@@ -40,7 +40,7 @@ export const approveTenant = async (req, res) => {
       return res.status(404).json({ error: 'Tenant not found' });
     }
 
-    const emailHtml = getWelcomeEmailTemplate(tenant.fullName);
+    const emailHtml = getWelcomeEmailTemplate(tenant.fullName, tenant.email);
 
     // Send Welcome Email in background to keep UI fast
     sendEmail({
