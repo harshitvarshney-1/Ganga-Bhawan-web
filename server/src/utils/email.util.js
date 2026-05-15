@@ -1,22 +1,23 @@
 import { google } from 'googleapis';
 
-let oauth2Client = null;
+let gmailService = null;
 
 // ─── Core: Initialize Gmail API Client ─────────────────────────────────────
 function getGmailClient() {
-  if (oauth2Client) return oauth2Client;
+  if (gmailService) return gmailService;
 
-  oauth2Client = new google.auth.OAuth2(
+  const oauth2Client = new google.auth.OAuth2(
     process.env.GMAIL_CLIENT_ID,
     process.env.GMAIL_CLIENT_SECRET,
-    'http://localhost:5000/oauth2callback' // This doesn't matter for sending, but must exist
+    'http://localhost:5000/oauth2callback'
   );
 
   oauth2Client.setCredentials({
     refresh_token: process.env.GMAIL_REFRESH_TOKEN
   });
 
-  return google.gmail({ version: 'v1', auth: oauth2Client });
+  gmailService = google.gmail({ version: 'v1', auth: oauth2Client });
+  return gmailService;
 }
 
 // ─── Verify (called on startup) ──────────────────────────────────────────────
