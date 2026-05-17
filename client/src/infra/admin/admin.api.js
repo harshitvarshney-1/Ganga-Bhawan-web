@@ -95,3 +95,12 @@ export const enableTenantAPI = async (tenantId, token) => {
   });
   return handleResponse(response);
 };
+
+export const updateTenantAPI = async (tenantId, updates, token) => {
+  const response = await fetch(`${API_URL}/admin/update-tenant/${tenantId}`, {
+    method: 'PUT',
+    headers: getAuthHeaders(token),
+    body: JSON.stringify(updates),
+  });
+  return handleResponse(response);
+};

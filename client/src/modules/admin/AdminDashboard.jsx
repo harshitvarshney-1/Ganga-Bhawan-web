@@ -14,7 +14,8 @@ import {
   deleteTenantAPI,
   disableTenantAPI,
   enableTenantAPI,
-  resetPasswordAPI 
+  resetPasswordAPI,
+  updateTenantAPI
 } from '../../infra/admin/admin.api';
 import Loader from '../../shared/components/atoms/Loader/Loader';
 
@@ -58,6 +59,10 @@ const AdminDashboard = () => {
   const [resetPasswordInput, setResetPasswordInput] = useState('');
   const [resetting, setResetting] = useState(false);
   const [selectedAadhaar, setSelectedAadhaar] = useState(null);
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({});
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const [auth, setAuth] = useAtom(authAtom);
   const navigate = useNavigate();
@@ -391,6 +396,22 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error enabling account:', error);
       alert(`❌ Error: ${error.message}`);
+    }
+  };
+
+  const handleUpdateTenant = async () => {
+    setIsUpdating(true);
+    try {
+      const data = await updateTenantAPI(selectedTenant._id, editData, auth.token);
+      alert('✅ Tenant details updated successfully!');
+      setSelectedTenant(data.tenant); 
+      setIsEditing(false);
+      fetchTenants();
+    } catch (error) {
+      console.error('Update error:', error);
+      alert(`❌ Error: ${error.message || 'Failed to update tenant'}`);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -887,39 +908,106 @@ const AdminDashboard = () => {
                   </span>
                 </div>
               </div>
-              <button
-                onClick={() => setShowModal(false)}
-                className="w-11 h-11 flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded-2xl transition-all text-slate-500"
-              >
-                ✕
-              </button>
+              <div className="flex items-center gap-2">
+                {!isEditing && (
+                  <button
+                    onClick={() => {
+                      setEditData(selectedTenant);
+                      setIsEditing(true);
+                    }}
+                    className="px-4 py-2 text-sm font-bold bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all"
+                  >
+                    ✏️ Edit
+                  </button>
+                )}
+                <button
+                  onClick={() => { setShowModal(false); setIsEditing(false); }}
+                  className="w-11 h-11 flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded-2xl transition-all text-slate-500"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             <div className="p-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
                 {[
-                  ['Full Name', selectedTenant.fullName],
-                  ['Email', selectedTenant.email],
-                  ['Mobile', selectedTenant.mobileNumber],
-                  ['Aadhaar', selectedTenant.aadhaarNumber],
-                  ['Date of Birth', new Date(selectedTenant.dateOfBirth).toLocaleDateString()],
-                  ["Father's Name", selectedTenant.fatherName],
-                  ['Gender', selectedTenant.gender],
-                  ['Registered', new Date(selectedTenant.createdAt).toLocaleString()],
-                  ["Father's Phone", selectedTenant.fatherPhone || 'N/A'],
-                  ["Mother's Name", selectedTenant.motherName || 'N/A'],
-                  ["Mother's Phone", selectedTenant.motherPhone || 'N/A'],
-                ].map(([label, value]) => (
+                  ['fullName', 'Full Name', editData.fullName || selectedTenant.fullName],
+                  ['email', 'Email', editData.email || selectedTenant.email],
+                  ['mobileNumber', 'Mobile', editData.mobileNumber || selectedTenant.mobileNumber],
+                  ['aadhaarNumber', 'Aadhaar', editData.aadhaarNumber || selectedTenant.aadhaarNumber],
+                  ['dateOfBirth', 'Date of Birth', (editData.dateOfBirth || selectedTenant.dateOfBirth) ? new Date(editData.dateOfBirth || selectedTenant.dateOfBirth).toISOString().split('T')[0] : ''],
+                  ['fatherName', "Father's Name", editData.fatherName || selectedTenant.fatherName],
+                  ['gender', 'Gender', editData.gender || selectedTenant.gender],
+                  ['createdAt', 'Registered', new Date(selectedTenant.createdAt).toLocaleString(), true],
+                  ['fatherPhone', "Father's Phone", editData.fatherPhone !== undefined ? editData.fatherPhone : (selectedTenant.fatherPhone || '')],
+                  ['motherName', "Mother's Name", editData.motherName !== undefined ? editData.motherName : (selectedTenant.motherName || '')],
+                  ['motherPhone', "Mother's Phone", editData.motherPhone !== undefined ? editData.motherPhone : (selectedTenant.motherPhone || '')],
+                ].map(([key, label, value, readOnly]) => (
                   <div key={label} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-                    <p className="text-base font-bold text-slate-900 break-all">{value}</p>
+                    {isEditing && !readOnly ? (
+                      key === 'gender' ? (
+                        <select
+                          value={value}
+                          onChange={(e) => setEditData({...editData, [key]: e.target.value})}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-400"
+                        >
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      ) : key === 'dateOfBirth' ? (
+                        <input
+                          type="date"
+                          value={value}
+                          onChange={(e) => setEditData({...editData, [key]: e.target.value})}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-400"
+                        />
+                      ) : (
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={(e) => setEditData({...editData, [key]: e.target.value})}
+                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-400"
+                        />
+                      )
+                    ) : (
+                      <p className="text-base font-bold text-slate-900 break-all">{key === 'dateOfBirth' && !isEditing ? new Date(value).toLocaleDateString() : value || 'N/A'}</p>
+                    )}
                   </div>
                 ))}
                 <div className="md:col-span-2 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Address</p>
-                  <p className="text-base font-bold text-slate-900">{selectedTenant.permanentAddress}</p>
+                  {isEditing ? (
+                    <textarea
+                      value={editData.permanentAddress !== undefined ? editData.permanentAddress : selectedTenant.permanentAddress}
+                      onChange={(e) => setEditData({...editData, permanentAddress: e.target.value})}
+                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-400 resize-none h-20"
+                    />
+                  ) : (
+                    <p className="text-base font-bold text-slate-900">{selectedTenant.permanentAddress}</p>
+                  )}
                 </div>
               </div>
+
+              {isEditing && (
+                <div className="flex gap-3 mb-8">
+                  <button
+                    onClick={handleUpdateTenant}
+                    disabled={isUpdating}
+                    className="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50 shadow-lg shadow-indigo-200"
+                  >
+                    {isUpdating ? 'Saving...' : 'Save Changes'}
+                  </button>
+                  <button
+                    onClick={() => { setIsEditing(false); setEditData(selectedTenant); }}
+                    className="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-all"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              )}
 
               {/* Password Reset */}
               <div className="p-6 rounded-2xl bg-rose-50 border-2 border-dashed border-rose-200 mb-6">

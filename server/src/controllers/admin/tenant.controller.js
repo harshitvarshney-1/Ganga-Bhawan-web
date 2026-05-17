@@ -152,3 +152,34 @@ export const enableTenant = async (req, res) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
+
+export const updateTenant = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+    
+    // Prevent role escalation or id tampering just in case, though it's an admin
+    delete updates._id;
+    delete updates.role;
+    delete updates.password;
+
+    const tenant = await User.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    );
+
+    if (!tenant) {
+      return res.status(404).json({ error: 'Tenant not found' });
+    }
+
+    res.json({
+      success: true,
+      message: 'Tenant details updated successfully',
+      tenant
+    });
+  } catch (error) {
+    console.error('Error updating tenant:', error);
+    res.status(500).json({ error: 'Server error updating tenant' });
+  }
+};

@@ -8,7 +8,8 @@ import {
   deleteTenant,
   getDisabledTenants,
   disableTenant,
-  enableTenant
+  enableTenant,
+  updateTenant
 } from '../../controllers/admin/tenant.controller.js';
 import {
   getPaymentsSummary,
@@ -51,6 +52,7 @@ router.delete('/delete-tenant/:id', isAdmin, deleteTenant);
 router.get('/disabled-tenants', isAdmin, getDisabledTenants);
 router.post('/disable-tenant/:id', isAdmin, disableTenant);
 router.post('/enable-tenant/:id', isAdmin, enableTenant);
+router.put('/update-tenant/:id', isAdmin, updateTenant);
 
 // Payment Management Routes
 router.get('/payments-summary', isAdmin, getPaymentsSummary);
