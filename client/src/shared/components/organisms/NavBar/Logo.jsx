@@ -8,10 +8,8 @@ const Logo = () => {
   const handleLogoClick = (e) => {
     e.preventDefault();
     if (location.pathname === "/") {
-      // If already on home, scroll to top
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      // Navigate to home
       navigate("/", { replace: true });
     }
   };
@@ -20,14 +18,12 @@ const Logo = () => {
     <Link
       to="/"
       onClick={handleLogoClick}
-      className="flex items-center gap-2
-        text-lg font-semibold tracking-wide
-        hover:text-cyan-400 transition cursor-pointer"
+      className="flex items-center gap-2.5 text-[14px] font-semibold text-foreground hover:text-primary transition cursor-pointer"
     >
-      <i className="fa-solid fa-house text-cyan-400 text-xl"></i>
+      <span className="text-lg">🏠</span>
       <span>
         Ganga Bhawan
-        <span className="font-normal text-gray-400"> (Hariom)</span>
+        <span className="font-normal text-muted-foreground"> (Hariom)</span>
       </span>
     </Link>
   );

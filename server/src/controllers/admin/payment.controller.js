@@ -8,6 +8,46 @@ import { sendEmail, getPaymentApprovalEmailTemplate, getPasswordResetEmailTempla
 // Secret used only for quick-approve links (separate from user JWT secret)
 const QUICK_SECRET = process.env.QUICK_APPROVE_SECRET || (currentConfig.jwtSecret + '_quick');
 
+export const assignDuePayment = async (req, res) => {
+  try {
+    const { userId, month, monthIndex, amount, isAdvanced } = req.body;
+    
+    if (!userId || monthIndex === undefined || month === undefined) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+
+    const existing = await Payment.findOne({
+      userId,
+      monthIndex,
+      isAdvanced: isAdvanced === true
+    });
+
+    if (existing) {
+      if (existing.status !== 'due') {
+        return res.status(400).json({ error: `Payment for this month already exists with status: ${existing.status}` });
+      }
+      existing.amount = parseFloat(amount) || 0;
+      await existing.save();
+      return res.json({ success: true, message: 'Updated due payment amount', payment: existing });
+    }
+
+    const payment = new Payment({
+      userId,
+      month,
+      monthIndex,
+      amount: parseFloat(amount) || 0,
+      isAdvanced: isAdvanced === true,
+      status: 'due'
+    });
+
+    await payment.save();
+    res.json({ success: true, message: 'Rent assigned successfully', payment });
+  } catch (error) {
+    console.error('Error assigning due payment:', error);
+    res.status(500).json({ error: 'Failed to assign due payment' });
+  }
+};
+
 export const getPaymentsSummary = async (req, res) => {
   try {
     const tenants = await User.find({ role: 'tenant' }).select('_id fullName email');

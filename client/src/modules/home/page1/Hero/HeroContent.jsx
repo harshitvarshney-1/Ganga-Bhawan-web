@@ -7,41 +7,43 @@ const HeroContent = () => {
   return (
     <div className="space-y-6 animate-fadeIn">
 
-      <span className="inline-block px-4 py-1 text-sm rounded-full
-        bg-cyan-500/10 text-cyan-400 tracking-wide">
+      <span className="inline-block px-3 py-1 text-[12px] rounded-full bg-primary/10 text-primary font-medium tracking-wide">
         Trusted Hostel & PG
       </span>
 
-      <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+      <h1 className="text-4xl md:text-5xl font-bold leading-tight text-foreground">
         Comfortable & Secure Stay at <br />
-        <span className="text-cyan-400">
-          Ganga Bhawan (Hariom)
-        </span>
+        <span className="text-primary">Ganga Bhawan (Hariom)</span>
       </h1>
 
-      <p className="text-gray-400 text-lg max-w-xl">
+      <p className="text-muted-foreground text-lg max-w-xl">
         Affordable accommodation for students and working professionals
         with all essential facilities.
       </p>
 
-      {/* FEATURES */}
-      <ul className="grid grid-cols-2 gap-3 text-sm text-gray-300">
-        <li>✔ Furnished Rooms</li>
-        <li>✔ High Speed Wi-Fi</li>
-        <li>✔ RO Drinking Water</li>
-        <li>✔ 24×7 CCTV Security</li>
-        <li>✔ Power Backup</li>
-        <li>✔ Peaceful Area</li>
+      {/* Features */}
+      <ul className="grid grid-cols-2 gap-3 text-[13px] text-muted-foreground">
+        <li className="flex items-center gap-2"><span className="text-primary">✔</span> Furnished Rooms</li>
+        <li className="flex items-center gap-2"><span className="text-primary">✔</span> High Speed Wi-Fi</li>
+        <li className="flex items-center gap-2"><span className="text-primary">✔</span> RO Drinking Water</li>
+        <li className="flex items-center gap-2"><span className="text-primary">✔</span> 24×7 CCTV Security</li>
+        <li className="flex items-center gap-2"><span className="text-primary">✔</span> Power Backup</li>
+        <li className="flex items-center gap-2"><span className="text-primary">✔</span> Peaceful Area</li>
       </ul>
 
-      {/* ACTION BUTTONS */}
-      <div className="flex gap-4 pt-4">
+      {/* CTA */}
+      <div className="flex gap-3 pt-2">
         <button
           onClick={() => navigate('/register')}
-          className="px-6 py-3 rounded-md font-medium
-          bg-cyan-500 hover:bg-cyan-600 transition"
+          className="px-6 py-2.5 rounded-md font-medium text-[13px] bg-primary text-primary-foreground hover:bg-primary/90 transition shadow-sm"
         >
           Register Now
+        </button>
+        <button
+          onClick={() => navigate('/login')}
+          className="px-6 py-2.5 rounded-md font-medium text-[13px] border border-border text-foreground hover:bg-accent transition"
+        >
+          Sign In
         </button>
       </div>
 

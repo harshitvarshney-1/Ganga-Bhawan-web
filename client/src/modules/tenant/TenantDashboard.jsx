@@ -133,7 +133,7 @@ const TenantDashboard = () => {
   if (loading) return <Loader text="LOADING TENANT PORTAL" />;
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-inter">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar */}
       <Sidebar
         activeSection={activeSection}
@@ -149,39 +149,40 @@ const TenantDashboard = () => {
         setIsMobileOpen={setIsMobileMenuOpen}
       />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-72">
-        {/* Top Navbar */}
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200 px-4 lg:px-8 h-16 flex items-center justify-between">
+      {/* Main Content — floating card */}
+      <div className="flex-1 min-w-0 lg:ml-56 flex flex-col lg:p-2 h-full">
+        <div className="flex-1 flex flex-col lg:rounded-xl lg:border lg:border-border bg-card overflow-hidden">
+        {/* Top Header */}
+        <header className="sticky top-0 z-30 bg-card/80 backdrop-blur-md border-b border-border px-4 lg:px-8 h-[44px] flex items-center justify-between shrink-0">
           {/* Mobile hamburger */}
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="lg:hidden p-2 rounded-xl hover:bg-slate-100 transition-colors"
+            className="lg:hidden p-1.5 rounded-md hover:bg-accent transition-colors"
             aria-label="Toggle menu"
           >
             {isMobileMenuOpen
-              ? <X className="w-5 h-5 text-slate-700" />
-              : <Menu className="w-5 h-5 text-slate-700" />
+              ? <X className="w-4 h-4 text-foreground" />
+              : <Menu className="w-4 h-4 text-foreground" />
             }
           </button>
 
           <div className="hidden lg:block">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Tenant Portal</p>
-            <h2 className="text-lg font-black text-slate-900 font-outfit">{sectionTitle[activeSection]}</h2>
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em]">Tenant Portal</p>
+            <h2 className="text-[13px] font-semibold text-foreground">{sectionTitle[activeSection]}</h2>
           </div>
 
           {/* Mobile title */}
-          <h1 className="lg:hidden text-lg font-black bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent font-outfit">
+          <h1 className="lg:hidden text-[13px] font-semibold text-foreground">
             Tenant Portal
           </h1>
 
           {/* User badge */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             <div className="hidden sm:block text-right">
-              <p className="text-sm font-bold text-slate-900 truncate max-w-[140px]">{userData?.fullName}</p>
-              <p className="text-xs text-slate-400 truncate max-w-[140px]">{userData?.email}</p>
+              <p className="text-[13px] font-medium text-foreground truncate max-w-[140px] leading-none">{userData?.fullName}</p>
+              <p className="text-[11px] text-muted-foreground truncate max-w-[140px] mt-0.5">{userData?.email}</p>
             </div>
-            <div className="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-indigo-200">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shadow-sm">
               {userData?.fullName?.charAt(0).toUpperCase()}
             </div>
           </div>
@@ -203,6 +204,7 @@ const TenantDashboard = () => {
             </motion.div>
           </AnimatePresence>
         </main>
+        </div>
       </div>
     </div>
   );

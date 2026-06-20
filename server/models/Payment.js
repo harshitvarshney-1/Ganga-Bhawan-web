@@ -28,7 +28,7 @@ export const paymentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'success', 'failed', 'rejected'],
+    enum: ['due', 'pending', 'success', 'failed', 'rejected'],
     default: 'pending'
   },
   paymentDate: {
@@ -45,8 +45,6 @@ export const paymentSchema = new mongoose.Schema({
     default: null
   }
 }, { timestamps: true });
-<<<<<<<< HEAD:server/src/schemas/payment.schema.js
-========
 
-module.exports = mongoose.model('Payment', paymentSchema);
->>>>>>>> avdhesh/chore/refactor-codebase:server/models/Payment.js
+const Payment = mongoose.models.Payment || mongoose.model('Payment', paymentSchema);
+export default Payment;

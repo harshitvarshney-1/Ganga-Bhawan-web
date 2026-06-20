@@ -20,7 +20,8 @@ import {
   deletePayment,
   resetTenantPassword,
   quickApprovePayment,
-  quickRejectPayment
+  quickRejectPayment,
+  assignDuePayment
 } from '../../controllers/admin/payment.controller.js';
 
 const router = express.Router();
@@ -57,6 +58,7 @@ router.put('/update-tenant/:id', isAdmin, updateTenant);
 // Payment Management Routes
 router.get('/payments-summary', isAdmin, getPaymentsSummary);
 router.get('/pending-payments', isAdmin, getPendingPayments);
+router.post('/assign-due-payment', isAdmin, assignDuePayment);
 router.post('/approve-payment/:paymentId', isAdmin, approvePayment);
 router.post('/reject-payment/:paymentId', isAdmin, rejectPayment);
 router.get('/tenant-payments/:tenantId', isAdmin, getTenantPayments);

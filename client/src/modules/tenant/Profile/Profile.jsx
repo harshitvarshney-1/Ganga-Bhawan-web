@@ -5,91 +5,77 @@ import { User, Mail, Phone, MapPin, Calendar, CreditCard, ShieldAlert, BadgeChec
 const Profile = ({ userData }) => {
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.08 } }
+    visible: { opacity: 1, transition: { staggerChildren: 0.07 } }
   };
-
   const itemVariants = {
-    hidden: { opacity: 0, y: 16 },
+    hidden: { opacity: 0, y: 10 },
     visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } }
   };
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-5xl mx-auto space-y-6">
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-4xl mx-auto space-y-5">
 
-      {/* Page Header */}
-      <motion.div variants={itemVariants} className="relative overflow-hidden rounded-3xl bg-slate-900">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/20 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
-        <div className="relative z-10 px-8 py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Header */}
+      <motion.div variants={itemVariants} className="relative overflow-hidden rounded-xl bg-background border border-border">
+        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none" />
+        <div className="relative z-10 px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <p className="text-indigo-400 text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5">Ganga Bhawan</p>
-            <h1 className="text-2xl lg:text-3xl font-black text-white font-outfit">My Profile</h1>
-            <p className="text-slate-500 text-sm font-medium mt-1">Personal information locked for security</p>
+            <p className="text-primary text-[10px] font-semibold uppercase tracking-[0.15em] mb-1">Ganga Bhawan</p>
+            <h1 className="text-xl font-bold text-foreground">My Profile</h1>
+            <p className="text-muted-foreground text-[12px] mt-0.5">Personal information locked for security</p>
           </div>
-          <div className="flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl">
-            <ShieldAlert className="w-4 h-4 text-amber-400" />
-            <span className="text-sm font-bold text-amber-400">Profile Locked</span>
+          <div className="flex items-center gap-2 self-start sm:self-auto px-3 py-2 bg-amber-500/10 border border-amber-500/20 rounded-lg">
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
+            <span className="text-[12px] font-semibold text-amber-500">Profile Locked</span>
           </div>
         </div>
       </motion.div>
 
       {/* Info Banner */}
-      <motion.div variants={itemVariants} className="p-5 bg-white border border-slate-100 rounded-3xl flex items-start gap-4 shadow-sm">
-        <div className="w-10 h-10 rounded-2xl bg-indigo-100 flex items-center justify-center shrink-0">
-          <BadgeCheck className="w-5 h-5 text-indigo-600" />
+      <motion.div variants={itemVariants} className="p-4 bg-card border border-border rounded-xl flex items-start gap-3">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <BadgeCheck className="w-4 h-4 text-primary" />
         </div>
         <div>
-          <h3 className="text-sm font-bold text-slate-900 mb-0.5">Information Security Note</h3>
-          <p className="text-sm text-slate-500 leading-relaxed max-w-3xl">
-            For security and compliance, your personal information is locked. Only your profile photo can be updated from the sidebar. To update other details, please contact the building administration.
+          <h3 className="text-[13px] font-semibold text-foreground mb-0.5">Information Security Note</h3>
+          <p className="text-[12px] text-muted-foreground leading-relaxed max-w-3xl">
+            Your personal information is locked. Only your profile photo can be updated from the sidebar. To update other details, please contact the building administration.
           </p>
         </div>
       </motion.div>
 
       {/* Info Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <ProfileCard variants={itemVariants} icon={User}       title="Full Name"        value={userData?.fullName}        accent="indigo" />
-        <ProfileCard variants={itemVariants} icon={Mail}       title="Email Address"    value={userData?.email}           accent="sky" />
-        <ProfileCard variants={itemVariants} icon={Phone}      title="Mobile Number"    value={userData?.mobileNumber}    accent="emerald" />
-        <ProfileCard variants={itemVariants} icon={User}       title="Gender"           value={userData?.gender}          accent="violet" />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        <ProfileCard variants={itemVariants} icon={User}       title="Full Name"        value={userData?.fullName} />
+        <ProfileCard variants={itemVariants} icon={Mail}       title="Email Address"    value={userData?.email} />
+        <ProfileCard variants={itemVariants} icon={Phone}      title="Mobile Number"    value={userData?.mobileNumber} />
+        <ProfileCard variants={itemVariants} icon={User}       title="Gender"           value={userData?.gender} />
         <ProfileCard variants={itemVariants} icon={Calendar}   title="Date of Birth"
           value={userData?.dateOfBirth ? new Date(userData.dateOfBirth).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}
-          accent="pink" size="lg:col-span-2"
+          size="lg:col-span-2"
         />
-        <ProfileCard variants={itemVariants} icon={CreditCard} title="Aadhaar Number"  value={userData?.aadhaarNumber}   accent="fuchsia" size="lg:col-span-2" />
-        <ProfileCard variants={itemVariants} icon={MapPin}     title="Permanent Address" value={userData?.permanentAddress} accent="rose"   size="lg:col-span-2" />
+        <ProfileCard variants={itemVariants} icon={CreditCard} title="Aadhaar Number"  value={userData?.aadhaarNumber} size="lg:col-span-2" />
+        <ProfileCard variants={itemVariants} icon={MapPin}     title="Permanent Address" value={userData?.permanentAddress} size="lg:col-span-2" />
       </div>
     </motion.div>
   );
 };
 
-const accentMap = {
-  indigo:  { bg: 'bg-indigo-50',  text: 'text-indigo-600',  ring: 'ring-indigo-100' },
-  sky:     { bg: 'bg-sky-50',     text: 'text-sky-600',     ring: 'ring-sky-100' },
-  emerald: { bg: 'bg-emerald-50', text: 'text-emerald-600', ring: 'ring-emerald-100' },
-  violet:  { bg: 'bg-violet-50',  text: 'text-violet-600',  ring: 'ring-violet-100' },
-  pink:    { bg: 'bg-pink-50',    text: 'text-pink-600',    ring: 'ring-pink-100' },
-  fuchsia: { bg: 'bg-fuchsia-50', text: 'text-fuchsia-600', ring: 'ring-fuchsia-100' },
-  rose:    { bg: 'bg-rose-50',    text: 'text-rose-600',    ring: 'ring-rose-100' },
-};
-
-const ProfileCard = ({ icon: Icon, title, value, accent = 'indigo', size = '', variants }) => {
-  const a = accentMap[accent] ?? accentMap.indigo;
-  return (
-    <motion.div
-      variants={variants}
-      className={`bg-white rounded-3xl p-6 border border-slate-100 hover:border-slate-200 hover:shadow-md transition-all group ${size}`}
-    >
-      <div className="flex items-start gap-4 h-full">
-        <div className={`p-3 rounded-2xl ring-1 ${a.bg} ${a.text} ${a.ring} group-hover:scale-110 transition-transform`}>
-          <Icon className="w-5 h-5" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1.5">{title}</h4>
-          <p className="text-lg font-bold text-slate-800 break-words">{value || 'Not provided'}</p>
-        </div>
+const ProfileCard = ({ icon: Icon, title, value, size = '', variants }) => (
+  <motion.div
+    variants={variants}
+    className={`bg-card rounded-lg p-4 border border-border hover:border-primary/30 transition-colors group ${size}`}
+  >
+    <div className="flex items-start gap-3 h-full">
+      <div className="p-2 rounded-md bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors shrink-0">
+        <Icon className="w-4 h-4" />
       </div>
-    </motion.div>
-  );
-};
+      <div className="flex-1 min-w-0">
+        <h4 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.06em] mb-1">{title}</h4>
+        <p className="text-[14px] font-medium text-foreground break-words">{value || 'Not provided'}</p>
+      </div>
+    </div>
+  </motion.div>
+);
 
 export default Profile;

@@ -9,7 +9,6 @@ const Home = () => {
   const [showSplash, setShowSplash] = useState(false);
 
   useEffect(() => {
-    // Check session storage to see if splash has been shown
     const hasShown = sessionStorage.getItem('hasShownSplash');
     if (!hasShown) {
       setShowSplash(true);
@@ -17,14 +16,10 @@ const Home = () => {
     }
   }, []);
 
-  const handleSplashComplete = () => {
-    setShowSplash(false);
-  };
-
   return (
     <>
-      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      <div className="min-h-screen bg-gray-900">
+      {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+      <div className="min-h-screen bg-background">
         <NavBar />
         <Page1 />
         <Page2 />
@@ -35,6 +30,3 @@ const Home = () => {
 };
 
 export default Home;
-
-
-

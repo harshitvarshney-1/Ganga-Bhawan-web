@@ -50,17 +50,34 @@ export const submitPayment = async (req, res) => {
       });
     }
 
-    const payment = new Payment({
+    // Check if a 'due' payment exists
+    const existingDue = await Payment.findOne({
       userId: userId,
-      month: finalMonth,
-      monthIndex: finalMonthIndices[0], // First month as primary
-      monthIndices: finalMonthIndices,   // Full list for tracking
-      amount: parseFloat(amount) || 0,
-      isAdvanced: isAdvanced === true || isAdvanced === 'true',
-      barcodeImage: barcodeImageUrl,
-      status: 'pending',
-      paymentDate: new Date()
+      status: 'due',
+      monthIndex: finalMonthIndices[0]
     });
+
+    let payment;
+    if (existingDue && !isBulk) {
+      payment = existingDue;
+      payment.status = 'pending';
+      payment.barcodeImage = barcodeImageUrl;
+      payment.paymentDate = new Date();
+      // Keep the admin-assigned amount
+      payment.isAdvanced = isAdvanced === true || isAdvanced === 'true';
+    } else {
+      payment = new Payment({
+        userId: userId,
+        month: finalMonth,
+        monthIndex: finalMonthIndices[0], // First month as primary
+        monthIndices: finalMonthIndices,   // Full list for tracking
+        amount: parseFloat(amount) || 0,
+        isAdvanced: isAdvanced === true || isAdvanced === 'true',
+        barcodeImage: barcodeImageUrl,
+        status: 'pending',
+        paymentDate: new Date()
+      });
+    }
 
     await payment.save();
 

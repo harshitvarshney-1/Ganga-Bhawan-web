@@ -525,18 +525,21 @@ const Payment = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 relative z-10">
           {monthNames.map((month, index) => {
-            // Get registration month (defaults to current month if not found)
-            const regDate = user?.createdAt ? new Date(user.createdAt) : new Date();
-            const regMonth = regDate.getMonth();
-            
-            // Only show months from registration month onwards
-            if (index < regMonth) return null;
+            // Find if there is a matching payment record in the DB!
+            const paymentRecord = payments.find(p => 
+              (p.monthIndex === index || (p.monthIndices && p.monthIndices.includes(index))) && !p.isAdvanced
+            );
 
-            const isPaid = isMonthPaid(index);
-            const pendingPayment = isMonthPending(index);
-            const isCurrent = index === currentMonth;
-            const isPast = index < currentMonth;
-            const canPay = !isPaid && !pendingPayment;
+            // If there's no record at all, the admin hasn't generated this month. DO NOT SHOW.
+            if (!paymentRecord) return null;
+
+            const isPaid = paymentRecord.status === 'success';
+            const pendingPayment = paymentRecord.status === 'pending';
+            const isDue = paymentRecord.status === 'due';
+            const isRejected = paymentRecord.status === 'rejected';
+
+            // Tenant can pay if it's 'due' or 'rejected'.
+            const canPay = isDue || isRejected;
             
             let baseStyle, iconStyle, tagStyle, tagText;
             
@@ -550,16 +553,11 @@ const Payment = () => {
               iconStyle = "bg-amber-500 text-white shadow-amber-500/30 shadow-lg";
               tagStyle = "bg-amber-100 text-amber-700";
               tagText = "Processing";
-            } else if (isCurrent) {
+            } else if (isDue || isRejected) {
               baseStyle = "border-indigo-200 bg-white text-indigo-900 shadow-xl shadow-indigo-100/50 ring-1 ring-indigo-50";
               iconStyle = "bg-indigo-600 text-white shadow-indigo-600/30 shadow-lg";
               tagStyle = "bg-rose-100 text-rose-600 animate-pulse";
-              tagText = "Due Now";
-            } else if (isPast) {
-              baseStyle = "border-rose-100 bg-rose-50 text-rose-900";
-              iconStyle = "bg-rose-500 text-white shadow-rose-500/30 shadow-lg";
-              tagStyle = "bg-rose-200 text-rose-700";
-              tagText = "Overdue";
+              tagText = isRejected ? "Rejected/Due" : "Due Now";
             } else {
               tagStyle = "bg-slate-200 text-slate-500";
               tagText = "Upcoming";
@@ -587,8 +585,11 @@ const Payment = () => {
                   </span>
                 </div>
 
-                <h4 className={`text-lg font-extrabold ${isPaid || pendingPayment || isCurrent || isPast ? '' : 'text-slate-400'}`}>
+                <h4 className={`text-lg font-extrabold ${!canPay && !isPaid && !pendingPayment ? 'text-slate-400' : ''}`}>
                   {month}
+                  {paymentRecord.amount > 0 && (
+                    <span className="block text-sm font-bold text-slate-500 mt-1">₹ {paymentRecord.amount}</span>
+                  )}
                 </h4>
 
                 {canPay && (
@@ -599,7 +600,7 @@ const Payment = () => {
                       className={`
                         w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all 
                         shadow-lg relative overflow-hidden group/btn
-                        ${isCurrent 
+                        ${canPay 
                           ? 'bg-indigo-600 text-white shadow-indigo-200' 
                           : 'bg-rose-600 text-white shadow-rose-200'}
                       `}

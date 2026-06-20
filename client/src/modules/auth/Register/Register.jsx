@@ -11,88 +11,42 @@ export default function Register() {
   const authState = useAtomValue(authAtom);
   const userState = useAtomValue(userAtom);
   const [formData, setFormData] = useState({
-    fullName: '',
-    email: '',
-    password: '',
-    mobileNumber: '',
-    fatherName: '',
-    fatherPhone: '',
-    motherName: '',
-    motherPhone: '',
-    dateOfBirth: '',
-    gender: '',
-    permanentAddress: '',
-    aadhaarNumber: '',
-  });
-  
-  const [files, setFiles] = useState({
-    aadhaarFront: null,
-    aadhaarBack: null,
-    profilePicture: null,
+    fullName: '', email: '', password: '', mobileNumber: '',
+    fatherName: '', fatherPhone: '', motherName: '', motherPhone: '',
+    dateOfBirth: '', gender: '', permanentAddress: '', aadhaarNumber: '',
   });
 
-  const [uploadStatus, setUploadStatus] = useState({
-    aadhaarFront: null,   // null | 'uploading' | 'done' | 'error'
-    aadhaarBack: null,
-    profilePicture: null,
-  });
-
-  const [uploadedUrls, setUploadedUrls] = useState({
-    aadhaarFront: null,
-    aadhaarBack: null,
-    profilePicture: null,
-  });
-  
+  const [files, setFiles] = useState({ aadhaarFront: null, aadhaarBack: null, profilePicture: null });
+  const [uploadStatus, setUploadStatus] = useState({ aadhaarFront: null, aadhaarBack: null, profilePicture: null });
+  const [uploadedUrls, setUploadedUrls] = useState({ aadhaarFront: null, aadhaarBack: null, profilePicture: null });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Calculate DOB constraints
   const today = new Date();
   const eighteenYearsAgo = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split('T')[0];
   const minDate = "1995-01-01";
-  
-  // Redirect to dashboard if already logged in
+
   useEffect(() => {
     if (authState.isAuthenticated && authState.token) {
-      if (userState.role === 'admin') {
-        navigate('/admin-dashboard', { replace: true });
-      } else {
-        navigate('/tenant-dashboard', { replace: true });
-      }
+      navigate(userState.role === 'admin' ? '/admin-dashboard' : '/tenant-dashboard', { replace: true });
     }
   }, [navigate, authState, userState]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
-    // Numeric only validation for specific fields
     const numericFields = ['mobileNumber', 'fatherPhone', 'motherPhone', 'aadhaarNumber'];
-    if (numericFields.includes(name)) {
-      const numericValue = value.replace(/\D/g, ''); // Remove non-digits
-      setFormData({
-        ...formData,
-        [name]: numericValue,
-      });
-      return;
-    }
-
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData({ ...formData, [name]: numericFields.includes(name) ? value.replace(/\D/g, '') : value });
   };
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     const { name } = e.target;
-
     if (!file) return;
 
-    // Validation
     const allowedImageTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     if (!allowedImageTypes.includes(file.type)) {
-      setError(`Only JPG and PNG images are allowed for ${name === 'profilePicture' ? 'profile photo' : 'Aadhaar photos'}.`);
+      setError(`Only JPG and PNG images are allowed.`);
       e.target.value = '';
       return;
     }
@@ -102,30 +56,22 @@ export default function Register() {
     setUploadedUrls(prev => ({ ...prev, [name]: null }));
     setUploadStatus(prev => ({ ...prev, [name]: 'uploading' }));
 
-    // Determine folder
-    const folderMap = {
-      aadhaarFront: 'aadhaar_cards',
-      aadhaarBack: 'aadhaar_cards',
-      profilePicture: 'profile_photos',
-    };
+    const folderMap = { aadhaarFront: 'aadhaar_cards', aadhaarBack: 'aadhaar_cards', profilePicture: 'profile_photos' };
 
     try {
-      console.log(`[Upload] Uploading ${name} to Cloudinary...`);
       const url = await uploadToCloudinaryDirect(file, folderMap[name]);
-      console.log(`[Upload] ✅ ${name} success: ${url}`);
       setUploadedUrls(prev => ({ ...prev, [name]: url }));
       setUploadStatus(prev => ({ ...prev, [name]: 'done' }));
     } catch (err) {
-      console.error(`[Upload] ❌ ${name} failed:`, err);
       setUploadStatus(prev => ({ ...prev, [name]: 'error' }));
       setError(`Failed to upload ${name === 'profilePicture' ? 'profile photo' : 'Aadhaar photo'}. Please try again.`);
     }
   };
 
-  const getStatusIcon = (status) => {
-    if (status === 'uploading') return <span className="text-yellow-400 text-xs ml-2 animate-pulse font-medium">⏳ Uploading...</span>;
-    if (status === 'done') return <span className="text-green-400 text-xs ml-2 font-medium">✅ Uploaded</span>;
-    if (status === 'error') return <span className="text-red-400 text-xs ml-2 font-medium">❌ Failed</span>;
+  const getStatusBadge = (status) => {
+    if (status === 'uploading') return <span className="text-amber-500 text-[11px] ml-1.5 font-medium">⏳ Uploading...</span>;
+    if (status === 'done') return <span className="text-emerald-500 text-[11px] ml-1.5 font-medium">✅ Uploaded</span>;
+    if (status === 'error') return <span className="text-destructive text-[11px] ml-1.5 font-medium">❌ Failed</span>;
     return null;
   };
 
@@ -134,61 +80,32 @@ export default function Register() {
     setLoading(true);
     setError('');
 
-    // Email Validation Regex
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    
-    if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address.');
-      setLoading(false);
-      return;
-    }
+    if (!emailRegex.test(formData.email)) { setError('Please enter a valid email address.'); setLoading(false); return; }
 
-    // DOB Validation (18 years check)
     if (formData.dateOfBirth) {
       const dob = new Date(formData.dateOfBirth);
-      const ageLimit = new Date();
-      ageLimit.setFullYear(ageLimit.getFullYear() - 18);
-      
-      if (dob > ageLimit) {
-        setError('Tenant must be at least 18 years old.');
-        setLoading(false);
-        return;
-      }
-      
-      if (dob < new Date(minDate)) {
-        setError('Date of Birth cannot be earlier than 1995.');
-        setLoading(false);
-        return;
-      }
+      const ageLimit = new Date(); ageLimit.setFullYear(ageLimit.getFullYear() - 18);
+      if (dob > ageLimit) { setError('Tenant must be at least 18 years old.'); setLoading(false); return; }
+      if (dob < new Date(minDate)) { setError('Date of Birth cannot be earlier than 1995.'); setLoading(false); return; }
     }
 
-    // Check if all files are uploaded
-    const allFilesUploaded = uploadedUrls.aadhaarFront && uploadedUrls.aadhaarBack && uploadedUrls.profilePicture;
-    if (!allFilesUploaded) {
-      setError('Please wait for all documents to finish uploading before registering.');
-      setLoading(false);
-      return;
+    if (!uploadedUrls.aadhaarFront || !uploadedUrls.aadhaarBack || !uploadedUrls.profilePicture) {
+      setError('Please wait for all documents to finish uploading.'); setLoading(false); return;
     }
-
-    // Check for upload errors
     if (uploadStatus.aadhaarFront === 'error' || uploadStatus.aadhaarBack === 'error' || uploadStatus.profilePicture === 'error') {
-      setError('Some documents failed to upload. Please re-select the failed files.');
-      setLoading(false);
-      return;
+      setError('Some documents failed to upload. Please re-select the failed files.'); setLoading(false); return;
     }
 
     try {
-      // Send JSON payload with URLs
       const result = await registerTenantAPI({
         ...formData,
         aadhaarFrontUrl: uploadedUrls.aadhaarFront,
         aadhaarBackUrl: uploadedUrls.aadhaarBack,
         profilePictureUrl: uploadedUrls.profilePicture,
       });
-      
       alert(result.message);
       navigate('/login', { replace: true });
-      
     } catch (err) {
       setError(err.message);
     } finally {
@@ -196,287 +113,132 @@ export default function Register() {
     }
   };
 
+  const inputClass = "w-full bg-background text-foreground px-3 py-2 rounded-md border border-border focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 text-[13px] placeholder:text-muted-foreground";
+  const labelClass = "block text-[13px] font-medium text-foreground mb-1.5";
 
   return (
     <>
       {loading && <Loader text="REGISTERING" />}
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full bg-gray-800 rounded-lg p-4 sm:p-6 lg:p-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-cyan-400 mb-6">
-          Tenant Registration Form
-        </h2>
-
-        {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-400 p-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Profile Picture Section */}
-          <div className="flex flex-col items-center mb-8 p-4 bg-gray-700/30 rounded-2xl border border-gray-600">
-            <div className="w-24 h-24 rounded-full bg-gray-600 mb-3 flex items-center justify-center overflow-hidden border-2 border-cyan-400/30">
-              {files.profilePicture ? (
-                <img src={URL.createObjectURL(files.profilePicture)} alt="Profile Preview" className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-4xl text-gray-400">👤</span>
-              )}
-            </div>
-            <label className="block text-gray-300 mb-2 font-bold text-sm">
-              Profile Photo (Required)
-              {getStatusIcon(uploadStatus.profilePicture)}
-            </label>
-            <input
-              type="file"
-              name="profilePicture"
-              onChange={handleFileChange}
-              accept="image/*"
-              required
-              className="w-full max-w-xs text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-400/10 file:text-cyan-400 hover:file:bg-cyan-400/20 transition-all"
-            />
+      <div className="min-h-screen bg-background py-8 px-4">
+        <div className="max-w-2xl mx-auto">
+          {/* Brand header */}
+          <div className="text-center mb-6">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center mx-auto mb-3 text-xl shadow-lg">🏠</div>
+            <h1 className="text-lg font-semibold text-foreground">Ganga Bhawan</h1>
+            <p className="text-[13px] text-muted-foreground mt-0.5">Create your tenant account</p>
           </div>
 
-          {/* Full Name */}
-          <div>
-            <label className="block text-gray-300 mb-2">Full Name (as per ID)</label>
-            <input
-              type="text"
-              name="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
-              required
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="Enter your full name"
-            />
-          </div>
+          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+            <h2 className="text-[15px] font-semibold text-foreground mb-5">Tenant Registration</h2>
 
-          {/* Email */}
-          <div>
-            <label className="block text-gray-300 mb-2">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="your@email.com"
-            />
-          </div>
+            {error && (
+              <div className="bg-destructive/10 border border-destructive/30 text-destructive text-[13px] p-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
 
-          {/* Password */}
-          <div>
-            <label className="block text-gray-300 mb-2">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12"
-                placeholder="Create a strong password"
-              />
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Profile Picture */}
+              <div className="flex flex-col items-center mb-2 p-4 bg-muted/50 rounded-lg border border-border">
+                <div className="w-20 h-20 rounded-xl bg-accent mb-3 flex items-center justify-center overflow-hidden border border-border">
+                  {files.profilePicture ? (
+                    <img src={URL.createObjectURL(files.profilePicture)} alt="Preview" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-3xl text-muted-foreground">👤</span>
+                  )}
+                </div>
+                <label className={`${labelClass} text-center`}>
+                  Profile Photo (Required)
+                  {getStatusBadge(uploadStatus.profilePicture)}
+                </label>
+                <input
+                  type="file" name="profilePicture" onChange={handleFileChange} accept="image/*" required
+                  className="w-full max-w-xs text-[12px] text-muted-foreground file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-[12px] file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20"
+                />
+              </div>
+
+              {/* Full Name */}
+              <div><label className={labelClass}>Full Name (as per ID)</label><input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required className={inputClass} placeholder="Enter your full name" /></div>
+
+              {/* Email */}
+              <div><label className={labelClass}>Email Address</label><input type="email" name="email" value={formData.email} onChange={handleChange} required className={inputClass} placeholder="your@email.com" /></div>
+
+              {/* Password */}
+              <div>
+                <label className={labelClass}>Password</label>
+                <div className="relative">
+                  <input type={showPassword ? "text" : "password"} name="password" value={formData.password} onChange={handleChange} required className={`${inputClass} pr-10`} placeholder="Create a strong password" />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition text-sm">
+                    {showPassword ? '🔒' : '👁️'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Mobile */}
+              <div><label className={labelClass}>Mobile Number</label><input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange} required pattern="[0-9]{10}" className={inputClass} placeholder="10-digit number" /></div>
+
+              {/* Father & Mother */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label className={labelClass}>Father's Name</label><input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange} required className={inputClass} placeholder="Father's name" /></div>
+                <div><label className={labelClass}>Father's Phone</label><input type="tel" name="fatherPhone" value={formData.fatherPhone} onChange={handleChange} pattern="[0-9]{10}" className={inputClass} placeholder="10-digit number" /></div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label className={labelClass}>Mother's Name</label><input type="text" name="motherName" value={formData.motherName} onChange={handleChange} className={inputClass} placeholder="Mother's name" /></div>
+                <div><label className={labelClass}>Mother's Phone</label><input type="tel" name="motherPhone" value={formData.motherPhone} onChange={handleChange} pattern="[0-9]{10}" className={inputClass} placeholder="10-digit number" /></div>
+              </div>
+
+              {/* DOB & Gender */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label className={labelClass}>Date of Birth</label><input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required min={minDate} max={eighteenYearsAgo} className={inputClass} /></div>
+                <div>
+                  <label className={labelClass}>Gender</label>
+                  <select name="gender" value={formData.gender} onChange={handleChange} required className={inputClass}>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Address */}
+              <div><label className={labelClass}>Permanent Address</label><textarea name="permanentAddress" value={formData.permanentAddress} onChange={handleChange} required rows="3" className={inputClass} placeholder="Enter your complete address" /></div>
+
+              {/* Aadhaar Number */}
+              <div><label className={labelClass}>Aadhaar Card Number</label><input type="text" name="aadhaarNumber" value={formData.aadhaarNumber} onChange={handleChange} required pattern="[0-9]{12}" className={inputClass} placeholder="12-digit Aadhaar number" /></div>
+
+              {/* Aadhaar Photos */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className={labelClass}>Aadhaar Front{getStatusBadge(uploadStatus.aadhaarFront)}</label>
+                  <input type="file" name="aadhaarFront" onChange={handleFileChange} accept="image/*" required className={inputClass} />
+                  <p className="text-muted-foreground text-[11px] mt-1">Upload JPG or PNG photo.</p>
+                </div>
+                <div>
+                  <label className={labelClass}>Aadhaar Back{getStatusBadge(uploadStatus.aadhaarBack)}</label>
+                  <input type="file" name="aadhaarBack" onChange={handleFileChange} accept="image/*" required className={inputClass} />
+                  <p className="text-muted-foreground text-[11px] mt-1">Upload JPG or PNG photo.</p>
+                </div>
+              </div>
+
               <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition"
+                type="submit"
+                disabled={loading || uploadStatus.aadhaarFront === 'uploading' || uploadStatus.aadhaarBack === 'uploading' || uploadStatus.profilePicture === 'uploading'}
+                className="w-full bg-primary text-primary-foreground font-semibold py-2 rounded-md hover:bg-primary/90 transition disabled:opacity-50 disabled:cursor-not-allowed text-[13px] mt-1"
               >
-                {showPassword ? (
-                  <span title="Hide Password">🔒</span>
-                ) : (
-                  <span title="Show Password">👁️</span>
-                )}
+                {loading ? 'Registering...' :
+                 (uploadStatus.aadhaarFront === 'uploading' || uploadStatus.aadhaarBack === 'uploading' || uploadStatus.profilePicture === 'uploading')
+                  ? 'Uploading Documents...' : 'Register Now'}
               </button>
-            </div>
+            </form>
+
+            <p className="text-[12px] text-muted-foreground text-center mt-4">
+              Already have an account?{' '}
+              <a href="/login" className="text-primary hover:underline font-medium">Login here</a>
+            </p>
           </div>
-
-          {/* Mobile Number */}
-          <div>
-            <label className="block text-gray-300 mb-2">Mobile Number</label>
-            <input
-              type="tel"
-              name="mobileNumber"
-              value={formData.mobileNumber}
-              onChange={handleChange}
-              required
-              pattern="[0-9]{10}"
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="10-digit number"
-            />
-          </div>
-
-          {/* Father's Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-300 mb-2">Father's Name</label>
-              <input
-                type="text"
-                name="fatherName"
-                value={formData.fatherName}
-                onChange={handleChange}
-                required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                placeholder="Father's name"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-300 mb-2">Father's Phone No.</label>
-              <input
-                type="tel"
-                name="fatherPhone"
-                value={formData.fatherPhone}
-                onChange={handleChange}
-                pattern="[0-9]{10}"
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                placeholder="10-digit number"
-              />
-            </div>
-          </div>
-
-          {/* Mother's Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-300 mb-2">Mother's Name</label>
-              <input
-                type="text"
-                name="motherName"
-                value={formData.motherName}
-                onChange={handleChange}
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                placeholder="Mother's name"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-300 mb-2">Mother's Phone No.</label>
-              <input
-                type="tel"
-                name="motherPhone"
-                value={formData.motherPhone}
-                onChange={handleChange}
-                pattern="[0-9]{10}"
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-                placeholder="10-digit number"
-              />
-            </div>
-          </div>
-
-          {/* DOB and Gender */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-gray-300 mb-2">Date of Birth</label>
-              <input
-                type="date"
-                name="dateOfBirth"
-                value={formData.dateOfBirth}
-                onChange={handleChange}
-                required
-                min={minDate}
-                max={eighteenYearsAgo}
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              />
-            </div>
-            <div>
-              <label className="block text-gray-300 mb-2">Gender</label>
-              <select
-                name="gender"
-                value={formData.gender}
-                onChange={handleChange}
-                required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              >
-                <option value="">Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Permanent Address */}
-          <div>
-            <label className="block text-gray-300 mb-2">Permanent Address</label>
-            <textarea
-              name="permanentAddress"
-              value={formData.permanentAddress}
-              onChange={handleChange}
-              required
-              rows="3"
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="Enter your complete address"
-            />
-          </div>
-
-          {/* Aadhaar Number */}
-          <div>
-            <label className="block text-gray-300 mb-2">Aadhaar Card Number</label>
-            <input
-              type="text"
-              name="aadhaarNumber"
-              value={formData.aadhaarNumber}
-              onChange={handleChange}
-              required
-              pattern="[0-9]{12}"
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="12-digit Aadhaar number"
-            />
-          </div>
-
-          {/* Aadhaar Upload Sections */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-gray-300 mb-2">
-                Aadhaar Front Photo
-                {getStatusIcon(uploadStatus.aadhaarFront)}
-              </label>
-              <input
-                type="file"
-                name="aadhaarFront"
-                onChange={handleFileChange}
-                accept="image/*"
-                required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              />
-              <p className="text-gray-400 text-xs mt-1">Upload JPG or PNG photo.</p>
-            </div>
-            <div>
-              <label className="block text-gray-300 mb-2">
-                Aadhaar Back Photo
-                {getStatusIcon(uploadStatus.aadhaarBack)}
-              </label>
-              <input
-                type="file"
-                name="aadhaarBack"
-                onChange={handleFileChange}
-                accept="image/*"
-                required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              />
-              <p className="text-gray-400 text-xs mt-1">Upload JPG or PNG photo.</p>
-            </div>
-          </div>
-
-
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading || uploadStatus.aadhaarFront === 'uploading' || uploadStatus.aadhaarBack === 'uploading' || uploadStatus.profilePicture === 'uploading'}
-            className="w-full bg-cyan-400 text-gray-900 font-bold py-3 rounded hover:bg-cyan-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Registering...' : 
-             (uploadStatus.aadhaarFront === 'uploading' || uploadStatus.aadhaarBack === 'uploading' || uploadStatus.profilePicture === 'uploading')
-              ? 'Uploading Documents...' : 'Register Now'}
-          </button>
-        </form>
-
-        <p className="text-gray-400 text-center mt-6">
-          Already have an account?{' '}
-          <a href="/login" className="text-cyan-400 hover:underline">
-            Login here
-          </a>
-        </p>
+        </div>
       </div>
-    </div>
     </>
   );
 }

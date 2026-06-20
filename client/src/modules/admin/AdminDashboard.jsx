@@ -512,7 +512,7 @@ const AdminDashboard = () => {
 
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-inter">
+    <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar */}
       <Sidebar
         activeTab={activeTab}
@@ -524,8 +524,9 @@ const AdminDashboard = () => {
         pendingPaymentsCount={pendingPayments.length}
       />
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-72">
+      {/* Main Content — floating card */}
+      <div className="flex-1 min-w-0 lg:ml-56 flex flex-col lg:p-2 h-full">
+        <div className="flex-1 flex flex-col lg:rounded-xl lg:border lg:border-border bg-card overflow-hidden">
         <TopNavbar
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
@@ -547,91 +548,90 @@ const AdminDashboard = () => {
 
               {/* ── Overview ── */}
               {activeTab === 'overview' && (
-                <div className="space-y-6">
+                <div className="space-y-5">
 
-                  {/* ═══ TOP HERO — full-width dark strip ═══ */}
-                  <div className="relative overflow-hidden rounded-3xl bg-slate-900">
-                    {/* Decorative blobs */}
-                    <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-600/20 rounded-full -mr-32 -mt-32 blur-3xl pointer-events-none" />
-                    <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-violet-600/15 rounded-full -mb-24 blur-3xl pointer-events-none" />
+                  {/* Hero strip */}
+                  <div className="relative overflow-hidden rounded-xl bg-background border border-border">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-primary/5 rounded-full -mb-16 blur-3xl pointer-events-none" />
 
-                    <div className="relative z-10 px-8 py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div className="relative z-10 px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <p className="text-indigo-400 text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5">Ganga Bhawan</p>
-                        <h1 className="text-2xl lg:text-3xl font-black text-white font-outfit">Dashboard</h1>
-                        <p className="text-slate-500 text-sm font-medium mt-1">
+                        <p className="text-primary text-[10px] font-semibold uppercase tracking-[0.15em] mb-1">Ganga Bhawan</p>
+                        <h1 className="text-xl lg:text-2xl font-bold text-foreground">Admin Dashboard</h1>
+                        <p className="text-muted-foreground text-[12px] mt-0.5">
                           {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>
                       </div>
                       <button
                         onClick={() => setActiveTab('pending')}
-                        className="self-start sm:self-auto flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-indigo-900/50 shrink-0"
+                        className="self-start sm:self-auto flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground rounded-md font-medium text-[13px] transition-colors shrink-0"
                       >
-                        <UserPlus className="w-4 h-4" />
+                        <UserPlus className="w-3.5 h-3.5" />
                         View Applications
                       </button>
                     </div>
 
-                    {/* ── 4 metric tiles inline ── */}
-                    <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 border-t border-white/5">
+                    {/* 4 metric tiles */}
+                    <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 border-t border-border">
                       {[
-                        { label: 'Total Tenants', value: stats.total, color: 'text-white', sub: 'All time', accent: 'border-indigo-500' },
-                        { label: 'Pending Review', value: stats.pending, color: 'text-amber-400', sub: 'Action needed', accent: 'border-amber-500' },
-                        { label: 'Approved', value: stats.approved, color: 'text-emerald-400', sub: 'Checked in', accent: 'border-emerald-500' },
-                        { label: 'This Month', value: stats.thisMonth, color: 'text-violet-400', sub: 'New signups', accent: 'border-violet-500' },
+                        { label: 'Total Tenants',  value: stats.total,    color: 'text-foreground',        sub: 'All time',      accent: 'border-primary' },
+                        { label: 'Pending Review', value: stats.pending,  color: 'text-amber-500',         sub: 'Action needed', accent: 'border-amber-500' },
+                        { label: 'Approved',       value: stats.approved, color: 'text-emerald-500',       sub: 'Checked in',    accent: 'border-emerald-500' },
+                        { label: 'This Month',     value: stats.thisMonth, color: 'text-primary',          sub: 'New signups',   accent: 'border-primary' },
                       ].map((m, i) => (
                         <motion.div
                           key={m.label}
-                          initial={{ opacity: 0, y: 10 }}
+                          initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: i * 0.08, duration: 0.4 }}
-                          className={`px-6 py-5 border-white/5 border-t-2 odd:border-r even:border-r-0 md:border-r md:last:border-r-0 ${m.accent}`}
+                          transition={{ delay: i * 0.07, duration: 0.3 }}
+                          className={`px-5 py-4 border-border border-t-2 odd:border-r even:border-r-0 md:border-r md:last:border-r-0 ${m.accent}`}
                         >
-                          <p className={`text-4xl font-black font-outfit ${m.color}`}>{m.value}</p>
-                          <p className="text-slate-300 text-sm font-semibold mt-0.5">{m.label}</p>
-                          <p className="text-slate-500 text-[11px] font-medium mt-0.5">{m.sub}</p>
+                          <p className={`text-3xl font-bold ${m.color}`}>{m.value}</p>
+                          <p className="text-foreground text-[13px] font-medium mt-0.5">{m.label}</p>
+                          <p className="text-muted-foreground text-[11px] mt-0.5">{m.sub}</p>
                         </motion.div>
                       ))}
                     </div>
                   </div>
 
-                  {/* ═══ BOTTOM: 3-col grid ═══ */}
-                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                  {/* 3-col grid */}
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-                    {/* ── Quick Actions ── */}
-                    <div className="bg-white rounded-3xl p-6 border border-slate-100">
-                      <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Quick Actions</h3>
-                      <div className="space-y-2.5">
+                    {/* Quick Actions */}
+                    <div className="bg-background rounded-xl p-5 border border-border">
+                      <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-3">Quick Actions</h3>
+                      <div className="space-y-2">
                         {[
-                          { label: 'Review Pending',  count: stats.pending,  tab: 'pending',         color: 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-100',  dot: 'bg-amber-500' },
-                          { label: 'All Tenants',     count: stats.total,    tab: 'all',             color: 'bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border-indigo-100', dot: 'bg-indigo-500' },
-                          { label: 'Payment Approvals', count: pendingPayments.length, tab: 'pendingPayments', color: 'bg-rose-50 hover:bg-rose-100 text-rose-800 border-rose-100', dot: 'bg-rose-500' },
-                          { label: 'Payment History', count: stats.approved, tab: 'paymentStatus',   color: 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-100', dot: 'bg-emerald-500' },
+                          { label: 'Review Pending',    count: stats.pending,           tab: 'pending',         color: 'hover:bg-amber-500/10 text-amber-500',   dot: 'bg-amber-500' },
+                          { label: 'All Tenants',       count: stats.total,             tab: 'all',             color: 'hover:bg-primary/10 text-primary',        dot: 'bg-primary' },
+                          { label: 'Payment Approvals', count: pendingPayments.length,  tab: 'pendingPayments', color: 'hover:bg-destructive/10 text-destructive', dot: 'bg-destructive' },
+                          { label: 'Payment History',   count: stats.approved,          tab: 'paymentStatus',   color: 'hover:bg-emerald-500/10 text-emerald-500', dot: 'bg-emerald-500' },
                         ].map(item => (
                           <button
                             key={item.tab}
                             onClick={() => setActiveTab(item.tab)}
-                            className={`w-full flex items-center justify-between px-4 py-3.5 rounded-2xl border font-semibold text-sm transition-all ${item.color}`}
+                            className={`w-full flex items-center justify-between px-3 py-2.5 rounded-md border border-border text-[13px] font-medium transition-colors ${item.color}`}
                           >
-                            <div className="flex items-center gap-3">
-                              <span className={`w-2 h-2 rounded-full ${item.dot}`} />
+                            <div className="flex items-center gap-2.5">
+                              <span className={`w-1.5 h-1.5 rounded-full ${item.dot}`} />
                               {item.label}
                             </div>
-                            <span className="font-black text-base">{item.count}</span>
+                            <span className="font-semibold">{item.count}</span>
                           </button>
                         ))}
                       </div>
                     </div>
 
-                    {/* ── Occupancy with SVG Ring ── */}
-                    <div className="bg-white rounded-3xl p-6 border border-slate-100 flex flex-col items-center justify-center">
-                      <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6 self-start">Occupancy Rate</h3>
+                    {/* Occupancy Ring */}
+                    <div className="bg-background rounded-xl p-5 border border-border flex flex-col items-center justify-center">
+                      <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-5 self-start">Occupancy Rate</h3>
 
-                      <div className="relative w-40 h-40 mb-6">
-                        <svg viewBox="0 0 36 36" className="w-40 h-40 -rotate-90 drop-shadow-xl">
-                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f1f5f9" strokeWidth="3.2" />
+                      <div className="relative w-32 h-32 mb-5">
+                        <svg viewBox="0 0 36 36" className="w-32 h-32 -rotate-90">
+                          <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--border)" strokeWidth="3" />
                           <circle cx="18" cy="18" r="15.9" fill="none"
-                            stroke="url(#emeraldGrad)" strokeWidth="3.2"
+                            stroke="url(#emeraldGrad)" strokeWidth="3"
                             strokeDasharray={`${stats.total ? (stats.approved / stats.total) * 100 : 0} 100`}
                             strokeLinecap="round"
                           />
@@ -643,58 +643,58 @@ const AdminDashboard = () => {
                           </defs>
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
-                          <span className="text-4xl font-black text-slate-900 font-outfit">
+                          <span className="text-3xl font-bold text-foreground">
                             {stats.total ? Math.round((stats.approved / stats.total) * 100) : 0}%
                           </span>
-                          <span className="text-xs text-slate-400 font-bold uppercase tracking-wider">Filled</span>
+                          <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Filled</span>
                         </div>
                       </div>
 
-                      <div className="w-full grid grid-cols-2 gap-3">
-                        <div className="p-3.5 bg-emerald-50 rounded-2xl text-center border border-emerald-100">
-                          <p className="text-2xl font-black text-emerald-700 font-outfit">{stats.approved}</p>
-                          <p className="text-[11px] font-bold text-emerald-500 uppercase tracking-wider">Approved</p>
+                      <div className="w-full grid grid-cols-2 gap-2.5">
+                        <div className="p-3 bg-emerald-500/10 rounded-lg text-center border border-emerald-500/20">
+                          <p className="text-xl font-bold text-emerald-500">{stats.approved}</p>
+                          <p className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider">Approved</p>
                         </div>
-                        <div className="p-3.5 bg-amber-50 rounded-2xl text-center border border-amber-100">
-                          <p className="text-2xl font-black text-amber-700 font-outfit">{stats.pending}</p>
-                          <p className="text-[11px] font-bold text-amber-500 uppercase tracking-wider">Pending</p>
+                        <div className="p-3 bg-amber-500/10 rounded-lg text-center border border-amber-500/20">
+                          <p className="text-xl font-bold text-amber-500">{stats.pending}</p>
+                          <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-wider">Pending</p>
                         </div>
                       </div>
                     </div>
 
-                    {/* ── Recent Registrations ── */}
-                    <div className="bg-white rounded-3xl p-6 border border-slate-100">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Recent</h3>
-                        <button onClick={() => setActiveTab('all')} className="text-xs font-bold text-indigo-600 hover:text-indigo-800">View all →</button>
+                    {/* Recent Registrations */}
+                    <div className="bg-background rounded-xl p-5 border border-border">
+                      <div className="flex items-center justify-between mb-3">
+                        <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em]">Recent</h3>
+                        <button onClick={() => setActiveTab('all')} className="text-[12px] font-medium text-primary hover:text-primary/80">View all →</button>
                       </div>
 
                       {[...pendingTenants, ...approvedTenants].slice(0, 5).length === 0 ? (
-                        <div className="py-10 text-center">
-                          <Users className="w-10 h-10 text-slate-200 mx-auto mb-3" />
-                          <p className="text-slate-400 font-semibold text-sm">No tenants yet</p>
+                        <div className="py-8 text-center">
+                          <Users className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+                          <p className="text-muted-foreground text-[13px]">No tenants yet</p>
                         </div>
                       ) : (
-                        <div className="space-y-1">
+                        <div className="space-y-0.5">
                           {[...pendingTenants, ...approvedTenants].slice(0, 5).map((tenant, i) => {
                             const isPending = pendingTenants.some(t => t._id === tenant._id);
                             return (
                               <motion.div
                                 key={tenant._id}
-                                initial={{ opacity: 0, x: 12 }}
+                                initial={{ opacity: 0, x: 8 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: i * 0.07, duration: 0.35 }}
+                                transition={{ delay: i * 0.06, duration: 0.3 }}
                                 onClick={() => { setSelectedTenant(tenant); setShowModal(true); }}
-                                className="flex items-center gap-3 p-3 rounded-2xl hover:bg-slate-50 cursor-pointer transition-colors"
+                                className="flex items-center gap-2.5 p-2.5 rounded-md hover:bg-accent cursor-pointer transition-colors"
                               >
-                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-sm shrink-0 ${isPending ? 'bg-amber-500' : 'bg-indigo-600'}`}>
+                                <div className={`w-8 h-8 rounded-md flex items-center justify-center text-white font-semibold text-[12px] shrink-0 ${isPending ? 'bg-amber-500' : 'bg-primary'}`}>
                                   {tenant.fullName.charAt(0)}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-bold text-slate-900 truncate">{tenant.fullName}</p>
-                                  <p className="text-[11px] text-slate-400">{new Date(tenant.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
+                                  <p className="text-[13px] font-medium text-foreground truncate">{tenant.fullName}</p>
+                                  <p className="text-[11px] text-muted-foreground">{new Date(tenant.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
                                 </div>
-                                <span className={`shrink-0 w-2 h-2 rounded-full ${isPending ? 'bg-amber-500' : 'bg-emerald-500'}`} />
+                                <span className={`shrink-0 w-1.5 h-1.5 rounded-full ${isPending ? 'bg-amber-500' : 'bg-emerald-500'}`} />
                               </motion.div>
                             );
                           })}
@@ -708,21 +708,21 @@ const AdminDashboard = () => {
 
               {/* ── Tenant Lists (pending / approved / disabled / all) ── */}
               {(activeTab === 'pending' || activeTab === 'approved' || activeTab === 'disabled' || activeTab === 'all') && (
-                <div className="space-y-8">
-                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-5">
+                  <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
                     <div>
-                      <h1 className="text-3xl font-bold text-slate-900 font-outfit capitalize">
-                        {activeTab === 'pending' ? 'Pending Applications' : 
-                         activeTab === 'approved' ? 'Current Tenants' : 
+                      <h1 className="text-xl font-semibold text-foreground capitalize">
+                        {activeTab === 'pending' ? 'Pending Applications' :
+                         activeTab === 'approved' ? 'Current Tenants' :
                          activeTab === 'disabled' ? 'Disabled Accounts' : 'All Tenants'}
                       </h1>
-                      <p className="text-slate-500 font-medium mt-1">{filteredTenants.length} record{filteredTenants.length !== 1 ? 's' : ''} found</p>
+                      <p className="text-muted-foreground text-[13px] mt-0.5">{filteredTenants.length} record{filteredTenants.length !== 1 ? 's' : ''} found</p>
                     </div>
-                    <div className="flex items-center gap-3 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <select
                         value={dateRange}
                         onChange={(e) => setDateRange(e.target.value)}
-                        className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl font-semibold text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
+                        className="px-3 py-1.5 bg-background border border-border rounded-md text-foreground text-[13px] focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring"
                       >
                         <option value="all">All Time</option>
                         <option value="today">Today</option>
@@ -732,27 +732,27 @@ const AdminDashboard = () => {
                       <select
                         value={sortBy}
                         onChange={(e) => setSortBy(e.target.value)}
-                        className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl font-semibold text-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
+                        className="px-3 py-1.5 bg-background border border-border rounded-md text-foreground text-[13px] focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring"
                       >
                         <option value="date">Sort by Date</option>
                         <option value="name">Sort by Name</option>
                       </select>
                       <button
                         onClick={exportToCSV}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200"
+                        className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded-md font-medium text-[13px] hover:bg-primary/90 transition-colors"
                       >
-                        <IndianRupee className="w-4 h-4" />
+                        <IndianRupee className="w-3.5 h-3.5" />
                         Export CSV
                       </button>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                     {filteredTenants.length === 0 ? (
-                      <div className="col-span-full py-24 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
-                        <div className="text-6xl mb-4">🔍</div>
-                        <h3 className="text-2xl font-bold text-slate-900 mb-2 font-outfit">No Tenants Found</h3>
-                        <p className="text-slate-500 font-medium">Try adjusting your search or filter options.</p>
+                      <div className="col-span-full py-20 text-center bg-background rounded-xl border-2 border-dashed border-border">
+                        <div className="text-5xl mb-3">🔍</div>
+                        <h3 className="text-lg font-semibold text-foreground mb-1">No Tenants Found</h3>
+                        <p className="text-muted-foreground text-[13px]">Try adjusting your search or filter options.</p>
                       </div>
                     ) : (
                       filteredTenants.map((tenant, i) => (
@@ -776,85 +776,85 @@ const AdminDashboard = () => {
 
               {/* ── Pending Payments ── */}
               {activeTab === 'pendingPayments' && (
-                <div className="space-y-8">
+                <div className="space-y-5">
                   <div>
-                    <h1 className="text-3xl font-bold text-slate-900 font-outfit">Payment Approvals</h1>
-                    <p className="text-slate-500 font-medium mt-1">Review and approve submitted payment proofs.</p>
+                    <h1 className="text-xl font-semibold text-foreground">Payment Approvals</h1>
+                    <p className="text-muted-foreground text-[13px] mt-0.5">Review and approve submitted payment proofs.</p>
                   </div>
 
                   {pendingPayments.length === 0 ? (
-                    <div className="py-24 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
-                      <div className="w-20 h-20 bg-emerald-50 rounded-3xl flex items-center justify-center mx-auto mb-6 text-emerald-500">
-                        <IndianRupee className="w-10 h-10" />
+                    <div className="py-20 text-center bg-background rounded-xl border-2 border-dashed border-border">
+                      <div className="w-14 h-14 bg-emerald-500/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-emerald-500">
+                        <IndianRupee className="w-7 h-7" />
                       </div>
-                      <h3 className="text-2xl font-bold text-slate-900 font-outfit mb-2">All Clear!</h3>
-                      <p className="text-slate-500 font-medium">No pending payment approvals at this time.</p>
+                      <h3 className="text-lg font-semibold text-foreground mb-1">All Clear!</h3>
+                      <p className="text-muted-foreground text-[13px]">No pending payment approvals at this time.</p>
                     </div>
                   ) : (
-                    <div className="space-y-5">
+                    <div className="space-y-4">
                       {pendingPayments.map((payment, i) => (
                         <motion.div
                           key={payment._id}
-                          initial={{ opacity: 0, y: 20 }}
+                          initial={{ opacity: 0, y: 12 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: i * 0.05 }}
-                          className="bg-white rounded-3xl p-8 border border-slate-100 shadow-lg shadow-slate-100/50"
+                          className="bg-background rounded-xl p-6 border border-border"
                         >
-                          <div className="flex items-start gap-5 mb-6">
-                            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-white font-bold text-xl shrink-0">
+                          <div className="flex items-start gap-4 mb-5">
+                            <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-base shrink-0">
                               {payment.userId?.fullName?.charAt(0)?.toUpperCase() || 'T'}
                             </div>
                             <div className="flex-1">
-                              <div className="flex items-center gap-3 mb-1 flex-wrap">
-                                <h3 className="text-xl font-bold text-slate-900 font-outfit">{payment.userId?.fullName || 'Unknown'}</h3>
+                              <div className="flex items-center gap-2.5 mb-1 flex-wrap">
+                                <h3 className="text-[15px] font-semibold text-foreground">{payment.userId?.fullName || 'Unknown'}</h3>
                                 {payment.isAdvanced && (
-                                  <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-bold rounded-full">🚀 Advanced</span>
+                                  <span className="px-2 py-0.5 bg-primary/10 text-primary text-[11px] font-semibold rounded-full">🚀 Advanced</span>
                                 )}
-                                <span className="px-3 py-1 bg-amber-100 text-amber-700 text-xs font-bold rounded-full uppercase tracking-wider">Pending Review</span>
+                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[11px] font-semibold rounded-full">Pending Review</span>
                               </div>
-                              <p className="text-slate-400 text-sm font-medium">{payment.userId?.email}</p>
+                              <p className="text-muted-foreground text-[12px]">{payment.userId?.email}</p>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6 p-5 bg-slate-50 rounded-2xl">
+                          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5 p-4 bg-muted/30 rounded-lg">
                             <div>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Month</p>
-                              <p className="text-base font-bold text-slate-900">{payment.month}</p>
+                              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-0.5">Month</p>
+                              <p className="text-[13px] font-semibold text-foreground">{payment.month}</p>
                             </div>
                             <div>
-                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Submitted</p>
-                              <p className="text-base font-bold text-slate-900">{new Date(payment.paymentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-0.5">Submitted</p>
+                              <p className="text-[13px] font-semibold text-foreground">{new Date(payment.paymentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                             </div>
                           </div>
 
                           {payment.barcodeImage && (
-                            <div className="mb-6">
-                              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Payment Proof</p>
+                            <div className="mb-5">
+                              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-2">Payment Proof</p>
                               <img
                                 src={payment.barcodeImage}
                                 alt="Payment proof"
                                 onClick={() => setFullScreenImage(payment.barcodeImage)}
-                                className="max-w-xs max-h-48 object-contain rounded-2xl border border-slate-100 shadow-md cursor-pointer hover:shadow-xl transition-all hover:scale-105"
+                                className="max-w-xs max-h-40 object-contain rounded-lg border border-border cursor-pointer hover:border-primary/40 transition-all hover:scale-105"
                               />
                             </div>
                           )}
 
-                          <div className="flex gap-3 pt-6 border-t border-slate-50 flex-wrap">
+                          <div className="flex gap-2.5 pt-4 border-t border-border flex-wrap">
                             <button
                               onClick={() => setFullScreenImage(payment.barcodeImage)}
-                              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-slate-100 text-slate-700 rounded-2xl hover:bg-slate-200 font-bold text-sm"
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-accent text-foreground rounded-md hover:bg-accent/80 text-[13px] font-medium"
                             >
-                              View Full Image
+                              View Image
                             </button>
                             <button
                               onClick={() => handleApprovePayment(payment._id)}
-                              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 font-bold text-sm shadow-lg shadow-emerald-200"
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-[13px] font-medium"
                             >
                               ✓ Approve
                             </button>
                             <button
                               onClick={() => handleRejectPayment(payment._id)}
-                              className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-rose-600 text-white rounded-2xl hover:bg-rose-700 font-bold text-sm shadow-lg shadow-rose-200"
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 text-[13px] font-medium"
                             >
                               ✕ Reject
                             </button>
@@ -874,36 +874,33 @@ const AdminDashboard = () => {
             </motion.div>
           </AnimatePresence>
         </main>
+        </div>
       </div>
 
       {/* ── Tenant Detail Modal ── */}
       {showModal && selectedTenant && (
         <div
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setShowModal(false)}
         >
           <motion.div
-            initial={{ opacity: 0, scale: 0.92, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 12 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[92vh] overflow-y-auto shadow-2xl"
+            className="bg-card rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-border shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white/80 backdrop-blur-xl border-b border-slate-100 p-7 flex items-center justify-between z-10">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-cyan-500 flex items-center justify-center text-white font-bold text-2xl overflow-hidden shadow-lg shadow-indigo-200">
+            <div className="sticky top-0 bg-card/90 backdrop-blur-xl border-b border-border px-6 py-4 flex items-center justify-between z-10">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-base overflow-hidden">
                   {selectedTenant.profilePicture ? (
-                    <img 
-                      src={selectedTenant.profilePicture} 
-                      alt={selectedTenant.fullName} 
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={selectedTenant.profilePicture} alt={selectedTenant.fullName} className="w-full h-full object-cover" />
                   ) : (
                     selectedTenant.fullName.charAt(0)
                   )}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-slate-900 font-outfit">{selectedTenant.fullName}</h2>
-                  <span className={`text-xs font-bold px-3 py-1 rounded-full ${pendingTenants.some(t => t._id === selectedTenant._id) ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'}`}>
+                  <h2 className="text-[15px] font-semibold text-foreground">{selectedTenant.fullName}</h2>
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${pendingTenants.some(t => t._id === selectedTenant._id) ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'}`}>
                     {pendingTenants.some(t => t._id === selectedTenant._id) ? 'Pending' : 'Approved'}
                   </span>
                 </div>
@@ -911,26 +908,23 @@ const AdminDashboard = () => {
               <div className="flex items-center gap-2">
                 {!isEditing && (
                   <button
-                    onClick={() => {
-                      setEditData(selectedTenant);
-                      setIsEditing(true);
-                    }}
-                    className="px-4 py-2 text-sm font-bold bg-indigo-50 text-indigo-600 rounded-xl hover:bg-indigo-100 transition-all"
+                    onClick={() => { setEditData(selectedTenant); setIsEditing(true); }}
+                    className="px-3 py-1.5 text-[13px] font-medium bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors"
                   >
                     ✏️ Edit
                   </button>
                 )}
                 <button
                   onClick={() => { setShowModal(false); setIsEditing(false); }}
-                  className="w-11 h-11 flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded-2xl transition-all text-slate-500"
+                  className="w-8 h-8 flex items-center justify-center bg-accent hover:bg-accent/80 rounded-md transition-colors text-muted-foreground"
                 >
                   ✕
                 </button>
               </div>
             </div>
 
-            <div className="p-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
                 {[
                   ['fullName', 'Full Name', editData.fullName || selectedTenant.fullName],
                   ['email', 'Email', editData.email || selectedTenant.email],
@@ -944,144 +938,102 @@ const AdminDashboard = () => {
                   ['motherName', "Mother's Name", editData.motherName !== undefined ? editData.motherName : (selectedTenant.motherName || '')],
                   ['motherPhone', "Mother's Phone", editData.motherPhone !== undefined ? editData.motherPhone : (selectedTenant.motherPhone || '')],
                 ].map(([key, label, value, readOnly]) => (
-                  <div key={label} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
+                  <div key={label} className="p-3 bg-muted/30 rounded-lg border border-border">
+                    <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-1">{label}</p>
                     {isEditing && !readOnly ? (
                       key === 'gender' ? (
-                        <select
-                          value={value}
-                          onChange={(e) => setEditData({...editData, [key]: e.target.value})}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-400"
-                        >
+                        <select value={value} onChange={(e) => setEditData({...editData, [key]: e.target.value})} className="w-full bg-background border border-border rounded-md px-2.5 py-1.5 text-[13px] text-foreground outline-none focus:border-ring">
                           <option value="Male">Male</option>
                           <option value="Female">Female</option>
                           <option value="Other">Other</option>
                         </select>
                       ) : key === 'dateOfBirth' ? (
-                        <input
-                          type="date"
-                          value={value}
-                          onChange={(e) => setEditData({...editData, [key]: e.target.value})}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-400"
-                        />
+                        <input type="date" value={value} onChange={(e) => setEditData({...editData, [key]: e.target.value})} className="w-full bg-background border border-border rounded-md px-2.5 py-1.5 text-[13px] text-foreground outline-none focus:border-ring" />
                       ) : (
-                        <input
-                          type="text"
-                          value={value}
-                          onChange={(e) => setEditData({...editData, [key]: e.target.value})}
-                          className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-400"
-                        />
+                        <input type="text" value={value} onChange={(e) => setEditData({...editData, [key]: e.target.value})} className="w-full bg-background border border-border rounded-md px-2.5 py-1.5 text-[13px] text-foreground outline-none focus:border-ring" />
                       )
                     ) : (
-                      <p className="text-base font-bold text-slate-900 break-all">{key === 'dateOfBirth' && !isEditing ? new Date(value).toLocaleDateString() : value || 'N/A'}</p>
+                      <p className="text-[13px] font-medium text-foreground break-all">{key === 'dateOfBirth' && !isEditing ? new Date(value).toLocaleDateString() : value || 'N/A'}</p>
                     )}
                   </div>
                 ))}
-                <div className="md:col-span-2 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Address</p>
+                <div className="md:col-span-2 p-3 bg-muted/30 rounded-lg border border-border">
+                  <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-1">Address</p>
                   {isEditing ? (
-                    <textarea
-                      value={editData.permanentAddress !== undefined ? editData.permanentAddress : selectedTenant.permanentAddress}
-                      onChange={(e) => setEditData({...editData, permanentAddress: e.target.value})}
-                      className="w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-indigo-400 resize-none h-20"
-                    />
+                    <textarea value={editData.permanentAddress !== undefined ? editData.permanentAddress : selectedTenant.permanentAddress} onChange={(e) => setEditData({...editData, permanentAddress: e.target.value})} className="w-full bg-background border border-border rounded-md px-2.5 py-1.5 text-[13px] text-foreground outline-none focus:border-ring resize-none h-16" />
                   ) : (
-                    <p className="text-base font-bold text-slate-900">{selectedTenant.permanentAddress}</p>
+                    <p className="text-[13px] font-medium text-foreground">{selectedTenant.permanentAddress}</p>
                   )}
                 </div>
               </div>
 
               {isEditing && (
-                <div className="flex gap-3 mb-8">
-                  <button
-                    onClick={handleUpdateTenant}
-                    disabled={isUpdating}
-                    className="flex-1 bg-indigo-600 text-white font-bold py-3 rounded-xl hover:bg-indigo-700 transition-all disabled:opacity-50 shadow-lg shadow-indigo-200"
-                  >
+                <div className="flex gap-2.5 mb-6">
+                  <button onClick={handleUpdateTenant} disabled={isUpdating} className="flex-1 bg-primary text-primary-foreground font-medium py-2 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 text-[13px]">
                     {isUpdating ? 'Saving...' : 'Save Changes'}
                   </button>
-                  <button
-                    onClick={() => { setIsEditing(false); setEditData(selectedTenant); }}
-                    className="flex-1 bg-slate-200 text-slate-700 font-bold py-3 rounded-xl hover:bg-slate-300 transition-all"
-                  >
+                  <button onClick={() => { setIsEditing(false); setEditData(selectedTenant); }} className="flex-1 bg-accent text-foreground font-medium py-2 rounded-md hover:bg-accent/80 transition-colors text-[13px]">
                     Cancel
                   </button>
                 </div>
               )}
 
               {/* Password Reset */}
-              <div className="p-6 rounded-2xl bg-rose-50 border-2 border-dashed border-rose-200 mb-6">
-                <h3 className="text-sm font-bold text-rose-600 uppercase tracking-widest mb-4">🔒 Manual Password Override</h3>
-                <div className="flex gap-3 flex-col sm:flex-row">
+              <div className="p-4 rounded-lg bg-destructive/5 border border-destructive/20 mb-5">
+                <h3 className="text-[12px] font-semibold text-destructive uppercase tracking-[0.08em] mb-3">🔒 Manual Password Override</h3>
+                <div className="flex gap-2.5 flex-col sm:flex-row">
                   <input
                     type="text"
                     value={resetPasswordInput}
                     onChange={(e) => setResetPasswordInput(e.target.value)}
                     placeholder="Enter new password..."
-                    className="flex-1 px-4 py-3 border border-red-200 rounded-xl focus:ring-2 focus:ring-red-400 outline-none text-sm font-semibold"
+                    className="flex-1 px-3 py-2 bg-background border border-border rounded-md focus:ring-2 focus:ring-destructive/20 focus:border-destructive outline-none text-[13px] text-foreground"
                   />
                   <button
                     onClick={() => handleResetPassword(selectedTenant._id)}
                     disabled={resetting}
-                    className="px-8 py-3 bg-red-600 text-white font-bold rounded-xl hover:bg-red-700 disabled:opacity-50 shadow-lg shadow-red-200 transition-all text-sm"
+                    className="px-6 py-2 bg-destructive text-destructive-foreground font-medium rounded-md hover:bg-destructive/90 disabled:opacity-50 transition-colors text-[13px]"
                   >
                     {resetting ? 'Saving...' : 'Set Password'}
                   </button>
                 </div>
-                <p className="text-[11px] text-rose-400 mt-3">⚠️ The tenant will NOT be notified. Inform them manually.</p>
+                <p className="text-[11px] text-destructive/70 mt-2">⚠️ The tenant will NOT be notified. Inform them manually.</p>
               </div>
 
               {(selectedTenant.aadhaarFront || selectedTenant.aadhaarBack) && (
-                <div className="mb-6">
+                <div className="mb-5">
                   <button
                     onClick={() => setSelectedAadhaar(selectedTenant)}
-                    className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 font-bold transition-all shadow-lg shadow-indigo-200"
+                    className="w-full flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 font-medium text-[13px] transition-colors"
                   >
                     📄 View Aadhaar Photos
                   </button>
                 </div>
               )}
 
-              <div className="flex gap-3 pt-6 border-t border-slate-100 flex-wrap">
+              <div className="flex gap-2.5 pt-5 border-t border-border flex-wrap">
                 {pendingTenants.some(t => t._id === selectedTenant._id) && (
                   <>
-                    <button
-                      onClick={() => { handleApprove(selectedTenant._id); setShowModal(false); }}
-                      className="flex-1 px-6 py-4 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700 font-bold shadow-lg shadow-emerald-200 transition-all"
-                    >
+                    <button onClick={() => { handleApprove(selectedTenant._id); setShowModal(false); }} className="flex-1 px-5 py-2.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 font-medium text-[13px] transition-colors">
                       ✓ Approve Tenant
                     </button>
-                    <button
-                      onClick={() => { handleReject(selectedTenant._id); setShowModal(false); }}
-                      className="flex-1 px-6 py-4 bg-amber-500 text-white rounded-2xl hover:bg-amber-600 font-bold shadow-lg shadow-amber-200 transition-all"
-                    >
+                    <button onClick={() => { handleReject(selectedTenant._id); setShowModal(false); }} className="flex-1 px-5 py-2.5 bg-amber-500 text-white rounded-md hover:bg-amber-600 font-medium text-[13px] transition-colors">
                       ✕ Reject
                     </button>
                   </>
                 )}
-                
                 {selectedTenant.isDisabled ? (
-                  <button
-                    onClick={() => handleEnable(selectedTenant._id)}
-                    className="flex-1 px-6 py-4 bg-indigo-600 text-white rounded-2xl hover:bg-indigo-700 font-bold shadow-lg shadow-indigo-200 transition-all"
-                  >
+                  <button onClick={() => handleEnable(selectedTenant._id)} className="flex-1 px-5 py-2.5 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 font-medium text-[13px] transition-colors">
                     🔓 Enable Account
                   </button>
                 ) : (
                   !pendingTenants.some(t => t._id === selectedTenant._id) && (
-                    <button
-                      onClick={() => handleDisable(selectedTenant._id)}
-                      className="flex-1 px-6 py-4 bg-amber-600 text-white rounded-2xl hover:bg-amber-700 font-bold shadow-lg shadow-amber-200 transition-all"
-                    >
+                    <button onClick={() => handleDisable(selectedTenant._id)} className="flex-1 px-5 py-2.5 bg-amber-600 text-white rounded-md hover:bg-amber-700 font-medium text-[13px] transition-colors">
                       🚫 Disable Account
                     </button>
                   )
                 )}
-
-                <button
-                  onClick={() => handleDelete(selectedTenant._id, selectedTenant.fullName)}
-                  className="flex-1 px-6 py-4 bg-rose-600 text-white rounded-2xl hover:bg-rose-700 font-bold shadow-lg shadow-rose-200 transition-all"
-                >
+                <button onClick={() => handleDelete(selectedTenant._id, selectedTenant.fullName)} className="flex-1 px-5 py-2.5 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 font-medium text-[13px] transition-colors">
                   🗑️ Delete
                 </button>
               </div>
@@ -1103,91 +1055,55 @@ const AdminDashboard = () => {
 
       {/* ── Full Screen Image ── */}
       {fullScreenImage && (
-        <div className="fixed inset-0 z-[100] bg-black/92 flex items-center justify-center p-4" onClick={() => setFullScreenImage(null)}>
+        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setFullScreenImage(null)}>
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
             className="relative max-w-full max-h-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              onClick={() => setFullScreenImage(null)}
-              className="absolute -top-14 right-0 w-10 h-10 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-xl text-white transition-all"
-            >
+            <button onClick={() => setFullScreenImage(null)} className="absolute -top-12 right-0 w-9 h-9 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors">
               ✕
             </button>
-            <img
-              src={fullScreenImage}
-              alt="Full size"
-              className="max-w-full max-h-full object-contain rounded-2xl"
-              style={{ maxWidth: '90vw', maxHeight: '85vh' }}
-            />
-            <p className="text-center text-white/60 text-sm mt-4 font-medium">Click outside or press ESC to close</p>
+            <img src={fullScreenImage} alt="Full size" className="max-w-full max-h-full object-contain rounded-lg" style={{ maxWidth: '90vw', maxHeight: '85vh' }} />
+            <p className="text-center text-white/50 text-[12px] mt-3">Click outside or press ESC to close</p>
           </motion.div>
-          <div className="absolute inset-0 -z-10" onClick={() => setFullScreenImage(null)} />
         </div>
       )}
 
       {/* ── Aadhaar Viewer ── */}
       {selectedAadhaar && (
-        <div
-          className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          onClick={() => setSelectedAadhaar(null)}
-        >
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedAadhaar(null)}>
           <motion.div
-            initial={{ opacity: 0, scale: 0.92 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-white rounded-[2rem] w-full max-w-5xl flex flex-col overflow-hidden shadow-2xl"
-            style={{ height: '90vh' }}
+            className="bg-card rounded-xl w-full max-w-4xl flex flex-col overflow-hidden border border-border shadow-2xl"
+            style={{ height: '88vh' }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between p-6 border-b border-slate-100 shrink-0">
+            <div className="flex items-center justify-between px-5 py-3.5 border-b border-border shrink-0">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 font-outfit">Aadhaar Card – {selectedAadhaar.fullName}</h3>
-                <p className="text-sm text-slate-400 font-medium">ID: {selectedAadhaar.aadhaarNumber}</p>
+                <h3 className="text-[14px] font-semibold text-foreground">Aadhaar Card – {selectedAadhaar.fullName}</h3>
+                <p className="text-[12px] text-muted-foreground">ID: {selectedAadhaar.aadhaarNumber}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setSelectedAadhaar(null)}
-                  className="w-10 h-10 flex items-center justify-center bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-500 transition-all font-bold"
-                >
-                  ✕
-                </button>
-              </div>
+              <button onClick={() => setSelectedAadhaar(null)} className="w-8 h-8 flex items-center justify-center bg-accent hover:bg-accent/80 rounded-md text-muted-foreground transition-colors">✕</button>
             </div>
-            <div className="flex-1 bg-slate-900 border-t border-slate-800 flex flex-col md:flex-row items-center justify-center p-6 gap-6 overflow-y-auto">
-              {/* Aadhaar Front */}
-              <div className="flex-1 flex flex-col items-center gap-3 h-full min-h-[300px]">
-                <p className="text-white/50 text-xs font-bold uppercase tracking-widest">Front Side</p>
+            <div className="flex-1 bg-background flex flex-col md:flex-row items-center justify-center p-5 gap-5 overflow-y-auto">
+              <div className="flex-1 flex flex-col items-center gap-2.5 h-full min-h-[280px]">
+                <p className="text-muted-foreground text-[11px] font-semibold uppercase tracking-[0.08em]">Front Side</p>
                 {selectedAadhaar.aadhaarFront ? (
-                  <img
-                    src={selectedAadhaar.aadhaarFront}
-                    alt="Aadhaar Front"
-                    className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-2xl border border-white/5"
-                  />
+                  <img src={selectedAadhaar.aadhaarFront} alt="Aadhaar Front" className="max-w-full max-h-[55vh] object-contain rounded-lg border border-border" />
                 ) : (
-                  <div className="flex-1 w-full bg-slate-800/50 rounded-xl flex items-center justify-center text-slate-500 border border-white/5 border-dashed">
-                    No Front Photo
-                  </div>
+                  <div className="flex-1 w-full bg-muted/30 rounded-lg flex items-center justify-center text-muted-foreground border border-dashed border-border">No Front Photo</div>
                 )}
               </div>
-
-              {/* Vertical Divider */}
-              <div className="hidden md:block w-px h-32 bg-white/10" />
-
-              {/* Aadhaar Back */}
-              <div className="flex-1 flex flex-col items-center gap-3 h-full min-h-[300px]">
-                <p className="text-white/50 text-xs font-bold uppercase tracking-widest">Back Side</p>
+              <div className="hidden md:block w-px h-28 bg-border" />
+              <div className="flex-1 flex flex-col items-center gap-2.5 h-full min-h-[280px]">
+                <p className="text-muted-foreground text-[11px] font-semibold uppercase tracking-[0.08em]">Back Side</p>
                 {selectedAadhaar.aadhaarBack ? (
-                  <img
-                    src={selectedAadhaar.aadhaarBack}
-                    alt="Aadhaar Back"
-                    className="max-w-full max-h-[60vh] object-contain rounded-xl shadow-2xl border border-white/5"
-                  />
+                  <img src={selectedAadhaar.aadhaarBack} alt="Aadhaar Back" className="max-w-full max-h-[55vh] object-contain rounded-lg border border-border" />
                 ) : (
-                  <div className="flex-1 w-full bg-slate-800/50 rounded-xl flex items-center justify-center text-slate-500 border border-white/5 border-dashed">
-                    No Back Photo
-                  </div>
+                  <div className="flex-1 w-full bg-muted/30 rounded-lg flex items-center justify-center text-muted-foreground border border-dashed border-border">No Back Photo</div>
                 )}
               </div>
             </div>

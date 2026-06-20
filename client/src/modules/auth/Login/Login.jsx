@@ -9,58 +9,31 @@ export default function Login() {
   const navigate = useNavigate();
   const setAuth = useSetAtom(authAtom);
   const setUser = useSetAtom(userAtom);
-  const [loginType, setLoginType] = useState('tenant'); // 'tenant' or 'admin'
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [loginType, setLoginType] = useState('tenant');
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  // Redirect to dashboard if already logged in
   useEffect(() => {
-    // Redirection is handled by PublicRoute in App.jsx, but we keep this as a secondary guard
     const auth = JSON.parse(localStorage.getItem('auth') || '{}');
     if (auth.isAuthenticated && auth.token) {
       const user = JSON.parse(localStorage.getItem('user') || '{}');
-      if (user.role === 'admin') {
-        navigate('/admin-dashboard', { replace: true });
-      } else {
-        navigate('/tenant-dashboard', { replace: true });
-      }
+      navigate(user.role === 'admin' ? '/admin-dashboard' : '/tenant-dashboard', { replace: true });
     }
   }, [navigate]);
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
-
     try {
       const result = await loginAPI(formData.email, formData.password, loginType);
-      
-      // Save to Jotai (Memory Only)
-      setAuth({
-        token: result.token,
-        isAuthenticated: true,
-      });
+      setAuth({ token: result.token, isAuthenticated: true });
       setUser(result.user);
-      
-      // Redirect based on role
-      if (result.user.role === 'admin') {
-        navigate('/admin-dashboard');
-      } else {
-        navigate('/tenant-dashboard');
-      }
-      
+      navigate(result.user.role === 'admin' ? '/admin-dashboard' : '/tenant-dashboard');
     } catch (err) {
       setError(err.message);
     } finally {
@@ -71,107 +44,95 @@ export default function Login() {
   return (
     <>
       {loading && <Loader text="LOGGING IN" />}
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-gray-800 rounded-lg p-4 sm:p-6 lg:p-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">Login</h2>
-
-
-
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6">
-          <button
-            onClick={() => {
-              setLoginType('tenant');
-              setFormData({ email: '', password: '' });
-              setError('');
-            }}
-            className={`flex-1 py-2 rounded font-medium transition ${
-              loginType === 'tenant'
-                ? 'bg-cyan-400 text-gray-900'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            Tenant Login
-          </button>
-          <button
-            onClick={() => {
-              setLoginType('admin');
-              setFormData({ email: '', password: '' });
-              setError('');
-            }}
-            className={`flex-1 py-2 rounded font-medium transition ${
-              loginType === 'admin'
-                ? 'bg-cyan-400 text-gray-900'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-            }`}
-          >
-            Admin Login
-          </button>
-        </div>
-
-        {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-400 p-3 rounded mb-4">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-gray-300 mb-2">Email Address</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
-              placeholder="Enter your email"
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-300 mb-2">Password</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12"
-                placeholder="Enter your password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition"
-              >
-                {showPassword ? (
-                  <span title="Hide Password">🔒</span>
-                ) : (
-                  <span title="Show Password">👁️</span>
-                )}
-              </button>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="w-full max-w-sm">
+          {/* Brand */}
+          <div className="text-center mb-8">
+            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center mx-auto mb-3 text-xl shadow-lg">
+              🏠
             </div>
+            <h1 className="text-lg font-semibold text-foreground">Ganga Bhawan</h1>
+            <p className="text-[13px] text-muted-foreground mt-0.5">Sign in to your account</p>
           </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-cyan-400 text-gray-900 font-bold py-3 rounded hover:bg-cyan-300 transition disabled:opacity-50"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+          <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
+            {/* Tabs */}
+            <div className="flex gap-1 mb-5 p-1 bg-muted rounded-lg">
+              {['tenant', 'admin'].map((type) => (
+                <button
+                  key={type}
+                  onClick={() => { setLoginType(type); setFormData({ email: '', password: '' }); setError(''); }}
+                  className={`flex-1 py-1.5 rounded-md text-[13px] font-medium transition-colors capitalize ${
+                    loginType === type
+                      ? 'bg-card text-foreground shadow-sm'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {type} Login
+                </button>
+              ))}
+            </div>
 
-        <p className="text-gray-400 text-center mt-6">
-          Don't have an account?{' '}
-          <a href="/register" className="text-cyan-400 hover:underline">
-            Register
-          </a>
-        </p>
+            {error && (
+              <div className="bg-destructive/10 border border-destructive/30 text-destructive text-[13px] p-3 rounded-lg mb-4">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-3.5">
+              <div>
+                <label className="block text-[13px] font-medium text-foreground mb-1.5">Email Address</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full bg-background text-foreground px-3 py-2 rounded-md border border-border focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 text-[13px] placeholder:text-muted-foreground"
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[13px] font-medium text-foreground mb-1.5">Password</label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    required
+                    className="w-full bg-background text-foreground px-3 py-2 rounded-md border border-border focus:outline-none focus:border-ring focus:ring-2 focus:ring-ring/20 text-[13px] placeholder:text-muted-foreground pr-10"
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-primary transition text-sm"
+                  >
+                    {showPassword ? '🔒' : '👁️'}
+                  </button>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-primary text-primary-foreground font-semibold py-2 rounded-md hover:bg-primary/90 transition disabled:opacity-50 text-[13px] mt-1"
+              >
+                {loading ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
+
+            <p className="text-[12px] text-muted-foreground text-center mt-4">
+              Don't have an account?{' '}
+              <a href="/register" className="text-primary hover:underline font-medium">
+                Register
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
     </>
   );
-} 
+}

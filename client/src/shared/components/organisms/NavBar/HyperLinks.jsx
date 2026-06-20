@@ -5,28 +5,20 @@ const HyperLinks = () => {
   const location = useLocation();
 
   const handleScroll = (id) => {
-    // If we're not on the home page, navigate to home first
     if (location.pathname !== "/") {
       navigate("/");
-      // Wait for navigation to complete, then scroll
       setTimeout(() => {
         const section = document.getElementById(id);
-        if (section) {
-          section.scrollIntoView({ behavior: "smooth" });
-        }
+        if (section) section.scrollIntoView({ behavior: "smooth" });
       }, 100);
     } else {
-      // If we're already on home page, just scroll
       const section = document.getElementById(id);
-      if (section) {
-        section.scrollIntoView({ behavior: "smooth" });
-      }
+      if (section) section.scrollIntoView({ behavior: "smooth" });
     }
   };
 
   return (
-    <ul className="flex flex-col md:flex-row gap-6 md:gap-10
-      text-[16px] font-medium text-gray-300">
+    <ul className="flex flex-col md:flex-row gap-5 md:gap-8 text-[13px] font-medium text-muted-foreground">
       {[
         { name: "Home", id: "home" },
         { name: "About", id: "about" },
@@ -35,7 +27,7 @@ const HyperLinks = () => {
         <li key={item.name}>
           <button
             onClick={() => handleScroll(item.id)}
-            className="hover:text-cyan-400 transition w-full text-left block"
+            className="hover:text-primary transition w-full text-left block"
           >
             {item.name}
           </button>

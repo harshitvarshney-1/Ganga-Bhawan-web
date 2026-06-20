@@ -32,7 +32,7 @@ export const paymentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['pending', 'success', 'failed', 'rejected'],
+    enum: ['due', 'pending', 'success', 'failed', 'rejected'],
     default: 'pending'
   },
   paymentDate: {
