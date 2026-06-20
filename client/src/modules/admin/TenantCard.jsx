@@ -106,9 +106,9 @@ const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSel
             {!isPending && !tenant.isDisabled && (
               <button
                 onClick={() => handleDisable(tenant._id)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500/10 text-amber-500 rounded-md hover:bg-amber-500 hover:text-foreground transition-colors text-[12px] font-medium"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500/20 border border-amber-500 text-amber-600 dark:text-amber-400 rounded-md hover:bg-amber-500/30 transition-colors text-[12px] font-medium"
               >
-                Disable
+                🚫 Disable
               </button>
             )}
 
