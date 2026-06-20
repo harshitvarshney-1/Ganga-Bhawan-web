@@ -456,7 +456,7 @@ const Payment = () => {
         </div>
 
         {/* Advanced Booking Box */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 relative overflow-hidden text-white shadow-xl shadow-indigo-500/20 group">
+        <div className="lg:col-span-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 relative overflow-hidden text-foreground shadow-xl shadow-indigo-500/20 group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full -mr-32 -mt-32 blur-2xl group-hover:bg-primary/20 transition-all duration-700 pointer-events-none" />
           
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 h-full">
@@ -482,7 +482,7 @@ const Payment = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={openMultiModal}
-                  className="whitespace-nowrap px-6 py-3.5 bg-indigo-400 text-white hover:bg-indigo-300 font-bold rounded-2xl shadow-lg transition-all border border-white/30 flex items-center gap-2"
+                  className="whitespace-nowrap px-6 py-3.5 bg-indigo-400 text-foreground hover:bg-indigo-300 font-bold rounded-2xl shadow-lg transition-all border border-white/30 flex items-center gap-2"
                 >
                   Bulk Payment (Multi-Month)
                 </motion.button>
@@ -545,23 +545,23 @@ const Payment = () => {
             
             if (isPaid) {
               baseStyle = "border-emerald-100 bg-emerald-50/50 text-emerald-900";
-              iconStyle = "bg-emerald-500 text-white shadow-emerald-500/30 shadow-lg";
+              iconStyle = "bg-emerald-500 text-foreground shadow-emerald-500/30 shadow-lg";
               tagStyle = "bg-emerald-100 text-emerald-700";
               tagText = "Paid";
             } else if (pendingPayment) {
               baseStyle = "border-amber-100 bg-amber-50 text-amber-900";
-              iconStyle = "bg-amber-500 text-white shadow-amber-500/30 shadow-lg";
+              iconStyle = "bg-amber-500 text-foreground shadow-amber-500/30 shadow-lg";
               tagStyle = "bg-amber-100 text-amber-700";
               tagText = "Processing";
             } else if (isDue || isRejected) {
-              baseStyle = "border-indigo-200 bg-white text-indigo-900 shadow-xl shadow-indigo-100/50 ring-1 ring-indigo-50";
-              iconStyle = "bg-indigo-600 text-white shadow-indigo-600/30 shadow-lg";
+              baseStyle = "border-indigo-200 bg-card text-indigo-900 shadow-xl shadow-indigo-100/50 ring-1 ring-indigo-50";
+              iconStyle = "bg-indigo-600 text-foreground shadow-indigo-600/30 shadow-lg";
               tagStyle = "bg-rose-100 text-rose-600 animate-pulse";
               tagText = isRejected ? "Rejected/Due" : "Due Now";
             } else {
               tagStyle = "bg-muted text-muted-foreground";
               tagText = "Upcoming";
-              baseStyle = "border-border bg-white text-muted-foreground opacity-60";
+              baseStyle = "border-border bg-card text-muted-foreground opacity-60";
               iconStyle = "bg-muted text-muted-foreground";
             }
 
@@ -601,8 +601,8 @@ const Payment = () => {
                         w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all 
                         shadow-lg relative overflow-hidden group/btn
                         ${canPay 
-                          ? 'bg-indigo-600 text-white shadow-indigo-200' 
-                          : 'bg-rose-600 text-white shadow-rose-200'}
+                          ? 'bg-indigo-600 text-foreground shadow-indigo-200' 
+                          : 'bg-rose-600 text-foreground shadow-rose-200'}
                       `}
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700" />
@@ -650,7 +650,7 @@ const Payment = () => {
                   {payment.barcodeImage && (
                     <button 
                       onClick={() => setFullScreenImage(payment.barcodeImage)}
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-border flex items-center justify-center text-muted-foreground hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm shrink-0 ml-auto sm:ml-0"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm shrink-0 ml-auto sm:ml-0"
                       title="View Receipt"
                     >
                       <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -725,7 +725,7 @@ const Payment = () => {
             className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-md flex items-center justify-center p-4"
           >
             <div className="relative max-w-full max-h-full">
-              <button onClick={() => setFullScreenImage(null)} className="absolute -top-16 right-0 text-foreground/50 hover:text-white transition-colors bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <button onClick={() => setFullScreenImage(null)} className="absolute -top-16 right-0 text-foreground/50 hover:text-foreground transition-colors bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm">
                 <X className="w-6 h-6" />
               </button>
               <motion.img 
@@ -838,7 +838,7 @@ const PaymentModal = ({
                   </div>
                 ) : (
                   <div className="space-y-2 pointer-events-none">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto text-muted-foreground group-hover:text-indigo-500 group-hover:scale-110 transition-all">
+                    <div className="w-12 h-12 bg-card rounded-full flex items-center justify-center shadow-sm mx-auto text-muted-foreground group-hover:text-indigo-500 group-hover:scale-110 transition-all">
                       <UploadCloud className="w-5 h-5" />
                     </div>
                     <p className="text-sm font-bold text-foreground">Click or drag receipt here</p>
@@ -850,11 +850,11 @@ const PaymentModal = ({
           </div>
         </div>
 
-        <div className="p-6 border-t border-border bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-10 shrink-0">
+        <div className="p-6 border-t border-border bg-card shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-10 shrink-0">
           <button
             onClick={handleSubmit}
             disabled={processing || !barcodeImage || (isAdvanced && !advancedModal.month) || (isMulti && multiModal.selectedMonths.length === 0)}
-            className="w-full py-4 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-4 bg-indigo-600 text-foreground rounded-xl font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {processing ? (
               <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Verifying...</>

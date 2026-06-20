@@ -14,10 +14,10 @@ const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSel
     >
       {/* Top strip */}
       <div className="h-20 bg-gradient-to-r from-primary via-primary/80 to-primary/60 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-xl -mr-8 -mt-8" />
+        <div className="absolute top-0 right-0 w-24 h-24 bg-card/10 rounded-full blur-xl -mr-8 -mt-8" />
         <div className="absolute top-3 right-3 z-10">
           <span className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold backdrop-blur-sm ${
-            tenant.isDisabled ? 'bg-destructive/80 text-white' :
+            tenant.isDisabled ? 'bg-destructive/80 text-foreground' :
             isPending ? 'bg-amber-400/90 text-amber-900' : 'bg-emerald-400/90 text-emerald-900'
           }`}>
             {tenant.isDisabled ? <Trash2 className="w-3 h-3" /> :
@@ -106,7 +106,7 @@ const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSel
             {!isPending && !tenant.isDisabled && (
               <button
                 onClick={() => handleDisable(tenant._id)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500/10 text-amber-500 rounded-md hover:bg-amber-500 hover:text-white transition-colors text-[12px] font-medium"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-amber-500/10 text-amber-500 rounded-md hover:bg-amber-500 hover:text-foreground transition-colors text-[12px] font-medium"
               >
                 Disable
               </button>

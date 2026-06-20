@@ -47,7 +47,7 @@ const ContactCards = () => {
             {item.icon}
           </div>
 
-          <h3 className="text-xl font-semibold mb-4 text-white">
+          <h3 className="text-xl font-semibold mb-4 text-foreground">
             {item.title}
           </h3>
 
@@ -67,7 +67,7 @@ const ContactCards = () => {
                 ? "bg-green-500/10 text-green-400 hover:bg-green-500" 
                 : "bg-blue-500/10 text-blue-400 hover:bg-blue-500"
               }
-              hover:text-white transition text-sm font-medium`}
+              hover:text-foreground transition text-sm font-medium`}
             >
               {item.title === "WhatsApp" ? "Open WhatsApp" : "Send Email"}
             </a>

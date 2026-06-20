@@ -46,12 +46,12 @@ const StatCard = ({ title, value, icon: Icon, color, index, trend }) => {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: index * 0.1, ease: [0.22, 1, 0.36, 1] }}
       whileHover={{ y: -4, transition: { duration: 0.25 } }}
-      className={`group relative overflow-hidden bg-white rounded-3xl p-7 border ${c.border} shadow-sm hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 cursor-default`}
+      className={`group relative overflow-hidden bg-card rounded-3xl p-7 border ${c.border} shadow-sm hover:shadow-xl hover:shadow-slate-200/60 transition-all duration-300 cursor-default`}
     >
       {/* Top section */}
       <div className="flex items-start justify-between mb-6">
         <div className={`w-14 h-14 ${c.icon} rounded-2xl flex items-center justify-center shadow-lg ${c.iconShadow} group-hover:scale-110 transition-transform duration-300`}>
-          <Icon className="w-7 h-7 text-white" strokeWidth={1.8} />
+          <Icon className="w-7 h-7 text-foreground" strokeWidth={1.8} />
         </div>
         <div className={`flex items-center gap-1 text-xs font-bold ${c.text} opacity-80`}>
           <TrendingUp className="w-3.5 h-3.5" />

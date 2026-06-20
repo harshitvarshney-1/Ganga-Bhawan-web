@@ -14,7 +14,7 @@ const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {approvedTenants.length === 0 ? (
-          <div className="col-span-full py-20 text-center bg-white/50 backdrop-blur-sm rounded-3xl border-2 border-dashed border-slate-200">
+          <div className="col-span-full py-20 text-center bg-card/50 backdrop-blur-sm rounded-3xl border-2 border-dashed border-slate-200">
             <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-400">
               <History className="w-8 h-8" />
             </div>
@@ -29,7 +29,7 @@ const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               onClick={() => openHistoryModal(tenant)}
-              className="group bg-white rounded-3xl p-6 border border-slate-100 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all cursor-pointer relative overflow-hidden"
+              className="group bg-card rounded-3xl p-6 border border-slate-100 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all cursor-pointer relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <ChevronRight className="w-5 h-5 text-indigo-500" />

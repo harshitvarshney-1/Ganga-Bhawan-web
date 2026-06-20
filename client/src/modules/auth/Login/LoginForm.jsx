@@ -14,7 +14,7 @@ const LoginForm = () => {
           placeholder="Enter your email"
           className="w-full px-4 py-3 rounded-lg
             bg-slate-800 border border-slate-700
-            text-white placeholder-gray-500
+            text-foreground placeholder-gray-500
             focus:outline-none focus:border-cyan-500
             focus:ring-2 focus:ring-cyan-500/20 transition"
         />
@@ -30,7 +30,7 @@ const LoginForm = () => {
           placeholder="Enter your password"
           className="w-full px-4 py-3 rounded-lg
             bg-slate-800 border border-slate-700
-            text-white placeholder-gray-500
+            text-foreground placeholder-gray-500
             focus:outline-none focus:border-cyan-500
             focus:ring-2 focus:ring-cyan-500/20 transition"
         />
@@ -39,7 +39,7 @@ const LoginForm = () => {
       {/* Button */}
       <button
         type="submit"
-        className="w-full py-3 rounded-lg font-semibold text-white
+        className="w-full py-3 rounded-lg font-semibold text-foreground
           bg-gradient-to-r from-cyan-500 to-teal-500
           hover:opacity-90 hover:-translate-y-[1px]
           transition shadow-lg shadow-cyan-500/30"

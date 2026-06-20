@@ -27,7 +27,7 @@ const Details = ({ userData }) => {
         <div className="relative z-10 px-8 py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-indigo-400 text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5">Ganga Bhawan</p>
-            <h1 className="text-2xl lg:text-3xl font-black text-white font-outfit">Personal Details</h1>
+            <h1 className="text-2xl lg:text-3xl font-black text-foreground font-outfit">Personal Details</h1>
             <p className="text-slate-500 text-sm font-medium mt-1">Family information and official documents</p>
           </div>
           <div className="flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-2xl">
@@ -38,7 +38,7 @@ const Details = ({ userData }) => {
       </motion.div>
 
       {/* Family Information */}
-      <motion.div variants={cardVariants} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+      <motion.div variants={cardVariants} className="bg-card rounded-3xl p-6 border border-slate-100 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2.5 bg-indigo-100 text-indigo-600 rounded-2xl">
             <Users className="w-5 h-5" />
@@ -55,7 +55,7 @@ const Details = ({ userData }) => {
       </motion.div>
 
       {/* Official Documents */}
-      <motion.div variants={cardVariants} className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+      <motion.div variants={cardVariants} className="bg-card rounded-3xl p-6 border border-slate-100 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2.5 bg-cyan-100 text-cyan-600 rounded-2xl">
             <FileText className="w-5 h-5" />
@@ -75,9 +75,9 @@ const Details = ({ userData }) => {
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="p-4 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
-                  <FileImage className="w-8 h-8 text-white" />
+                  <FileImage className="w-8 h-8 text-foreground" />
                 </div>
-                <div className="p-2 bg-white rounded-full group-hover:bg-indigo-50 transition-colors border border-slate-200">
+                <div className="p-2 bg-card rounded-full group-hover:bg-indigo-50 transition-colors border border-slate-200">
                   <DownloadCloud className="w-5 h-5 text-slate-400 group-hover:text-indigo-600" />
                 </div>
               </div>
@@ -105,9 +105,9 @@ const Details = ({ userData }) => {
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="p-4 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
-                  <FileImage className="w-8 h-8 text-white" />
+                  <FileImage className="w-8 h-8 text-foreground" />
                 </div>
-                <div className="p-2 bg-white rounded-full group-hover:bg-indigo-50 transition-colors border border-slate-200">
+                <div className="p-2 bg-card rounded-full group-hover:bg-indigo-50 transition-colors border border-slate-200">
                   <DownloadCloud className="w-5 h-5 text-slate-400 group-hover:text-indigo-600" />
                 </div>
               </div>
@@ -130,7 +130,7 @@ const Details = ({ userData }) => {
 };
 
 const DetailRow = ({ icon: Icon, label, value, iconBg, iconColor }) => (
-  <div className="flex items-center gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 hover:bg-white transition-all group">
+  <div className="flex items-center gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 hover:bg-card transition-all group">
     <div className={`p-3 rounded-xl ${iconBg} group-hover:scale-110 transition-transform`}>
       <Icon className={`w-5 h-5 ${iconColor}`} />
     </div>

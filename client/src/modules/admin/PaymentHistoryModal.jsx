@@ -76,7 +76,7 @@ const PaymentHistoryModal = ({
         {/* Header */}
         <div className="p-5 border-b border-border flex items-center justify-between relative z-10">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-primary/20">
+            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-foreground font-bold text-2xl shadow-lg shadow-primary/20">
               {selectedHistoryTenant.fullName.charAt(0).toUpperCase()}
             </div>
             <div>
@@ -135,7 +135,7 @@ const PaymentHistoryModal = ({
                 <button 
                   onClick={handleAssignRent}
                   disabled={assigning}
-                  className="w-full md:w-auto px-6 py-3 bg-primary hover:bg-primary/90 text-white font-bold rounded-xl shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
+                  className="w-full md:w-auto px-6 py-3 bg-primary hover:bg-primary/90 text-foreground font-bold rounded-xl shadow-lg shadow-primary/20 transition-all disabled:opacity-50"
                 >
                   {assigning ? 'Assigning...' : 'Assign Rent'}
                 </button>
@@ -203,7 +203,7 @@ const PaymentHistoryModal = ({
                         <div className="flex gap-2">
                           <button 
                             onClick={() => setFullScreenImage(payment.barcodeImage)}
-                            className="flex-1 py-2 bg-card rounded-xl shadow-sm text-[10px] font-bold text-slate-700 flex items-center justify-center gap-1.5 hover:bg-primary hover:text-white transition-all border border-border"
+                            className="flex-1 py-2 bg-card rounded-xl shadow-sm text-[10px] font-bold text-slate-700 flex items-center justify-center gap-1.5 hover:bg-primary hover:text-foreground transition-all border border-border"
                           >
                             <ImageIcon className="w-3.5 h-3.5" />
                             RECEIPT
@@ -213,7 +213,7 @@ const PaymentHistoryModal = ({
                               e.stopPropagation();
                               handleDeletePayment(payment._id, selectedHistoryTenant._id);
                             }}
-                            className="p-2 bg-card rounded-xl shadow-sm text-rose-500 hover:bg-rose-600 hover:text-white transition-all border border-border"
+                            className="p-2 bg-card rounded-xl shadow-sm text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all border border-border"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>
@@ -230,7 +230,7 @@ const PaymentHistoryModal = ({
                 
                 <div className="relative z-10">
                   <div className="flex items-center gap-4 mb-8">
-                    <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                    <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-foreground shadow-lg shadow-primary/20">
                       <Rocket className="w-6 h-6" />
                     </div>
                     <div>
@@ -256,7 +256,7 @@ const PaymentHistoryModal = ({
                           {payment.barcodeImage && (
                             <button 
                               onClick={() => setFullScreenImage(payment.barcodeImage)}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-indigo-500 hover:bg-primary hover:text-white transition-all"
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-indigo-500 hover:bg-primary hover:text-foreground transition-all"
                             >
                               <ImageIcon className="w-5 h-5" />
                             </button>
@@ -266,7 +266,7 @@ const PaymentHistoryModal = ({
                               e.stopPropagation();
                               handleDeletePayment(payment._id, selectedHistoryTenant._id);
                             }}
-                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-rose-500 hover:bg-rose-600 hover:text-white transition-all"
+                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all"
                           >
                             <Trash2 className="w-5 h-5" />
                           </button>

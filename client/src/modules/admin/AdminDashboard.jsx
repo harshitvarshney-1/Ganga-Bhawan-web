@@ -687,7 +687,7 @@ const AdminDashboard = () => {
                                 onClick={() => { setSelectedTenant(tenant); setShowModal(true); }}
                                 className="flex items-center gap-2.5 p-2.5 rounded-md hover:bg-accent cursor-pointer transition-colors"
                               >
-                                <div className={`w-8 h-8 rounded-md flex items-center justify-center text-white font-semibold text-[12px] shrink-0 ${isPending ? 'bg-amber-500' : 'bg-primary'}`}>
+                                <div className={`w-8 h-8 rounded-md flex items-center justify-center text-foreground font-semibold text-[12px] shrink-0 ${isPending ? 'bg-amber-500' : 'bg-primary'}`}>
                                   {tenant.fullName.charAt(0)}
                                 </div>
                                 <div className="flex-1 min-w-0">
@@ -848,7 +848,7 @@ const AdminDashboard = () => {
                             </button>
                             <button
                               onClick={() => handleApprovePayment(payment._id)}
-                              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 text-[13px] font-medium"
+                              className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-foreground rounded-md hover:bg-emerald-700 text-[13px] font-medium"
                             >
                               ✓ Approve
                             </button>
@@ -1014,10 +1014,10 @@ const AdminDashboard = () => {
               <div className="flex gap-2.5 pt-5 border-t border-border flex-wrap">
                 {pendingTenants.some(t => t._id === selectedTenant._id) && (
                   <>
-                    <button onClick={() => { handleApprove(selectedTenant._id); setShowModal(false); }} className="flex-1 px-5 py-2.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 font-medium text-[13px] transition-colors">
+                    <button onClick={() => { handleApprove(selectedTenant._id); setShowModal(false); }} className="flex-1 px-5 py-2.5 bg-emerald-600 text-foreground rounded-md hover:bg-emerald-700 font-medium text-[13px] transition-colors">
                       ✓ Approve Tenant
                     </button>
-                    <button onClick={() => { handleReject(selectedTenant._id); setShowModal(false); }} className="flex-1 px-5 py-2.5 bg-amber-500 text-white rounded-md hover:bg-amber-600 font-medium text-[13px] transition-colors">
+                    <button onClick={() => { handleReject(selectedTenant._id); setShowModal(false); }} className="flex-1 px-5 py-2.5 bg-amber-500 text-foreground rounded-md hover:bg-amber-600 font-medium text-[13px] transition-colors">
                       ✕ Reject
                     </button>
                   </>
@@ -1028,7 +1028,7 @@ const AdminDashboard = () => {
                   </button>
                 ) : (
                   !pendingTenants.some(t => t._id === selectedTenant._id) && (
-                    <button onClick={() => handleDisable(selectedTenant._id)} className="flex-1 px-5 py-2.5 bg-amber-600 text-white rounded-md hover:bg-amber-700 font-medium text-[13px] transition-colors">
+                    <button onClick={() => handleDisable(selectedTenant._id)} className="flex-1 px-5 py-2.5 bg-amber-600 text-foreground rounded-md hover:bg-amber-700 font-medium text-[13px] transition-colors">
                       🚫 Disable Account
                     </button>
                   )
@@ -1062,11 +1062,11 @@ const AdminDashboard = () => {
             className="relative max-w-full max-h-full"
             onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={() => setFullScreenImage(null)} className="absolute -top-12 right-0 w-9 h-9 flex items-center justify-center bg-white/10 hover:bg-white/20 rounded-lg text-white transition-colors">
+            <button onClick={() => setFullScreenImage(null)} className="absolute -top-12 right-0 w-9 h-9 flex items-center justify-center bg-card/10 hover:bg-card/20 rounded-lg text-foreground transition-colors">
               ✕
             </button>
             <img src={fullScreenImage} alt="Full size" className="max-w-full max-h-full object-contain rounded-lg" style={{ maxWidth: '90vw', maxHeight: '85vh' }} />
-            <p className="text-center text-white/50 text-[12px] mt-3">Click outside or press ESC to close</p>
+            <p className="text-center text-foreground/50 text-[12px] mt-3">Click outside or press ESC to close</p>
           </motion.div>
         </div>
       )}
