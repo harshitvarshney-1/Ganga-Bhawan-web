@@ -1,6 +1,6 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import LogoIcon from "../../atoms/Logo/LogoIcon";
+import LogoIcon from "@/shared/components/atoms/Logo/LogoIcon";
 
 const Logo = () => {
   const navigate = useNavigate();

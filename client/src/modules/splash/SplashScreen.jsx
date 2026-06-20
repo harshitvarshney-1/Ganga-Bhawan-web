@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import LogoIcon from "../../../shared/components/atoms/Logo/LogoIcon";
+import LogoIcon from "@/shared/components/atoms/Logo/LogoIcon";
 import './SplashScreen.css';
 
 const SplashScreen = ({ onComplete }) => {
