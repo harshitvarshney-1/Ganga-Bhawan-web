@@ -78,7 +78,7 @@ const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSel
             <button
               onClick={() => { setSelectedTenant(tenant); setShowModal(true); }}
               className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-medium text-[12px] transition-colors border border-border ${
-                isPending ? 'flex-1 bg-accent text-foreground hover:bg-accent/80' : 'w-full bg-primary/10 text-primary hover:bg-primary/20 border-primary/20'
+                isPending ? 'flex-1 bg-accent text-foreground hover:bg-accent/80' : (!tenant.isDisabled ? 'flex-1 bg-primary/10 text-primary hover:bg-primary/20 border-primary/20' : 'w-full bg-primary/10 text-primary hover:bg-primary/20 border-primary/20')
               }`}
             >
               <Eye className="w-3.5 h-3.5" />
