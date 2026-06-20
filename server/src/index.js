@@ -9,6 +9,7 @@ import { currentConfig } from './config/env.js';
 import { connectDB } from './infra/mongodb.js';
 import routes from './routes/index.js';
 import { verifyEmailConnection } from './utils/email.util.js';
+import { sanitizeError } from './utils/error.util.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -88,9 +89,12 @@ app.get('/ping', (req, res) => res.status(200).send('pong'));
 app.use('/api', routes);
 app.get('/', (req, res) => res.json({ message: 'API is Live' }));
 
+// Global error handler - sanitizes sensitive information
 app.use((err, req, res, next) => {
-  console.error(err);
-  res.status(500).json({ error: 'Server Error' });
+  console.error('Server Error:', err);
+  const sanitizedMessage = sanitizeError(err);
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({ error: sanitizedMessage });
 });
 
 if (process.env.NODE_ENV !== 'test') {
