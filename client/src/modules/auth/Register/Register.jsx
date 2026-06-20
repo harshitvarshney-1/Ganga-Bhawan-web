@@ -5,7 +5,7 @@ import { registerTenantAPI } from '../../../infra/auth/auth.api';
 import { uploadToCloudinaryDirect } from '../../../infra/cloudinary';
 import { authAtom, userAtom } from '../../../shared/hooks/store/auth.atom';
 import Loader from '../../../shared/components/atoms/Loader/Loader';
-import LogoIcon from "../../../shared/components/atoms/Logo";
+import LogoIcon from "../../../shared/components/atoms/Logo/LogoIcon";
 
 export default function Register() {
   const navigate = useNavigate();

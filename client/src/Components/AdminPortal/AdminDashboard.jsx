@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../../services/api';
 import Loader from '../Loader/Loader';
-import LogoIcon from "../../shared/components/atoms/Logo";
+import LogoIcon from "../../shared/components/atoms/Logo/LogoIcon";
 
 
 const StatCard = ({ title, value, icon, gradient }) => (

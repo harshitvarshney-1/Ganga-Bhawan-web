@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, UserPlus, Users, IndianRupee, History, LogOut } from 'lucide-react';
-import LogoIcon from "../../../shared/components/atoms/Logo";
+import LogoIcon from "../../../shared/components/atoms/Logo/LogoIcon";
 
 const menuItems = [
   { id: 'overview',        label: 'Dashboard',        icon: LayoutDashboard },
