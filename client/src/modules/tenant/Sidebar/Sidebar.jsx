@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, FileText, CreditCard, LogOut, Camera, CheckCircle2, Clock } from 'lucide-react';
+import LogoIcon from '../../shared/components/atoms/Logo/LogoIcon';
 
 const menuItems = [
   { id: 'profile', label: 'My Profile',       icon: User },
@@ -26,8 +27,8 @@ const Sidebar = ({
       {/* Brand */}
       <div className="px-6 pt-6 pb-4">
         <div className="flex items-center gap-3 mb-6">
-          <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center shadow-lg shrink-0">
-            <span className="text-lg">🏠</span>
+          <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shadow-lg shrink-0 text-primary">
+            <LogoIcon size={24} />
           </div>
           <div>
             <h1 className="text-[13px] font-semibold text-foreground leading-none">Ganga Bhawan</h1>

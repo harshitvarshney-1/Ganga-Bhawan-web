@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BASE_URL } from '../../services/api';
 import Loader from '../Loader/Loader';
+import LogoIcon from '../../shared/components/atoms/Logo/LogoIcon';
 
 
 const StatCard = ({ title, value, icon, gradient }) => (
@@ -821,8 +822,8 @@ const AdminDashboard = () => {
         <div className="flex-1 overflow-y-auto">
           <div className="p-6 border-b border-gray-700">
             <div className="flex items-center gap-3">
-              <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-2 rounded-xl text-2xl">
-                🏠
+              <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-2 rounded-xl text-primary">
+                <LogoIcon size={32} />
               </div>
               <h2 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
                 Ganga Bhawan

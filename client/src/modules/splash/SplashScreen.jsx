@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import LogoIcon from '../../shared/components/atoms/Logo/LogoIcon';
 import './SplashScreen.css';
 
 const SplashScreen = ({ onComplete }) => {
@@ -39,7 +40,9 @@ const SplashScreen = ({ onComplete }) => {
   return (
     <div className={`splash-screen ${!isVisible ? 'fade-out' : ''}`}>
       <div className="splash-content">
-        <div className={`splash-icon ${animationStage}`}>🏠</div>
+        <div className={`splash-icon ${animationStage}`}>
+          <LogoIcon size={80} />
+        </div>
         
         <div className={`splash-title-container ${animationStage}`}>
           {letters.map((letter, index) => (

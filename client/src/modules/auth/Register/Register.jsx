@@ -5,6 +5,7 @@ import { registerTenantAPI } from '../../../infra/auth/auth.api';
 import { uploadToCloudinaryDirect } from '../../../infra/cloudinary';
 import { authAtom, userAtom } from '../../../shared/hooks/store/auth.atom';
 import Loader from '../../../shared/components/atoms/Loader/Loader';
+import LogoIcon from '../../../shared/components/atoms/Logo/LogoIcon';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -123,7 +124,7 @@ export default function Register() {
         <div className="max-w-2xl mx-auto">
           {/* Brand header */}
           <div className="text-center mb-6">
-            <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center mx-auto mb-3 text-xl shadow-lg">🏠</div>
+            <div className="w-16 h-16 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-3 shadow-lg text-primary"><LogoIcon size={40} /></div>
             <h1 className="text-lg font-semibold text-foreground">Ganga Bhawan</h1>
             <p className="text-[13px] text-muted-foreground mt-0.5">Create your tenant account</p>
           </div>
