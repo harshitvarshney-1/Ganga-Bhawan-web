@@ -15,7 +15,7 @@ const LoginForm = () => {
           className="w-full px-4 py-3 rounded-lg
             bg-slate-800 border border-slate-700
             text-foreground placeholder-gray-500
-            focus:outline-none focus:border-cyan-500
+            focus:outline-none focus:border-primary
             focus:ring-2 focus:ring-cyan-500/20 transition"
         />
       </div>
@@ -31,7 +31,7 @@ const LoginForm = () => {
           className="w-full px-4 py-3 rounded-lg
             bg-slate-800 border border-slate-700
             text-foreground placeholder-gray-500
-            focus:outline-none focus:border-cyan-500
+            focus:outline-none focus:border-primary
             focus:ring-2 focus:ring-cyan-500/20 transition"
         />
       </div>
@@ -50,7 +50,7 @@ const LoginForm = () => {
       {/* Register link */}
       <p className="text-sm text-center text-gray-400 pt-3">
         Don't have an account?{" "}
-        <Link to="/register" className="text-cyan-400 hover:underline cursor-pointer">
+        <Link to="/register" className="text-primary hover:underline cursor-pointer">
           Register
         </Link>
       </p>

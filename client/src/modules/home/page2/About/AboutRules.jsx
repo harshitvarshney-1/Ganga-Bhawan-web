@@ -11,7 +11,7 @@ const AboutRules = () => {
     <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12">
 
       <h2 className="text-3xl font-bold mb-6">
-        House <span className="text-cyan-400">Rules & Discipline</span>
+        House <span className="text-primary">Rules & Discipline</span>
       </h2>
 
       <p className="text-gray-400 mb-8 max-w-2xl">
@@ -23,7 +23,7 @@ const AboutRules = () => {
         {rules.map((rule) => (
           <li
             key={rule}
-            className="hover:text-cyan-400 transition"
+            className="hover:text-primary transition"
           >
             {rule}
           </li>

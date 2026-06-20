@@ -5,11 +5,11 @@ import { TrendingUp } from 'lucide-react';
 const StatCard = ({ title, value, icon: Icon, color, index, trend }) => {
   const colorMap = {
     indigo: {
-      bg: 'bg-indigo-50',
+      bg: 'bg-primary/10',
       border: 'border-indigo-100',
-      icon: 'bg-indigo-600',
-      iconShadow: 'shadow-indigo-200',
-      text: 'text-indigo-600',
+      icon: 'bg-primary',
+      iconShadow: 'shadow-primary/10',
+      text: 'text-primary',
       glow: 'before:bg-indigo-400/10',
     },
     amber: {

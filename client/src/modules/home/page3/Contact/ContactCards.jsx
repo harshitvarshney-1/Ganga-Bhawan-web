@@ -39,11 +39,11 @@ const ContactCards = () => {
           key={item.title}
           className="p-8 rounded-2xl bg-slate-900
           border border-slate-800
-          hover:border-cyan-500/40
+          hover:border-primary/40
           hover:-translate-y-1 transition"
         >
           {/* Icon */}
-          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500/20 to-blue-500/20 flex items-center justify-center mb-4 text-3xl">
+          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-primary/20 to-primary/20 flex items-center justify-center mb-4 text-3xl">
             {item.icon}
           </div>
 
@@ -65,7 +65,7 @@ const ContactCards = () => {
               className={`inline-block mt-4 px-4 py-2 rounded-md
               ${item.title === "WhatsApp" 
                 ? "bg-green-500/10 text-green-400 hover:bg-green-500" 
-                : "bg-blue-500/10 text-blue-400 hover:bg-blue-500"
+                : "bg-primary/100/10 text-blue-400 hover:bg-primary/100"
               }
               hover:text-foreground transition text-sm font-medium`}
             >

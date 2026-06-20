@@ -99,7 +99,7 @@ const PaymentHistoryModal = ({
         <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
           {loadingHistory ? (
             <div className="py-20 text-center">
-              <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
+              <div className="w-12 h-12 border-4 border-primary/20 border-t-indigo-600 rounded-full animate-spin mx-auto mb-6"></div>
               <p className="text-muted-foreground font-bold font-outfit">Retrieving Financial Records...</p>
             </div>
           ) : (
@@ -176,7 +176,7 @@ const PaymentHistoryModal = ({
                     icon = <AlertTriangle className="w-5 h-5 text-rose-500" />;
                     label = "Issue Found";
                   } else if (isDue) {
-                    style = "bg-primary/10 border-indigo-200 text-indigo-800 shadow-sm";
+                    style = "bg-primary/10 border-primary/30 text-foreground shadow-sm";
                     icon = <Calendar className="w-5 h-5 text-primary" />;
                     label = "ASSIGNED (DUE)";
                   } else if (isOverdue) {
@@ -243,7 +243,7 @@ const PaymentHistoryModal = ({
                     {tenantPayments.filter(p => p.isAdvanced).map((payment, idx) => (
                       <div key={idx} className="bg-card px-5 py-4 rounded-2xl border border-indigo-100 shadow-sm flex items-center gap-5 group/adv">
                         <div>
-                          <p className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Target Month</p>
+                          <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Target Month</p>
                           <span className="font-bold text-foreground">{payment.month || 'Future'}</span>
                         </div>
                         <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
@@ -319,7 +319,7 @@ const PaymentHistoryModal = ({
                             {payment.barcodeImage && (
                               <button 
                                 onClick={() => setFullScreenImage(payment.barcodeImage)}
-                                className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-indigo-200 hover:bg-card transition-all shadow-sm"
+                                className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-card transition-all shadow-sm"
                                 title="View Receipt"
                               >
                                 <ImageIcon className="w-5 h-5" />

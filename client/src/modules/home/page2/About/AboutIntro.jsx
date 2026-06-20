@@ -4,13 +4,13 @@ const AboutIntro = () => {
 
       {/* TEXT */}
       <div className="space-y-6">
-        <span className="text-cyan-400 text-sm tracking-widest uppercase">
+        <span className="text-primary text-sm tracking-widest uppercase">
           About Ganga Bhawan
         </span>
 
         <h2 className="text-3xl md:text-4xl font-bold leading-tight">
           A Safe & Trusted Hostel / PG <br />
-          <span className="text-cyan-400">for Students & Professionals</span>
+          <span className="text-primary">for Students & Professionals</span>
         </h2>
 
         <p className="text-gray-400 leading-relaxed">
@@ -22,7 +22,7 @@ const AboutIntro = () => {
 
         <p className="text-gray-400 leading-relaxed">
           The property is personally managed by
-          <span className="text-cyan-400 font-medium">
+          <span className="text-primary font-medium">
             {" "}Shri Hariom Varshney{" "}
           </span>
           and his family, ensuring every tenant receives respectful and
@@ -41,9 +41,9 @@ const AboutIntro = () => {
           <div
             key={label}
             className="p-6 rounded-xl bg-slate-900 border border-slate-800
-            hover:border-cyan-500/40 transition"
+            hover:border-primary/40 transition"
           >
-            <h3 className="text-2xl font-bold text-cyan-400">{value}</h3>
+            <h3 className="text-2xl font-bold text-primary">{value}</h3>
             <p className="text-gray-400 mt-1">{label}</p>
           </div>
         ))}

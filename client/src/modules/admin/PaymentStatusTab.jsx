@@ -29,18 +29,18 @@ const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               onClick={() => openHistoryModal(tenant)}
-              className="group bg-card rounded-3xl p-6 border border-slate-100 hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 transition-all cursor-pointer relative overflow-hidden"
+              className="group bg-card rounded-3xl p-6 border border-slate-100 hover:border-primary hover:shadow-2xl hover:shadow-indigo-500/10 transition-all cursor-pointer relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <ChevronRight className="w-5 h-5 text-indigo-500" />
               </div>
 
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-xl group-hover:scale-110 transition-transform duration-300">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 flex items-center justify-center text-primary font-bold text-xl group-hover:scale-110 transition-transform duration-300">
                   {tenant.fullName.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-indigo-600 transition-colors font-outfit">{tenant.fullName}</h3>
+                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-primary transition-colors font-outfit">{tenant.fullName}</h3>
                   <div className="flex items-center gap-1.5 text-slate-500 text-sm font-medium">
                     <User className="w-3 h-3" />
                     <span>ID: {tenant._id.slice(-6).toUpperCase()}</span>
@@ -62,7 +62,7 @@ const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
                 </div>
               </div>
               
-              <div className="mt-6 flex items-center justify-center gap-2 py-2 bg-indigo-50 text-indigo-600 rounded-xl opacity-0 group-hover:opacity-100 transition-all">
+              <div className="mt-6 flex items-center justify-center gap-2 py-2 bg-primary/10 text-primary rounded-xl opacity-0 group-hover:opacity-100 transition-all">
                 <History className="w-4 h-4" />
                 <span className="text-sm font-bold">View History</span>
               </div>

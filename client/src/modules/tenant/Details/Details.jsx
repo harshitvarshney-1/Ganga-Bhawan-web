@@ -26,7 +26,7 @@ const Details = ({ userData }) => {
         <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
         <div className="relative z-10 px-8 py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-indigo-400 text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5">Ganga Bhawan</p>
+            <p className="text-primary text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5">Ganga Bhawan</p>
             <h1 className="text-2xl lg:text-3xl font-black text-foreground font-outfit">Personal Details</h1>
             <p className="text-slate-500 text-sm font-medium mt-1">Family information and official documents</p>
           </div>
@@ -40,15 +40,15 @@ const Details = ({ userData }) => {
       {/* Family Information */}
       <motion.div variants={cardVariants} className="bg-card rounded-3xl p-6 border border-slate-100 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-indigo-100 text-indigo-600 rounded-2xl">
+          <div className="p-2.5 bg-muted text-primary rounded-2xl">
             <Users className="w-5 h-5" />
           </div>
           <h3 className="text-lg font-bold text-slate-900 font-outfit">Family Information</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DetailRow icon={User}  label="Father's Name"  value={userData?.fatherName}  iconBg="bg-indigo-50" iconColor="text-indigo-600" />
-          <DetailRow icon={Phone} label="Father's Phone" value={userData?.fatherPhone} iconBg="bg-indigo-50" iconColor="text-indigo-600" />
+          <DetailRow icon={User}  label="Father's Name"  value={userData?.fatherName}  iconBg="bg-primary/10" iconColor="text-primary" />
+          <DetailRow icon={Phone} label="Father's Phone" value={userData?.fatherPhone} iconBg="bg-primary/10" iconColor="text-primary" />
           <DetailRow icon={User}  label="Mother's Name"  value={userData?.motherName}  iconBg="bg-pink-50"   iconColor="text-pink-600" />
           <DetailRow icon={Phone} label="Mother's Phone" value={userData?.motherPhone} iconBg="bg-pink-50"   iconColor="text-pink-600" />
         </div>
@@ -74,11 +74,11 @@ const Details = ({ userData }) => {
               className="group flex flex-col justify-between bg-slate-50 rounded-3xl border border-slate-200 p-6 hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer"
             >
               <div className="flex items-start justify-between mb-6">
-                <div className="p-4 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+                <div className="p-4 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                   <FileImage className="w-8 h-8 text-foreground" />
                 </div>
-                <div className="p-2 bg-card rounded-full group-hover:bg-indigo-50 transition-colors border border-slate-200">
-                  <DownloadCloud className="w-5 h-5 text-slate-400 group-hover:text-indigo-600" />
+                <div className="p-2 bg-card rounded-full group-hover:bg-primary/10 transition-colors border border-slate-200">
+                  <DownloadCloud className="w-5 h-5 text-slate-400 group-hover:text-primary" />
                 </div>
               </div>
               <div>
@@ -104,11 +104,11 @@ const Details = ({ userData }) => {
               className="group flex flex-col justify-between bg-slate-50 rounded-3xl border border-slate-200 p-6 hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer"
             >
               <div className="flex items-start justify-between mb-6">
-                <div className="p-4 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl shadow-lg shadow-indigo-500/20 group-hover:scale-110 transition-transform">
+                <div className="p-4 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                   <FileImage className="w-8 h-8 text-foreground" />
                 </div>
-                <div className="p-2 bg-card rounded-full group-hover:bg-indigo-50 transition-colors border border-slate-200">
-                  <DownloadCloud className="w-5 h-5 text-slate-400 group-hover:text-indigo-600" />
+                <div className="p-2 bg-card rounded-full group-hover:bg-primary/10 transition-colors border border-slate-200">
+                  <DownloadCloud className="w-5 h-5 text-slate-400 group-hover:text-primary" />
                 </div>
               </div>
               <div>

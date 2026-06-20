@@ -37,7 +37,7 @@ function CustomAlert({ open, message, onClose }) {
             initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
             className="bg-card rounded-3xl shadow-2xl p-6 md:p-8 min-w-[320px] max-w-sm text-center relative max-h-[90vh] overflow-hidden"
           >
-            <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-8 h-8" />
             </div>
             <h3 className="text-xl font-bold text-foreground mb-2">Notice</h3>
@@ -426,10 +426,10 @@ const Payment = () => {
       
       {/* Hero Header */}
       <motion.div variants={itemVariants} className="relative overflow-hidden rounded-3xl bg-background">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/20 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
         <div className="relative z-10 px-8 py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <p className="text-indigo-400 text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5">Ganga Bhawan</p>
+            <p className="text-primary text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5">Ganga Bhawan</p>
             <h1 className="text-2xl lg:text-3xl font-black text-foreground font-outfit">Payments &amp; Dues</h1>
             <p className="text-muted-foreground text-sm font-medium mt-1">Manage your rent, clear dues, and view payment history</p>
           </div>
@@ -446,7 +446,7 @@ const Payment = () => {
         
         {/* User Card */}
         <div className="lg:col-span-1 bg-card rounded-3xl p-6 border border-border shadow-sm flex items-center gap-5">
-          <div className="w-16 h-16 rounded-[1.2rem] bg-indigo-50 flex items-center justify-center text-indigo-600 text-2xl font-black shadow-inner">
+          <div className="w-16 h-16 rounded-[1.2rem] bg-primary/10 flex items-center justify-center text-primary text-2xl font-black shadow-inner">
             {user?.fullName?.charAt(0)?.toUpperCase() || 'T'}
           </div>
           <div className="min-w-0">
@@ -456,7 +456,7 @@ const Payment = () => {
         </div>
 
         {/* Advanced Booking Box */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 relative overflow-hidden text-foreground shadow-xl shadow-indigo-500/20 group">
+        <div className="lg:col-span-2 bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-6 relative overflow-hidden text-foreground shadow-xl shadow-primary/20 group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full -mr-32 -mt-32 blur-2xl group-hover:bg-primary/20 transition-all duration-700 pointer-events-none" />
           
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 h-full">
@@ -465,7 +465,7 @@ const Payment = () => {
                 <Rocket className="w-3.5 h-3.5" /> Fast Track
               </div>
               <h3 className="text-2xl font-bold mb-1">Advanced Booking</h3>
-              <p className="text-indigo-100 text-sm font-medium">Pre-pay for coming months to avoid late fees</p>
+              <p className="text-primary-foreground text-sm font-medium">Pre-pay for coming months to avoid late fees</p>
             </div>
             
             {payments.filter(p => p.isAdvanced && p.status !== 'rejected').length === 0 ? (
@@ -482,7 +482,7 @@ const Payment = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={openMultiModal}
-                  className="whitespace-nowrap px-6 py-3.5 bg-indigo-400 text-foreground hover:bg-indigo-300 font-bold rounded-2xl shadow-lg transition-all border border-white/30 flex items-center gap-2"
+                  className="whitespace-nowrap px-6 py-3.5 bg-indigo-400 text-foreground hover:bg-indigo-300 font-bold rounded-2xl shadow-lg transition-all border border-primary/30 flex items-center gap-2"
                 >
                   Bulk Payment (Multi-Month)
                 </motion.button>
@@ -554,8 +554,8 @@ const Payment = () => {
               tagStyle = "bg-amber-100 text-amber-700";
               tagText = "Processing";
             } else if (isDue || isRejected) {
-              baseStyle = "border-indigo-200 bg-card text-indigo-900 shadow-xl shadow-indigo-100/50 ring-1 ring-indigo-50";
-              iconStyle = "bg-indigo-600 text-foreground shadow-indigo-600/30 shadow-lg";
+              baseStyle = "border-primary/30 bg-card text-foreground shadow-xl shadow-indigo-100/50 ring-1 ring-primary/10";
+              iconStyle = "bg-primary text-foreground shadow-primary/30 shadow-lg";
               tagStyle = "bg-rose-100 text-rose-600 animate-pulse";
               tagText = isRejected ? "Rejected/Due" : "Due Now";
             } else {
@@ -601,7 +601,7 @@ const Payment = () => {
                         w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all 
                         shadow-lg relative overflow-hidden group/btn
                         ${canPay 
-                          ? 'bg-indigo-600 text-foreground shadow-indigo-200' 
+                          ? 'bg-primary text-foreground shadow-primary/10' 
                           : 'bg-rose-600 text-foreground shadow-rose-200'}
                       `}
                     >
@@ -650,7 +650,7 @@ const Payment = () => {
                   {payment.barcodeImage && (
                     <button 
                       onClick={() => setFullScreenImage(payment.barcodeImage)}
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm shrink-0 ml-auto sm:ml-0"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/10 transition-all shadow-sm shrink-0 ml-auto sm:ml-0"
                       title="View Receipt"
                     >
                       <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -772,7 +772,7 @@ const PaymentModal = ({
               <label className="block text-sm font-bold text-foreground mb-2">Select Target Month</label>
               <div className="relative">
                 <select
-                  className="w-full appearance-none p-4 bg-background border border-border rounded-xl font-medium text-foreground focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                  className="w-full appearance-none p-4 bg-background border border-border rounded-xl font-medium text-foreground focus:ring-2 focus:ring-primary/100 focus:border-primary outline-none transition-all cursor-pointer"
                   value={advancedModal.month}
                   onChange={(e) => setAdvancedModal({...advancedModal, month: e.target.value})}
                 >
@@ -808,7 +808,7 @@ const PaymentModal = ({
                           setMultiModal({...multiModal, selectedMonths: [...current, m]});
                         }
                       }}
-                      className={`p-3 rounded-xl border text-left transition-all ${isAlreadyPaid ? 'bg-background opacity-50' : isSelected ? 'bg-indigo-50 border-indigo-500' : 'bg-card border-border'}`}
+                      className={`p-3 rounded-xl border text-left transition-all ${isAlreadyPaid ? 'bg-background opacity-50' : isSelected ? 'bg-primary/10 border-primary' : 'bg-card border-border'}`}
                     >
                       <span className="text-xs font-bold block">{m}</span>
                       <span className="text-[10px] text-muted-foreground">{new Date().getFullYear() + (mIdx < new Date().getMonth() ? 1 : 0)}</span>
@@ -819,22 +819,22 @@ const PaymentModal = ({
             </div>
           )}
 
-          <div className="bg-indigo-50/50 rounded-2xl p-5 mb-6 border border-indigo-100 text-center">
+          <div className="bg-primary/10/50 rounded-2xl p-5 mb-6 border border-indigo-100 text-center">
             <div className="inline-block p-2 bg-card rounded-xl shadow-sm mb-3">
               <img src={barcodeImg} alt="QR Code" className="w-64 h-64 object-contain" />
             </div>
-            <p className="text-sm font-bold text-indigo-800">Scan to Pay securely</p>
+            <p className="text-sm font-bold text-foreground">Scan to Pay securely</p>
           </div>
 
           <div className="mb-6">
             <label className="block text-sm font-bold text-foreground mb-2">Upload Receipt</label>
             <div className="relative group">
               <input type="file" accept="image/*" onChange={handleBarcodeChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" disabled={processing} />
-              <div className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${barcodePreview ? 'border-indigo-200 bg-indigo-50/30' : 'border-border bg-background group-hover:bg-muted group-hover:border-slate-300'}`}>
+              <div className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${barcodePreview ? 'border-primary/30 bg-primary/10/30' : 'border-border bg-background group-hover:bg-muted group-hover:border-slate-300'}`}>
                 {barcodePreview ? (
                   <div className="space-y-3">
                     <img src={barcodePreview} alt="Preview" className="max-h-32 object-contain rounded-lg mx-auto shadow-sm" />
-                    <p className="text-xs font-bold text-indigo-600">Tap to replace image</p>
+                    <p className="text-xs font-bold text-primary">Tap to replace image</p>
                   </div>
                 ) : (
                   <div className="space-y-2 pointer-events-none">
@@ -854,10 +854,10 @@ const PaymentModal = ({
           <button
             onClick={handleSubmit}
             disabled={processing || !barcodeImage || (isAdvanced && !advancedModal.month) || (isMulti && multiModal.selectedMonths.length === 0)}
-            className="w-full py-4 bg-indigo-600 text-foreground rounded-xl font-bold shadow-lg shadow-indigo-600/20 hover:bg-indigo-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full py-4 bg-primary text-foreground rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {processing ? (
-              <><div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Verifying...</>
+              <><div className="w-5 h-5 border-2 border-primary/30 border-t-white rounded-full animate-spin" /> Verifying...</>
             ) : (
               <><CheckCircle2 className="w-5 h-5" /> Submit for Approval</>
             )}
