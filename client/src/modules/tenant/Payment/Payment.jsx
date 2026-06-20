@@ -753,12 +753,12 @@ const PaymentModal = ({
       className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[80] p-4"
       onClick={closeModal}
     >
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
-        className="bg-white rounded-[2rem] w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]"
+        className="bg-card rounded-xl w-full max-w-sm sm:max-w-md mx-2 sm:mx-0 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={e => e.stopPropagation()}
       >
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between">
           <h3 className="text-xl font-bold text-slate-800">{title}</h3>
           <button onClick={closeModal} className="w-8 h-8 rounded-full bg-slate-200/50 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors">
             <X className="w-4 h-4" />

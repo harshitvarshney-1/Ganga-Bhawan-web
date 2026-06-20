@@ -15,33 +15,55 @@ function getEmailConfig() {
   };
 }
 
+function validateRequiredSecrets(env) {
+  const required = {
+    JWT_SECRET: 'JWT secret for token signing',
+    CLOUDINARY_CLOUD_NAME: 'Cloudinary cloud name',
+    CLOUDINARY_API_KEY: 'Cloudinary API key',
+    CLOUDINARY_API_SECRET: 'Cloudinary API secret'
+  };
+
+  const missing = Object.entries(required)
+    .filter(([key]) => !process.env[key])
+    .map(([key, desc]) => `${key} (${desc})`);
+
+  if (missing.length > 0) {
+    console.error('❌ FATAL: Required environment variables missing:');
+    missing.forEach(m => console.error(`   - ${m}`));
+    process.exit(1);
+  }
+}
+
 export const config = {
   development: {
     port: process.env.PORT || 9000,
     mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/ganga-bhawan',
-    jwtSecret: process.env.JWT_SECRET || 'qwer',
+    jwtSecret: process.env.JWT_SECRET || (validateRequiredSecrets('development'), process.env.JWT_SECRET),
     clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
     cloudinary: {
-      cloudName: process.env.CLOUDINARY_CLOUD_NAME || 'dfg',
-      apiKey: process.env.CLOUDINARY_API_KEY || 'cvbn',
-      apiSecret: process.env.CLOUDINARY_API_SECRET || 'asdf'
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME || (validateRequiredSecrets('development'), process.env.CLOUDINARY_CLOUD_NAME),
+      apiKey: process.env.CLOUDINARY_API_KEY || (validateRequiredSecrets('development'), process.env.CLOUDINARY_API_KEY),
+      apiSecret: process.env.CLOUDINARY_API_SECRET || (validateRequiredSecrets('development'), process.env.CLOUDINARY_API_SECRET)
     },
     email: getEmailConfig()
   },
   production: {
     port: process.env.PORT || 5000,
     mongoUri: process.env.MONGODB_URI || process.env.MONGO_URI || process.env.MONGODB_URL,
-    jwtSecret: process.env.JWT_SECRET,
+    jwtSecret: process.env.JWT_SECRET || (validateRequiredSecrets('production'), process.env.JWT_SECRET),
     clientUrl: process.env.CLIENT_URL || process.env.FRONTEND_URL,
     apiUrl: process.env.API_URL || process.env.SERVER_URL,
     cloudinary: {
-      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-      apiKey: process.env.CLOUDINARY_API_KEY,
-      apiSecret: process.env.CLOUDINARY_API_SECRET
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME || (validateRequiredSecrets('production'), process.env.CLOUDINARY_CLOUD_NAME),
+      apiKey: process.env.CLOUDINARY_API_KEY || (validateRequiredSecrets('production'), process.env.CLOUDINARY_API_KEY),
+      apiSecret: process.env.CLOUDINARY_API_SECRET || (validateRequiredSecrets('production'), process.env.CLOUDINARY_API_SECRET)
     },
     email: getEmailConfig()
   }
 };
+
+// Validate required secrets on startup
+validateRequiredSecrets();
 
 const env = process.env.NODE_ENV || 'development';
 export const currentConfig = config[env];
