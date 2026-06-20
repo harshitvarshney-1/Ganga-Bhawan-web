@@ -1028,7 +1028,7 @@ const AdminDashboard = () => {
                   </button>
                 ) : (
                   !pendingTenants.some(t => t._id === selectedTenant._id) && (
-                    <button onClick={() => handleDisable(selectedTenant._id)} className="flex-1 px-5 py-2.5 bg-amber-600 text-foreground rounded-md hover:bg-amber-700 font-medium text-[13px] transition-colors">
+                    <button onClick={() => handleDisable(selectedTenant._id)} className="flex-1 px-5 py-2.5 bg-amber-500/20 border border-amber-500 text-amber-600 dark:text-amber-400 rounded-md hover:bg-amber-500/30 font-medium text-[13px] transition-colors">
                       🚫 Disable Account
                     </button>
                   )
