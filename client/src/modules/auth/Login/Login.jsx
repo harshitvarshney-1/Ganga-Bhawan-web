@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { loginAPI } from '../../../infra/auth/auth.api';
 import { authAtom, userAtom } from '../../../shared/hooks/store/auth.atom';
 import Loader from '../../../shared/components/atoms/Loader/Loader';
-import LogoIcon from '../../../shared/components/atoms/Logo/LogoIcon';
+import LogoIcon from "../../../shared/components/atoms/Logo";
 
 export default function Login() {
   const navigate = useNavigate();
