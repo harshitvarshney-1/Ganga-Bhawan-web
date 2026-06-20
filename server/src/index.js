@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import path from 'path';
 import compression from 'compression';
 import axios from 'axios';
@@ -54,6 +55,7 @@ app.use((req, res, next) => {
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // Cookie security settings for CSRF protection
 app.use((req, res, next) => {

@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit';
 import { registerUser } from '../../controllers/auth/register.controller.js';
 import { loginUser } from '../../controllers/auth/login.controller.js';
 import { logoutUser } from '../../controllers/auth/logout.controller.js';
+import { refreshAccessToken } from '../../controllers/auth/refresh.controller.js';
 
 const router = express.Router();
 
@@ -26,6 +27,7 @@ const registerLimiter = rateLimit({
 
 router.post('/register', registerLimiter, registerUser);
 router.post('/login', authLimiter, loginUser);
+router.post('/refresh', refreshAccessToken);
 router.post('/logout', logoutUser);
 
 export default router;

@@ -41,20 +41,41 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
+    // Short-lived access token (15 minutes)
+    const accessToken = jwt.sign(
       {
         userId: user._id,
         role: user.role,
-        email: user.email
+        email: user.email,
+        type: 'access'
+      },
+      currentConfig.jwtSecret,
+      { expiresIn: '15m' }
+    );
+
+    // Long-lived refresh token (7 days) - stored in httpOnly cookie
+    const refreshToken = jwt.sign(
+      {
+        userId: user._id,
+        type: 'refresh'
       },
       currentConfig.jwtSecret,
       { expiresIn: '7d' }
     );
 
+    // Set refresh token in httpOnly cookie (secure in production)
+    const cookieOptions = {
+      httpOnly: true,
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+    };
+    res.cookie('refreshToken', refreshToken, cookieOptions);
+
     res.json({
       success: true,
       message: 'Login successful',
-      token,
+      token: accessToken,
       user: {
         id: user._id,
         fullName: user.fullName,
