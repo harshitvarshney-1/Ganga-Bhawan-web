@@ -15,11 +15,11 @@ const monthNames = [
 
 function Legend({ color, text, icon: Icon }) {
   return (
-    <div className="flex items-center gap-2 px-3 py-1.5 bg-white/50 backdrop-blur-sm rounded-full border border-slate-100/50 shadow-sm">
+    <div className="flex items-center gap-2 px-3 py-1.5 bg-card/50 backdrop-blur-sm rounded-full border border-border/50 shadow-sm">
       <div className={`p-1 rounded-full ${color.bg}`}>
         <Icon className={`w-3.5 h-3.5 ${color.text}`} />
       </div>
-      <span className="text-[13px] font-bold text-slate-700">{text}</span>
+      <span className="text-[13px] font-bold text-foreground">{text}</span>
     </div>
   );
 }
@@ -31,20 +31,20 @@ function CustomAlert({ open, message, onClose }) {
       {open && (
         <motion.div 
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-background/40 backdrop-blur-sm p-4"
         >
           <motion.div 
             initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }}
-            className="bg-white rounded-3xl shadow-2xl p-6 md:p-8 min-w-[320px] max-w-sm text-center relative max-h-[90vh] overflow-hidden"
+            className="bg-card rounded-3xl shadow-2xl p-6 md:p-8 min-w-[320px] max-w-sm text-center relative max-h-[90vh] overflow-hidden"
           >
             <div className="w-16 h-16 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
               <AlertCircle className="w-8 h-8" />
             </div>
-            <h3 className="text-xl font-bold text-slate-800 mb-2">Notice</h3>
-            <p className="text-slate-500 text-sm mb-6 leading-relaxed">{message}</p>
+            <h3 className="text-xl font-bold text-foreground mb-2">Notice</h3>
+            <p className="text-muted-foreground text-sm mb-6 leading-relaxed">{message}</p>
             <button
               onClick={onClose}
-              className="w-full bg-slate-900 text-white px-6 py-3.5 rounded-2xl font-bold shadow-lg shadow-slate-900/20 hover:bg-slate-800 transition-all active:scale-95"
+              className="w-full bg-primary text-primary-foreground px-6 py-3.5 rounded-2xl font-bold shadow-lg hover:bg-primary/90 transition-all active:scale-95"
             >
               Acknowledge
             </button>
@@ -425,13 +425,13 @@ const Payment = () => {
       <CustomAlert open={alert.open} message={alert.message} onClose={handleAlertClose} />
       
       {/* Hero Header */}
-      <motion.div variants={itemVariants} className="relative overflow-hidden rounded-3xl bg-slate-900">
+      <motion.div variants={itemVariants} className="relative overflow-hidden rounded-3xl bg-background">
         <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-600/20 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
         <div className="relative z-10 px-8 py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <p className="text-indigo-400 text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5">Ganga Bhawan</p>
-            <h1 className="text-2xl lg:text-3xl font-black text-white font-outfit">Payments &amp; Dues</h1>
-            <p className="text-slate-500 text-sm font-medium mt-1">Manage your rent, clear dues, and view payment history</p>
+            <h1 className="text-2xl lg:text-3xl font-black text-foreground font-outfit">Payments &amp; Dues</h1>
+            <p className="text-muted-foreground text-sm font-medium mt-1">Manage your rent, clear dues, and view payment history</p>
           </div>
           <div className="flex gap-2 self-start sm:self-auto flex-wrap">
             <Legend color={{bg: 'bg-emerald-900/50', text: 'text-emerald-400'}} icon={CheckCircle2} text="Paid" />
@@ -445,23 +445,23 @@ const Payment = () => {
       <motion.div variants={itemVariants} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* User Card */}
-        <div className="lg:col-span-1 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex items-center gap-5">
+        <div className="lg:col-span-1 bg-card rounded-3xl p-6 border border-border shadow-sm flex items-center gap-5">
           <div className="w-16 h-16 rounded-[1.2rem] bg-indigo-50 flex items-center justify-center text-indigo-600 text-2xl font-black shadow-inner">
             {user?.fullName?.charAt(0)?.toUpperCase() || 'T'}
           </div>
           <div className="min-w-0">
-            <h2 className="text-lg font-bold text-slate-800 truncate">{user?.fullName || 'Tenant'}</h2>
-            <p className="text-sm text-slate-500 truncate">{user?.email}</p>
+            <h2 className="text-lg font-bold text-foreground truncate">{user?.fullName || 'Tenant'}</h2>
+            <p className="text-sm text-muted-foreground truncate">{user?.email}</p>
           </div>
         </div>
 
         {/* Advanced Booking Box */}
         <div className="lg:col-span-2 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl p-6 relative overflow-hidden text-white shadow-xl shadow-indigo-500/20 group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-2xl group-hover:bg-white/20 transition-all duration-700 pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full -mr-32 -mt-32 blur-2xl group-hover:bg-primary/20 transition-all duration-700 pointer-events-none" />
           
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 h-full">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold tracking-wider uppercase mb-3 text-indigo-50 border border-white/20">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/20 backdrop-blur-md rounded-full text-xs font-bold tracking-wider uppercase mb-3 text-primary-foreground border border-primary/20">
                 <Rocket className="w-3.5 h-3.5" /> Fast Track
               </div>
               <h3 className="text-2xl font-bold mb-1">Advanced Booking</h3>
@@ -474,7 +474,7 @@ const Payment = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => openAdvancedModal()}
-                  className="whitespace-nowrap px-6 py-3.5 bg-white text-indigo-600 hover:bg-slate-50 font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2"
+                  className="whitespace-nowrap px-6 py-3.5 bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2"
                 >
                   Pay in Advance
                 </motion.button>
@@ -493,12 +493,12 @@ const Payment = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={openMultiModal}
-                  className="whitespace-nowrap px-4 py-2 bg-white/20 backdrop-blur-md text-white font-bold rounded-xl border border-white/20 transition-all text-xs"
+                  className="whitespace-nowrap px-4 py-2 bg-primary/20 backdrop-blur-md text-primary font-bold rounded-xl border border-primary/20 transition-all text-xs"
                 >
                   + Add Bulk
                 </motion.button>
                 {payments.filter(p => p.isAdvanced && p.status !== 'rejected').map((payment, idx) => (
-                  <div key={idx} className="bg-white/20 backdrop-blur-md px-4 py-2 rounded-xl border border-white/20 flex items-center gap-3">
+                  <div key={idx} className="bg-primary/20 backdrop-blur-md px-4 py-2 rounded-xl border border-primary/20 flex items-center gap-3">
                     <span className="font-bold text-sm">{payment.month}</span>
                     <span className={`w-2 h-2 rounded-full ${
                       payment.status === 'success' ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]' : 
@@ -513,12 +513,12 @@ const Payment = () => {
       </motion.div>
 
       {/* Payment Calendar */}
-      <motion.div variants={itemVariants} className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm relative overflow-hidden">
+      <motion.div variants={itemVariants} className="bg-card rounded-3xl p-8 border border-border shadow-sm relative overflow-hidden">
         <div className="flex items-center justify-between mb-8 relative z-10">
-          <h3 className="text-xl font-bold text-slate-800 flex items-center gap-3">
+          <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
             <Calendar className="w-6 h-6 text-indigo-500" /> Payment Schedule
           </h3>
-          <div className="px-4 py-1.5 bg-slate-100 text-slate-600 font-bold rounded-full text-sm">
+          <div className="px-4 py-1.5 bg-muted text-muted-foreground font-bold rounded-full text-sm">
             Year {currentYear}
           </div>
         </div>
@@ -559,10 +559,10 @@ const Payment = () => {
               tagStyle = "bg-rose-100 text-rose-600 animate-pulse";
               tagText = isRejected ? "Rejected/Due" : "Due Now";
             } else {
-              tagStyle = "bg-slate-200 text-slate-500";
+              tagStyle = "bg-muted text-muted-foreground";
               tagText = "Upcoming";
-              baseStyle = "border-slate-100 bg-white text-slate-400 opacity-60";
-              iconStyle = "bg-slate-100 text-slate-300";
+              baseStyle = "border-border bg-white text-muted-foreground opacity-60";
+              iconStyle = "bg-muted text-muted-foreground";
             }
 
             return (
@@ -585,15 +585,15 @@ const Payment = () => {
                   </span>
                 </div>
 
-                <h4 className={`text-lg font-extrabold ${!canPay && !isPaid && !pendingPayment ? 'text-slate-400' : ''}`}>
+                <h4 className={`text-lg font-extrabold ${!canPay && !isPaid && !pendingPayment ? 'text-muted-foreground' : ''}`}>
                   {month}
                   {paymentRecord.amount > 0 && (
-                    <span className="block text-sm font-bold text-slate-500 mt-1">₹ {paymentRecord.amount}</span>
+                    <span className="block text-sm font-bold text-muted-foreground mt-1">₹ {paymentRecord.amount}</span>
                   )}
                 </h4>
 
                 {canPay && (
-                  <div className="mt-4 pt-4 border-t border-slate-100">
+                  <div className="mt-4 pt-4 border-t border-border">
                     <motion.button 
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
@@ -617,9 +617,9 @@ const Payment = () => {
       </motion.div>
 
       {/* Payment History List */}
-      <motion.div variants={itemVariants} className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm">
-        <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-3">
-          <Clock className="w-6 h-6 text-slate-400" /> Recent Transactions
+      <motion.div variants={itemVariants} className="bg-card rounded-3xl p-8 border border-border shadow-sm">
+        <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
+          <Clock className="w-6 h-6 text-muted-foreground" /> Recent Transactions
         </h3>
 
         {payments.length > 0 ? (
@@ -629,7 +629,7 @@ const Payment = () => {
               const isPending = payment.status === 'pending';
               
               return (
-                <div key={index} className="group flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 p-4 rounded-2xl border border-slate-100 hover:border-slate-200 hover:bg-slate-50 transition-colors">
+                <div key={index} className="group flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 p-4 rounded-2xl border border-border hover:border-border hover:bg-background transition-colors">
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${
                       isSuccess ? 'bg-emerald-50 text-emerald-600' : 
@@ -638,10 +638,10 @@ const Payment = () => {
                       {isSuccess ? <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" /> : isPending ? <Clock className="w-5 h-5 sm:w-6 sm:h-6" /> : <X className="w-5 h-5 sm:w-6 sm:h-6" />}
                     </div>
                     <div className="min-w-0">
-                      <h5 className="font-bold text-slate-800 text-sm sm:text-base truncate">
-                        {payment.month} <span className="text-slate-400 font-normal text-xs sm:text-sm ml-1 hidden sm:inline">Rent</span>
+                      <h5 className="font-bold text-foreground text-sm sm:text-base truncate">
+                        {payment.month} <span className="text-muted-foreground font-normal text-xs sm:text-sm ml-1 hidden sm:inline">Rent</span>
                       </h5>
-                      <p className="text-[10px] sm:text-xs text-slate-500 font-medium mt-0.5 truncate">
+                      <p className="text-[10px] sm:text-xs text-muted-foreground font-medium mt-0.5 truncate">
                         {new Date(payment.paymentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} • {isSuccess ? 'Verified' : isPending ? 'Processing' : 'Declined'}
                       </p>
                     </div>
@@ -650,7 +650,7 @@ const Payment = () => {
                   {payment.barcodeImage && (
                     <button 
                       onClick={() => setFullScreenImage(payment.barcodeImage)}
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm shrink-0 ml-auto sm:ml-0"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white border border-border flex items-center justify-center text-muted-foreground hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm shrink-0 ml-auto sm:ml-0"
                       title="View Receipt"
                     >
                       <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -661,9 +661,9 @@ const Payment = () => {
             })}
           </div>
         ) : (
-          <div className="py-12 text-center bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
-            <CreditCard className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 font-medium">No transactions found</p>
+          <div className="py-12 text-center bg-background rounded-2xl border-2 border-dashed border-border">
+            <CreditCard className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <p className="text-muted-foreground font-medium">No transactions found</p>
           </div>
         )}
       </motion.div>
@@ -722,10 +722,10 @@ const Payment = () => {
         {fullScreenImage && (
           <motion.div 
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-slate-900/95 backdrop-blur-md flex items-center justify-center p-4"
+            className="fixed inset-0 z-[100] bg-background/95 backdrop-blur-md flex items-center justify-center p-4"
           >
             <div className="relative max-w-full max-h-full">
-              <button onClick={() => setFullScreenImage(null)} className="absolute -top-16 right-0 text-white/50 hover:text-white transition-colors bg-white/10 w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm">
+              <button onClick={() => setFullScreenImage(null)} className="absolute -top-16 right-0 text-foreground/50 hover:text-white transition-colors bg-primary/10 w-12 h-12 rounded-full flex items-center justify-center backdrop-blur-sm">
                 <X className="w-6 h-6" />
               </button>
               <motion.img 
@@ -750,7 +750,7 @@ const PaymentModal = ({
   return (
     <motion.div 
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[80] p-4"
+      className="fixed inset-0 bg-background/40 backdrop-blur-sm flex items-center justify-center z-[80] p-4"
       onClick={closeModal}
     >
       <motion.div
@@ -759,8 +759,8 @@ const PaymentModal = ({
         onClick={e => e.stopPropagation()}
       >
         <div className="p-4 sm:p-6 border-b border-border flex items-center justify-between">
-          <h3 className="text-xl font-bold text-slate-800">{title}</h3>
-          <button onClick={closeModal} className="w-8 h-8 rounded-full bg-slate-200/50 flex items-center justify-center text-slate-500 hover:bg-slate-200 hover:text-slate-800 transition-colors">
+          <h3 className="text-xl font-bold text-foreground">{title}</h3>
+          <button onClick={closeModal} className="w-8 h-8 rounded-full bg-muted/50 flex items-center justify-center text-muted-foreground hover:bg-muted hover:text-foreground transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -769,10 +769,10 @@ const PaymentModal = ({
           
           {isAdvanced && (
             <div className="mb-6">
-              <label className="block text-sm font-bold text-slate-700 mb-2">Select Target Month</label>
+              <label className="block text-sm font-bold text-foreground mb-2">Select Target Month</label>
               <div className="relative">
                 <select
-                  className="w-full appearance-none p-4 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all cursor-pointer"
+                  className="w-full appearance-none p-4 bg-background border border-border rounded-xl font-medium text-foreground focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all cursor-pointer"
                   value={advancedModal.month}
                   onChange={(e) => setAdvancedModal({...advancedModal, month: e.target.value})}
                 >
@@ -781,7 +781,7 @@ const PaymentModal = ({
                      <option key={m} value={m}>{m} {new Date().getFullYear() + (monthNames.indexOf(m) < new Date().getMonth() ? 1 : 0)}</option>
                   ))}
                 </select>
-                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-slate-400">
+                <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-muted-foreground">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </div>
               </div>
@@ -790,7 +790,7 @@ const PaymentModal = ({
 
           {isMulti && (
             <div className="mb-6">
-              <label className="block text-sm font-bold text-slate-700 mb-3">Select Months</label>
+              <label className="block text-sm font-bold text-foreground mb-3">Select Months</label>
               <div className="grid grid-cols-2 gap-2">
                 {monthNames.map((m) => {
                   const mIdx = monthNames.indexOf(m);
@@ -808,10 +808,10 @@ const PaymentModal = ({
                           setMultiModal({...multiModal, selectedMonths: [...current, m]});
                         }
                       }}
-                      className={`p-3 rounded-xl border text-left transition-all ${isAlreadyPaid ? 'bg-slate-50 opacity-50' : isSelected ? 'bg-indigo-50 border-indigo-500' : 'bg-white border-slate-200'}`}
+                      className={`p-3 rounded-xl border text-left transition-all ${isAlreadyPaid ? 'bg-background opacity-50' : isSelected ? 'bg-indigo-50 border-indigo-500' : 'bg-card border-border'}`}
                     >
                       <span className="text-xs font-bold block">{m}</span>
-                      <span className="text-[10px] text-slate-400">{new Date().getFullYear() + (mIdx < new Date().getMonth() ? 1 : 0)}</span>
+                      <span className="text-[10px] text-muted-foreground">{new Date().getFullYear() + (mIdx < new Date().getMonth() ? 1 : 0)}</span>
                     </button>
                   );
                 })}
@@ -820,17 +820,17 @@ const PaymentModal = ({
           )}
 
           <div className="bg-indigo-50/50 rounded-2xl p-5 mb-6 border border-indigo-100 text-center">
-            <div className="inline-block p-2 bg-white rounded-xl shadow-sm mb-3">
+            <div className="inline-block p-2 bg-card rounded-xl shadow-sm mb-3">
               <img src={barcodeImg} alt="QR Code" className="w-64 h-64 object-contain" />
             </div>
             <p className="text-sm font-bold text-indigo-800">Scan to Pay securely</p>
           </div>
 
           <div className="mb-6">
-            <label className="block text-sm font-bold text-slate-700 mb-2">Upload Receipt</label>
+            <label className="block text-sm font-bold text-foreground mb-2">Upload Receipt</label>
             <div className="relative group">
               <input type="file" accept="image/*" onChange={handleBarcodeChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" disabled={processing} />
-              <div className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${barcodePreview ? 'border-indigo-200 bg-indigo-50/30' : 'border-slate-200 bg-slate-50 group-hover:bg-slate-100 group-hover:border-slate-300'}`}>
+              <div className={`border-2 border-dashed rounded-2xl p-6 text-center transition-all ${barcodePreview ? 'border-indigo-200 bg-indigo-50/30' : 'border-border bg-background group-hover:bg-muted group-hover:border-slate-300'}`}>
                 {barcodePreview ? (
                   <div className="space-y-3">
                     <img src={barcodePreview} alt="Preview" className="max-h-32 object-contain rounded-lg mx-auto shadow-sm" />
@@ -838,11 +838,11 @@ const PaymentModal = ({
                   </div>
                 ) : (
                   <div className="space-y-2 pointer-events-none">
-                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto text-slate-400 group-hover:text-indigo-500 group-hover:scale-110 transition-all">
+                    <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm mx-auto text-muted-foreground group-hover:text-indigo-500 group-hover:scale-110 transition-all">
                       <UploadCloud className="w-5 h-5" />
                     </div>
-                    <p className="text-sm font-bold text-slate-700">Click or drag receipt here</p>
-                    <p className="text-xs text-slate-400">PNG, JPG (Max 5MB)</p>
+                    <p className="text-sm font-bold text-foreground">Click or drag receipt here</p>
+                    <p className="text-xs text-muted-foreground">PNG, JPG (Max 5MB)</p>
                   </div>
                 )}
               </div>
@@ -850,7 +850,7 @@ const PaymentModal = ({
           </div>
         </div>
 
-        <div className="p-6 border-t border-slate-100 bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-10 shrink-0">
+        <div className="p-6 border-t border-border bg-white shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-10 shrink-0">
           <button
             onClick={handleSubmit}
             disabled={processing || !barcodeImage || (isAdvanced && !advancedModal.month) || (isMulti && multiModal.selectedMonths.length === 0)}
