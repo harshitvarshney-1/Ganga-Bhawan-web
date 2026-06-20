@@ -16,21 +16,31 @@ function getEmailConfig() {
 }
 
 function validateRequiredSecrets(env) {
-  const required = {
-    JWT_SECRET: 'JWT secret for token signing',
-    CLOUDINARY_CLOUD_NAME: 'Cloudinary cloud name',
-    CLOUDINARY_API_KEY: 'Cloudinary API key',
-    CLOUDINARY_API_SECRET: 'Cloudinary API secret'
-  };
+  const nodeEnv = process.env.NODE_ENV || 'development';
 
-  const missing = Object.entries(required)
-    .filter(([key]) => !process.env[key])
-    .map(([key, desc]) => `${key} (${desc})`);
+  // In production, enforce all secrets
+  if (nodeEnv === 'production') {
+    const required = {
+      JWT_SECRET: 'JWT secret for token signing',
+      CLOUDINARY_CLOUD_NAME: 'Cloudinary cloud name',
+      CLOUDINARY_API_KEY: 'Cloudinary API key',
+      CLOUDINARY_API_SECRET: 'Cloudinary API secret'
+    };
 
-  if (missing.length > 0) {
-    console.error('❌ FATAL: Required environment variables missing:');
-    missing.forEach(m => console.error(`   - ${m}`));
-    process.exit(1);
+    const missing = Object.entries(required)
+      .filter(([key]) => !process.env[key])
+      .map(([key, desc]) => `${key} (${desc})`);
+
+    if (missing.length > 0) {
+      console.error('❌ FATAL: Required environment variables missing:');
+      missing.forEach(m => console.error(`   - ${m}`));
+      process.exit(1);
+    }
+  } else {
+    // Development: warn but don't fail
+    if (!process.env.JWT_SECRET) {
+      console.warn('⚠️ JWT_SECRET not set. Using development fallback.');
+    }
   }
 }
 
@@ -38,12 +48,12 @@ export const config = {
   development: {
     port: process.env.PORT || 9000,
     mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/ganga-bhawan',
-    jwtSecret: process.env.JWT_SECRET || (validateRequiredSecrets('development'), process.env.JWT_SECRET),
+    jwtSecret: process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production',
     clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
     cloudinary: {
-      cloudName: process.env.CLOUDINARY_CLOUD_NAME || (validateRequiredSecrets('development'), process.env.CLOUDINARY_CLOUD_NAME),
-      apiKey: process.env.CLOUDINARY_API_KEY || (validateRequiredSecrets('development'), process.env.CLOUDINARY_API_KEY),
-      apiSecret: process.env.CLOUDINARY_API_SECRET || (validateRequiredSecrets('development'), process.env.CLOUDINARY_API_SECRET)
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME || 'dev-cloudinary',
+      apiKey: process.env.CLOUDINARY_API_KEY || 'dev-api-key',
+      apiSecret: process.env.CLOUDINARY_API_SECRET || 'dev-api-secret'
     },
     email: getEmailConfig()
   },
