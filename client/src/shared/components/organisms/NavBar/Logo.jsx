@@ -1,5 +1,6 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import LogoIcon from "../../atoms/Logo/LogoIcon";
 
 const Logo = () => {
   const navigate = useNavigate();
@@ -20,11 +21,13 @@ const Logo = () => {
       onClick={handleLogoClick}
       className="flex items-center gap-2.5 text-[14px] font-semibold text-foreground hover:text-primary transition cursor-pointer"
     >
-      <span className="text-lg">🏠</span>
-      <span>
-        Ganga Bhawan
-        <span className="font-normal text-muted-foreground"> (Hariom)</span>
-      </span>
+      <div className="text-primary hover:scale-110 transition-transform">
+        <LogoIcon size={32} />
+      </div>
+      <div>
+        <span className="block font-bold">Ganga Bhawan</span>
+        <span className="text-[11px] text-muted-foreground font-normal">Hariom</span>
+      </div>
     </Link>
   );
 };
