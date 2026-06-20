@@ -33,7 +33,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isMobileOpen, setIsMobileO
               <button
                 key={item.id}
                 onClick={() => { setActiveTab(item.id); setIsMobileOpen(false); }}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium transition-colors group ${
+                className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-[13px] font-medium transition-colors group ${
                   isActive
                     ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:bg-accent hover:text-foreground'
@@ -57,7 +57,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isMobileOpen, setIsMobileO
       <div className="mt-auto px-6 pb-6 pt-4 border-t border-border">
         <button
           onClick={onLogout}
-          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px] font-medium text-destructive hover:bg-destructive/10 transition-colors"
+          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-md text-[13px] font-medium text-destructive hover:bg-destructive/10 transition-colors"
         >
           <LogOut className="w-4 h-4 shrink-0" />
           Logout Securely
