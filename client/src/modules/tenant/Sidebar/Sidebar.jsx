@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, FileText, CreditCard, LogOut, Camera, CheckCircle2, Clock } from 'lucide-react';
-import LogoIcon from '../../shared/components/atoms/Logo/LogoIcon';
+import LogoIcon from '../../../shared/components/atoms/Logo/LogoIcon';
 
 const menuItems = [
   { id: 'profile', label: 'My Profile',       icon: User },
