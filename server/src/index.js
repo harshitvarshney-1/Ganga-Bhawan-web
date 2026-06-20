@@ -55,6 +55,26 @@ app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
+// Cookie security settings for CSRF protection
+app.use((req, res, next) => {
+  // Set secure cookie defaults
+  res.cookie = function(name, val, options) {
+    options = options || {};
+    // Production: Use secure, HttpOnly, SameSite=Strict
+    if (process.env.NODE_ENV === 'production') {
+      options.secure = true; // HTTPS only
+      options.httpOnly = true; // Not accessible via JavaScript
+      options.sameSite = 'strict'; // CSRF protection
+    } else {
+      // Development: Allow localhost without HTTPS
+      options.httpOnly = true;
+      options.sameSite = 'lax';
+    }
+    return Object.getPrototypeOf(res).cookie.call(this, name, val, options);
+  };
+  next();
+});
+
 connectDB().then(() => {
   // Verify Email connection after DB is up
   verifyEmailConnection();

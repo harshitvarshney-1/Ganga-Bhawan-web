@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import User from '../../models/user.model.js';
+import { validatePassword } from '../../utils/password.util.js';
 
 // Registration handler - Now strictly using direct Cloudinary URLs from frontend
 export const registerUser = async (req, res) => {
@@ -17,6 +18,15 @@ export const registerUser = async (req, res) => {
     // Validation
     if (!fullName || !email || !password || !mobileNumber || !aadhaarNumber) {
       return res.status(400).json({ error: 'Please fill all required fields' });
+    }
+
+    // Validate password strength
+    const passwordValidation = validatePassword(password);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({
+        error: 'Password does not meet security requirements',
+        details: passwordValidation.errors
+      });
     }
 
     // Strictly require all document URLs

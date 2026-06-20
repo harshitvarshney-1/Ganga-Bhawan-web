@@ -252,9 +252,14 @@ export const deletePayment = async (req, res) => {
 export const resetTenantPassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
+    const { validatePassword } = await import('../../utils/password.util.js');
 
-    if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters long' });
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.valid) {
+      return res.status(400).json({
+        error: 'Invalid password',
+        details: passwordValidation.errors
+      });
     }
 
     const tenant = await User.findById(req.params.tenantId);

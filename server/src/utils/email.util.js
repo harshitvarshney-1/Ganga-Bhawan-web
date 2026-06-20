@@ -168,21 +168,25 @@ export const getWelcomeEmailTemplate = (fullName, email) => {
   return wrapInContainer(header, body);
 };
 
-export const getPasswordResetEmailTemplate = (fullName, newPassword) => {
-  const header = getEmailHeader('Security Update');
+export const getPasswordResetEmailTemplate = (fullName, resetLink, expiryMinutes = 30) => {
+  const header = getEmailHeader('Password Reset Request');
   const body = `
     <p style="color: #334155; font-family: Arial, sans-serif; font-size: 18px; line-height: 1.6; margin: 0 0 20px 0;">
       Hello <strong>${fullName}</strong>,
     </p>
     <p style="color: #475569; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
-      Your account password has been reset by the administrator. Please use the temporary password below to sign in and update your security settings.
+      We received a request to reset your password. Click the button below to set a new password. This link will expire in ${expiryMinutes} minutes.
     </p>
-    <div style="background-color: #fff7ed; border: 2px dashed #fb923c; border-radius: 12px; padding: 30px; text-align: center; margin-bottom: 30px;">
-      <p style="color: #9a3412; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; margin: 0 0 10px 0; text-transform: uppercase;">New Temporary Password</p>
-      <p style="color: ${PRIMARY_COLOR}; font-family: Courier New, Courier, monospace; font-size: 32px; font-weight: 800; margin: 0; letter-spacing: 4px;">${newPassword}</p>
+    <div style="text-align: center; margin-bottom: 30px;">
+      <a href="${resetLink}" style="background-color: ${PRIMARY_COLOR}; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; display: inline-block; font-family: Arial, sans-serif;">
+        Reset Password
+      </a>
     </div>
-    <p style="color: #ef4444; font-family: Arial, sans-serif; font-size: 13px; font-weight: 600; text-align: center; margin-bottom: 30px;">
-      ⚠️ Please change this password immediately after logging in.
+    <p style="color: #64748b; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; margin: 0 0 20px 0;">
+      If you didn't request this reset, please ignore this email or contact support immediately.
+    </p>
+    <p style="color: #94a3b8; font-family: Arial, sans-serif; font-size: 12px; margin: 0;">
+      <strong>Security Tip:</strong> Never share your password reset link with anyone. Ganga Bhawan staff will never ask for your password.
     </p>
   `;
   return wrapInContainer(header, body);
