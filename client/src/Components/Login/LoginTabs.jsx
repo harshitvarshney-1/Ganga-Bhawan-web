@@ -12,8 +12,8 @@ const LoginTabs = () => {
           className={`flex-1 py-2 text-sm font-semibold rounded-md transition
             ${
               active === tab
-                ? "bg-gradient-to-r from-cyan-500 to-teal-500 text-white"
-                : "text-gray-400 hover:text-white"
+                ? "bg-gradient-to-r from-cyan-500 to-teal-500 text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
         >
           {tab === "tenant" ? "Tenant Login" : "Admin Login"}

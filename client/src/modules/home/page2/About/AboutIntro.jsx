@@ -13,14 +13,14 @@ const AboutIntro = () => {
           <span className="text-primary">for Students & Professionals</span>
         </h2>
 
-        <p className="text-gray-400 leading-relaxed">
+        <p className="text-muted-foreground leading-relaxed">
           Ganga Bhawan (Hariom) is a reliable accommodation space in
           Chaumuhan, built to provide more than just rooms. We focus on
           comfort, safety, discipline, and a peaceful living environment
           so that residents can fully concentrate on their goals.
         </p>
 
-        <p className="text-gray-400 leading-relaxed">
+        <p className="text-muted-foreground leading-relaxed">
           The property is personally managed by
           <span className="text-primary font-medium">
             {" "}Shri Hariom Varshney{" "}
@@ -44,7 +44,7 @@ const AboutIntro = () => {
             hover:border-primary/40 transition"
           >
             <h3 className="text-2xl font-bold text-primary">{value}</h3>
-            <p className="text-gray-400 mt-1">{label}</p>
+            <p className="text-muted-foreground mt-1">{label}</p>
           </div>
         ))}
       </div>

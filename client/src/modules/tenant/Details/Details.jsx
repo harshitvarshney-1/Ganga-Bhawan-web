@@ -28,11 +28,11 @@ const Details = ({ userData }) => {
           <div>
             <p className="text-primary text-[11px] font-bold uppercase tracking-[0.2em] mb-1.5">Ganga Bhawan</p>
             <h1 className="text-2xl lg:text-3xl font-black text-foreground font-outfit">Personal Details</h1>
-            <p className="text-slate-500 text-sm font-medium mt-1">Family information and official documents</p>
+            <p className="text-muted-foreground text-sm font-medium mt-1">Family information and official documents</p>
           </div>
           <div className="flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-2xl">
-            <Lock className="w-4 h-4 text-slate-400" />
-            <span className="text-sm font-bold text-slate-400">Details Locked</span>
+            <Lock className="w-4 h-4 text-muted-foreground" />
+            <span className="text-sm font-bold text-muted-foreground">Details Locked</span>
           </div>
         </div>
       </motion.div>
@@ -43,7 +43,7 @@ const Details = ({ userData }) => {
           <div className="p-2.5 bg-muted text-primary rounded-2xl">
             <Users className="w-5 h-5" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 font-outfit">Family Information</h3>
+          <h3 className="text-lg font-bold text-foreground font-outfit">Family Information</h3>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -60,7 +60,7 @@ const Details = ({ userData }) => {
           <div className="p-2.5 bg-cyan-100 text-cyan-600 rounded-2xl">
             <FileText className="w-5 h-5" />
           </div>
-          <h3 className="text-lg font-bold text-slate-900 font-outfit">Official Documents</h3>
+          <h3 className="text-lg font-bold text-foreground font-outfit">Official Documents</h3>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -71,26 +71,26 @@ const Details = ({ userData }) => {
               href={userData.aadhaarFront}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col justify-between bg-slate-50 rounded-3xl border border-slate-200 p-6 hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer"
+              className="group flex flex-col justify-between bg-card/50 rounded-3xl border border-slate-200 p-6 hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer"
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="p-4 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                   <FileImage className="w-8 h-8 text-foreground" />
                 </div>
                 <div className="p-2 bg-card rounded-full group-hover:bg-primary/10 transition-colors border border-slate-200">
-                  <DownloadCloud className="w-5 h-5 text-slate-400 group-hover:text-primary" />
+                  <DownloadCloud className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                 </div>
               </div>
               <div>
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Identity Proof</p>
-                <h4 className="text-xl font-bold text-slate-800 group-hover:text-indigo-700 transition-colors font-outfit">Aadhaar Front</h4>
-                <p className="text-sm font-medium text-slate-500 mt-1">Front side image</p>
+                <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-1">Identity Proof</p>
+                <h4 className="text-xl font-bold text-foreground group-hover:text-indigo-700 transition-colors font-outfit">Aadhaar Front</h4>
+                <p className="text-sm font-medium text-muted-foreground mt-1">Front side image</p>
               </div>
             </motion.a>
           ) : (
-            <div className="flex flex-col items-center justify-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-8 text-center min-h-[200px]">
+            <div className="flex flex-col items-center justify-center bg-card/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 text-center min-h-[200px]">
               <FileImage className="w-10 h-10 text-slate-300 mb-3" />
-              <p className="text-slate-400 text-sm font-medium">Front photo not uploaded</p>
+              <p className="text-muted-foreground text-sm font-medium">Front photo not uploaded</p>
             </div>
           )}
 
@@ -101,26 +101,26 @@ const Details = ({ userData }) => {
               href={userData.aadhaarBack}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col justify-between bg-slate-50 rounded-3xl border border-slate-200 p-6 hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer"
+              className="group flex flex-col justify-between bg-card/50 rounded-3xl border border-slate-200 p-6 hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer"
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="p-4 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                   <FileImage className="w-8 h-8 text-foreground" />
                 </div>
                 <div className="p-2 bg-card rounded-full group-hover:bg-primary/10 transition-colors border border-slate-200">
-                  <DownloadCloud className="w-5 h-5 text-slate-400 group-hover:text-primary" />
+                  <DownloadCloud className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                 </div>
               </div>
               <div>
-                <p className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">Identity Proof</p>
-                <h4 className="text-xl font-bold text-slate-800 group-hover:text-indigo-700 transition-colors font-outfit">Aadhaar Back</h4>
-                <p className="text-sm font-medium text-slate-500 mt-1">Back side image</p>
+                <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-1">Identity Proof</p>
+                <h4 className="text-xl font-bold text-foreground group-hover:text-indigo-700 transition-colors font-outfit">Aadhaar Back</h4>
+                <p className="text-sm font-medium text-muted-foreground mt-1">Back side image</p>
               </div>
             </motion.a>
           ) : (
-            <div className="flex flex-col items-center justify-center bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 p-8 text-center min-h-[200px]">
+            <div className="flex flex-col items-center justify-center bg-card/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 text-center min-h-[200px]">
               <FileImage className="w-10 h-10 text-slate-300 mb-3" />
-              <p className="text-slate-400 text-sm font-medium">Back photo not uploaded</p>
+              <p className="text-muted-foreground text-sm font-medium">Back photo not uploaded</p>
             </div>
           )}
         </div>
@@ -130,13 +130,13 @@ const Details = ({ userData }) => {
 };
 
 const DetailRow = ({ icon: Icon, label, value, iconBg, iconColor }) => (
-  <div className="flex items-center gap-4 p-5 bg-slate-50 rounded-2xl border border-slate-100 hover:border-slate-200 hover:bg-card transition-all group">
+  <div className="flex items-center gap-4 p-5 bg-card/50 rounded-2xl border border-slate-100 hover:border-slate-200 hover:bg-card transition-all group">
     <div className={`p-3 rounded-xl ${iconBg} group-hover:scale-110 transition-transform`}>
       <Icon className={`w-5 h-5 ${iconColor}`} />
     </div>
     <div className="min-w-0 flex-1">
-      <p className="text-[11px] font-extrabold text-slate-400 uppercase tracking-widest mb-1">{label}</p>
-      <p className="text-[15px] font-bold text-slate-800 truncate">{value || 'Not provided'}</p>
+      <p className="text-[11px] font-extrabold text-muted-foreground uppercase tracking-widest mb-1">{label}</p>
+      <p className="text-[15px] font-bold text-foreground truncate">{value || 'Not provided'}</p>
     </div>
   </div>
 );

@@ -14,12 +14,12 @@ const AboutRules = () => {
         House <span className="text-cyan-400">Rules & Discipline</span>
       </h2>
 
-      <p className="text-gray-400 mb-8 max-w-2xl">
+      <p className="text-muted-foreground mb-8 max-w-2xl">
         To maintain a peaceful and respectful environment, all residents
         are requested to follow the rules mentioned below.
       </p>
 
-      <ol className="grid md:grid-cols-2 gap-4 text-gray-300 list-decimal list-inside">
+      <ol className="grid md:grid-cols-2 gap-4 text-muted-foreground list-decimal list-inside">
         {rules.map((rule) => (
           <li
             key={rule}

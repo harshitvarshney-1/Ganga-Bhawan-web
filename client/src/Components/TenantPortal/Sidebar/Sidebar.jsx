@@ -12,7 +12,7 @@ const Sidebar = ({
   handleLogout 
 }) => {
   return (
-    <div className="w-72 bg-gradient-to-b from-slate-800 via-slate-800 to-slate-900 text-white h-full flex flex-col shadow-2xl">
+    <div className="w-72 bg-gradient-to-b from-slate-800 via-slate-800 to-slate-900 text-foreground h-full flex flex-col shadow-2xl">
       {/* Scrollable Content */}
       <div className="flex-1 overflow-y-auto">
         {/* Profile Section */}
@@ -45,7 +45,7 @@ const Sidebar = ({
               </label>
             </div>
             <h2 className="text-xl font-semibold text-center">{userData?.fullName}</h2>
-            <p className="text-sm text-gray-400 text-center mt-1">{userData?.email}</p>
+            <p className="text-sm text-muted-foreground text-center mt-1">{userData?.email}</p>
             <span className="mt-2 px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-xs font-medium">
               {userData?.isApproved ? '✓ Approved' : '⏳ Pending'}
             </span>
@@ -55,7 +55,7 @@ const Sidebar = ({
               <button
                 onClick={handleSavePhoto}
                 disabled={saving}
-                className="mt-4 w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+                className="mt-4 w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-foreground rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
               >
                 {saving ? (
                   <>
@@ -81,8 +81,8 @@ const Sidebar = ({
             onClick={() => setActiveSection('profile')}
             className={`w-full text-left px-4 py-3 rounded-lg mb-2 transition-all ${
               activeSection === 'profile'
-                ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg'
-                : 'text-gray-300 hover:bg-slate-700 hover:text-white'
+                ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-foreground shadow-lg'
+                : 'text-muted-foreground hover:bg-slate-700 hover:text-foreground'
             }`}
           >
             <div className="flex items-center">
@@ -97,8 +97,8 @@ const Sidebar = ({
             onClick={() => setActiveSection('details')}
             className={`w-full text-left px-4 py-3 rounded-lg mb-2 transition-all ${
               activeSection === 'details'
-                ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg'
-                : 'text-gray-300 hover:bg-slate-700 hover:text-white'
+                ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-foreground shadow-lg'
+                : 'text-muted-foreground hover:bg-slate-700 hover:text-foreground'
             }`}
           >
             <div className="flex items-center">
@@ -113,8 +113,8 @@ const Sidebar = ({
             onClick={() => setActiveSection('payment')}
             className={`w-full text-left px-4 py-3 rounded-lg mb-2 transition-all ${
               activeSection === 'payment'
-                ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-white shadow-lg'
-                : 'text-gray-300 hover:bg-slate-700 hover:text-white'
+                ? 'bg-gradient-to-r from-cyan-600 to-teal-600 text-foreground shadow-lg'
+                : 'text-muted-foreground hover:bg-slate-700 hover:text-foreground'
             }`}
           >
             <div className="flex items-center">
@@ -131,7 +131,7 @@ const Sidebar = ({
       <div className="p-4 border-t border-slate-700 bg-slate-800">
         <button
           onClick={handleLogout}
-          className="w-full bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transition-all shadow-lg flex items-center justify-center"
+          className="w-full bg-gradient-to-r from-red-600 to-red-700 text-foreground px-4 py-3 rounded-lg hover:from-red-700 hover:to-red-800 transition-all shadow-lg flex items-center justify-center"
         >
           <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

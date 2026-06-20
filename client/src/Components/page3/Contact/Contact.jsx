@@ -4,7 +4,7 @@ import ContactMap from "./ContactMap";
 
 const Contact = () => {
   return (
-    <section className="pt-28 pb-24 px-12 bg-slate-950 text-white">
+    <section className="pt-28 pb-24 px-12 bg-slate-950 text-foreground">
       <div className="max-w-7xl mx-auto space-y-24">
         <ContactHeader />
         <ContactCards />

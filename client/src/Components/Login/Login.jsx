@@ -71,9 +71,9 @@ export default function Login() {
   return (
     <>
       {loading && <Loader text="LOGGING IN" />}
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="max-w-md w-full bg-gray-800 rounded-lg p-4 sm:p-6 lg:p-8">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">Login</h2>
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-background rounded-lg p-4 sm:p-6 lg:p-8">
+        <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center mb-6">Login</h2>
 
 
 
@@ -87,8 +87,8 @@ export default function Login() {
             }}
             className={`flex-1 py-2 rounded font-medium transition ${
               loginType === 'tenant'
-                ? 'bg-cyan-400 text-gray-900'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-cyan-400 text-foreground'
+                : 'bg-gray-700 text-muted-foreground hover:bg-card'
             }`}
           >
             Tenant Login
@@ -101,8 +101,8 @@ export default function Login() {
             }}
             className={`flex-1 py-2 rounded font-medium transition ${
               loginType === 'admin'
-                ? 'bg-cyan-400 text-gray-900'
-                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                ? 'bg-cyan-400 text-foreground'
+                : 'bg-gray-700 text-muted-foreground hover:bg-card'
             }`}
           >
             Admin Login
@@ -117,20 +117,20 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-gray-300 mb-2">Email Address</label>
+            <label className="block text-muted-foreground mb-2">Email Address</label>
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+              className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               placeholder="Enter your email"
             />
           </div>
 
           <div>
-            <label className="block text-gray-300 mb-2">Password</label>
+            <label className="block text-muted-foreground mb-2">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? "text" : "password"}
@@ -138,13 +138,13 @@ export default function Login() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12"
+                className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12"
                 placeholder="Enter your password"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-cyan-400 transition"
               >
                 {showPassword ? (
                   <span title="Hide Password">🔒</span>
@@ -158,13 +158,13 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-cyan-400 text-gray-900 font-bold py-3 rounded hover:bg-cyan-300 transition disabled:opacity-50"
+            className="w-full bg-cyan-400 text-foreground font-bold py-3 rounded hover:bg-cyan-300 transition disabled:opacity-50"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
-        <p className="text-gray-400 text-center mt-6">
+        <p className="text-muted-foreground text-center mt-6">
           Don't have an account?{' '}
           <a href="/register" className="text-cyan-400 hover:underline">
             Register

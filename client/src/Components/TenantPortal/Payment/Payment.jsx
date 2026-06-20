@@ -23,13 +23,13 @@ function Legend({ color, text }) {
 function CustomAlert({ open, message, onClose }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[99] flex items-center justify-center bg-black/60">
-      <div className="bg-gray-900 rounded-2xl shadow-xl px-8 py-8 min-w-[320px] max-w-full text-white relative">
+    <div className="fixed inset-0 z-[99] flex items-center justify-center bg-background/60">
+      <div className="bg-background rounded-2xl shadow-xl px-8 py-8 min-w-[320px] max-w-full text-foreground relative">
         <div className="text-lg font-bold mb-2">Payment Portal</div>
         <div className="mb-4 text-sm">{message}</div>
         <button
           onClick={onClose}
-          className="bg-cyan-400 text-gray-900 px-6 py-2 rounded-xl font-semibold shadow-lg border-2 border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 hover:bg-cyan-300 transition"
+          className="bg-cyan-400 text-foreground px-6 py-2 rounded-xl font-semibold shadow-lg border-2 border-cyan-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 hover:bg-cyan-300 transition"
           autoFocus
         >
           OK
@@ -436,24 +436,24 @@ const Payment = () => {
           <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-cyan-600 to-blue-600 bg-clip-text text-transparent mb-3">
             Payment Dashboard
           </h1>
-          <p className="text-gray-600 text-lg">Manage your monthly PG rent payments</p>
+          <p className="text-muted-foreground text-lg">Manage your monthly PG rent payments</p>
         </div>
 
         {/* User Info Card */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+        <div className="bg-card rounded-2xl shadow-lg p-6 mb-8 border border-border">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-white text-2xl font-bold">
+            <div className="w-16 h-16 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center text-foreground text-2xl font-bold">
               {user?.fullName?.charAt(0)?.toUpperCase() || 'T'}
             </div>
             <div>
-              <h2 className="text-xl font-bold text-gray-900">{user?.fullName || 'Tenant'}</h2>
-              <p className="text-gray-500">{user?.email || ''}</p>
+              <h2 className="text-xl font-bold text-foreground">{user?.fullName || 'Tenant'}</h2>
+              <p className="text-muted-foreground">{user?.email || ''}</p>
             </div>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-100">
+        <div className="bg-card rounded-2xl shadow-lg p-6 mb-8 border border-border">
           <div className="flex flex-wrap items-center justify-center gap-6">
             <Legend color="bg-emerald-500" text="Paid" />
             <Legend color="bg-amber-500" text="Pending Approval" />
@@ -463,8 +463,8 @@ const Payment = () => {
         </div>
 
         {/* Payment Calendar */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-100 mb-12">
-          <h3 className="text-2xl font-bold text-gray-900 mb-8 text-center">
+        <div className="bg-card rounded-2xl shadow-lg p-8 border border-border mb-12">
+          <h3 className="text-2xl font-bold text-foreground mb-8 text-center">
             Year {currentYear}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -492,7 +492,7 @@ const Payment = () => {
                         ? 'border-red-500 bg-red-50 shadow-lg shadow-red-100'
                         : isPast
                           ? 'border-amber-500 bg-amber-50'
-                          : 'border-gray-200 bg-gray-50'
+                          : 'border-border bg-card/50'
                   }
                     ${canPay ? 'cursor-pointer hover:scale-105 hover:shadow-xl' : ''}
                   `}
@@ -514,11 +514,11 @@ const Payment = () => {
                       }
                     `}>
                       {isPaid ? (
-                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-7 h-7 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
-                        <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-7 h-7 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                             d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -526,32 +526,32 @@ const Payment = () => {
                     </div>
 
                     {isCurrent && !isPaid && !pendingPayment && (
-                      <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded-full animate-pulse">
+                      <span className="px-2 py-1 bg-red-500 text-foreground text-xs font-bold rounded-full animate-pulse">
                         DUE
                       </span>
                     )}
                     {pendingPayment && (
-                      <span className="px-2 py-1 bg-amber-500 text-white text-xs font-bold rounded-full">
+                      <span className="px-2 py-1 bg-amber-500 text-foreground text-xs font-bold rounded-full">
                         PENDING
                       </span>
                     )}
                   </div>
 
                   {/* Month Name */}
-                  <h4 className="text-lg font-bold text-gray-900 mb-2">{month}</h4>
+                  <h4 className="text-lg font-bold text-foreground mb-2">{month}</h4>
 
                   {/* Status Badge */}
                   <div className={`
                     inline-block px-3 py-1 rounded-full text-xs font-bold
                     ${isPaid
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-emerald-500 text-foreground'
                     : pendingPayment
-                      ? 'bg-amber-500 text-white'
+                      ? 'bg-amber-500 text-foreground'
                       : isCurrent
-                        ? 'bg-red-500 text-white'
+                        ? 'bg-red-500 text-foreground'
                         : isPast
-                          ? 'bg-amber-500 text-white'
-                          : 'bg-gray-300 text-gray-700'
+                          ? 'bg-amber-500 text-foreground'
+                          : 'bg-gray-300 text-foreground'
                   }
                   `}>
                     {isPaid ? '✓ PAID' : pendingPayment ? '⏳ PENDING' : isCurrent ? 'PAY NOW' : isPast ? 'OVERDUE' : 'UPCOMING'}
@@ -560,7 +560,7 @@ const Payment = () => {
                   {/* Pay Button for Current/Overdue - Only show if canPay is true */}
                   {canPay && (
                     <button className={`
-                      w-full mt-4 py-2 rounded-xl font-semibold text-white transition-all
+                      w-full mt-4 py-2 rounded-xl font-semibold text-foreground transition-all
                       ${isCurrent
                         ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
                         : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700'
@@ -584,11 +584,11 @@ const Payment = () => {
             
             <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl shadow-lg animate-bounce">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-foreground text-3xl shadow-lg animate-bounce">
                   🚀
                 </div>
                 <div>
-                  <h3 className="text-2xl font-bold text-gray-900">Advanced Booking</h3>
+                  <h3 className="text-2xl font-bold text-foreground">Advanced Booking</h3>
                   <p className="text-indigo-600 font-medium">Pre-pay for upcoming months & secure your stay</p>
                 </div>
               </div>
@@ -596,13 +596,13 @@ const Payment = () => {
               <div className="flex items-center gap-4">
                 <button
                   onClick={openAdvancedModal}
-                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 transform hover:-translate-y-1"
+                  className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-foreground font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 transform hover:-translate-y-1"
                 >
                   <span>💸</span> Pay In Advance
                 </button>
                 <button
                   onClick={openMultiModal}
-                  className="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 transform hover:-translate-y-1"
+                  className="px-6 py-3 bg-cyan-600 hover:bg-cyan-700 text-foreground font-bold rounded-xl shadow-lg hover:shadow-xl transition-all flex items-center gap-2 transform hover:-translate-y-1"
                 >
                   <span>📦</span> Bulk Payment
                 </button>
@@ -615,7 +615,7 @@ const Payment = () => {
                 <h4 className="font-bold text-indigo-900 mb-4">Your Advanced Bookings</h4>
                 <div className="flex flex-wrap gap-3">
                   {payments.filter(p => p.isAdvanced).map((payment, idx) => (
-                    <div key={idx} className="bg-white px-4 py-2 rounded-lg border border-indigo-100 shadow-sm flex items-center gap-3">
+                    <div key={idx} className="bg-card px-4 py-2 rounded-lg border border-indigo-100 shadow-sm flex items-center gap-3">
                       <span className="font-bold text-indigo-700">{payment.month}</span>
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         payment.status === 'success' ? 'bg-emerald-100 text-emerald-700' : 
@@ -641,16 +641,16 @@ const Payment = () => {
         </div>
 
         {/* Payment History */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mt-8 border border-gray-100">
-          <h3 className="text-2xl font-bold text-gray-900 mb-6">Payment History</h3>
+        <div className="bg-card rounded-2xl shadow-lg p-8 mt-8 border border-border">
+          <h3 className="text-2xl font-bold text-foreground mb-6">Payment History</h3>
 
           {payments.length > 0 ? (
             <div className="space-y-4">
               {payments.map((payment, index) => (
-                <div key={index} className={`flex items-center justify-between p-4 rounded-xl hover:bg-gray-100 transition-colors ${
+                <div key={index} className={`flex items-center justify-between p-4 rounded-xl hover:bg-card transition-colors ${
                   payment.status === 'success' ? 'bg-emerald-50' : 
                   payment.status === 'pending' ? 'bg-amber-50' : 
-                  'bg-gray-50'
+                  'bg-card/50'
                 }`}>
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
@@ -659,29 +659,29 @@ const Payment = () => {
                       'bg-red-500'
                     }`}>
                       {payment.status === 'success' ? (
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                       ) : payment.status === 'pending' ? (
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                       ) : (
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                       )}
                     </div>
                     <div>
-                      <p className="font-bold text-gray-900">{payment.month}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-bold text-foreground">{payment.month}</p>
+                      <p className="text-sm text-muted-foreground">
                         {new Date(payment.paymentDate).toLocaleDateString('en-IN', {
                           day: 'numeric',
                           month: 'long',
                           year: 'numeric'
                         })}
                       </p>
-                      <p className="text-xs text-gray-400 mt-1">
+                      <p className="text-xs text-muted-foreground mt-1">
                         Status: {payment.status === 'success' ? '✅ Approved' : payment.status === 'pending' ? '⏳ Pending Approval' : '❌ Rejected'}
                       </p>
                     </div>
@@ -702,7 +702,7 @@ const Payment = () => {
           ) : (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">📋</div>
-              <p className="text-gray-500 text-lg">No payment history yet</p>
+              <p className="text-muted-foreground text-lg">No payment history yet</p>
             </div>
           )}
         </div>
@@ -711,32 +711,32 @@ const Payment = () => {
       {/* Payment Modal */}
       {modal.open && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-3xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-card rounded-3xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-4 sm:p-6 lg:p-8">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-gray-900">Submit Payment</h3>
+                <h3 className="text-2xl font-bold text-foreground">Submit Payment</h3>
                 <button
                   onClick={closeModal}
-                  className="w-10 h-10 flex items-center justify-center bg-gray-100 hover:bg-gray-200 rounded-xl transition-all text-gray-600 text-2xl"
+                  className="w-10 h-10 flex items-center justify-center bg-card hover:bg-gray-200 rounded-xl transition-all text-muted-foreground text-2xl"
                   disabled={processing}
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="bg-white rounded-2xl p-4 mb-6 border-2 border-cyan-200">
+              <div className="bg-card rounded-2xl p-4 mb-6 border-2 border-cyan-200">
                 <div className="text-center">
                   <div className="mb-0">
                     <img 
                       src={barcodeImg} 
                       alt="Payment Barcode" 
-                      className="w-full max-w-[240px] mx-auto rounded-lg shadow-md border-2 border-gray-100"
+                      className="w-full max-w-[240px] mx-auto rounded-lg shadow-md border-2 border-border"
                     />
                   </div>
                 </div>
@@ -744,7 +744,7 @@ const Payment = () => {
 
               {/* Barcode Upload Section */}
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-foreground mb-2">
                   Upload Barcode Payment Screenshot *
                 </label>
                 <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-cyan-500 transition-colors">
@@ -765,22 +765,22 @@ const Payment = () => {
                         <img
                           src={barcodePreview}
                           alt="Barcode preview"
-                          className="w-full max-h-64 object-contain rounded-lg mx-auto border-2 border-gray-200"
+                          className="w-full max-h-64 object-contain rounded-lg mx-auto border-2 border-border"
                         />
-                        <p className="text-sm text-gray-600">Click to change image</p>
+                        <p className="text-sm text-muted-foreground">Click to change image</p>
                       </div>
                     ) : (
                       <div className="space-y-3">
                         <div className="text-4xl">📷</div>
-                        <p className="text-gray-600 font-semibold">Click to upload barcode screenshot</p>
-                        <p className="text-xs text-gray-400">JPG, PNG (Max 5MB)</p>
+                        <p className="text-muted-foreground font-semibold">Click to upload barcode screenshot</p>
+                        <p className="text-xs text-muted-foreground">JPG, PNG (Max 5MB)</p>
                       </div>
                     )}
                   </label>
                 </div>
               </div>
 
-              <div className="space-y-3 mb-6 text-sm text-gray-600 bg-blue-50 p-4 rounded-xl">
+              <div className="space-y-3 mb-6 text-sm text-muted-foreground bg-blue-50 p-4 rounded-xl">
                 <div className="flex items-start gap-2">
                   <svg className="w-5 h-5 text-blue-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -803,7 +803,7 @@ const Payment = () => {
                   ${processing || !barcodeImage
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 shadow-lg hover:shadow-xl'
-                  } text-white
+                  } text-foreground
                 `}
               >
                 {processing ? (
@@ -816,7 +816,7 @@ const Payment = () => {
                 )}
               </button>
 
-              <p className="text-xs text-gray-400 text-center mt-4">
+              <p className="text-xs text-muted-foreground text-center mt-4">
                 By submitting, you confirm that you have made the payment via barcode
               </p>
             </div>
@@ -827,24 +827,24 @@ const Payment = () => {
       {/* Advanced Payment Modal */}
       {advancedModal.open && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-3xl w-full max-w-md shadow-2xl"
+            className="bg-card rounded-3xl w-full max-w-md shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-bold text-indigo-900">Advanced Booking</h3>
-                <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">✕</button>
+                <button onClick={closeModal} className="text-muted-foreground hover:text-foreground">✕</button>
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">Select Month</label>
+                  <label className="block text-sm font-semibold text-foreground mb-2">Select Month</label>
                   <select
-                    className="w-full p-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500"
+                    className="w-full p-3 bg-card/50 border border-border rounded-xl focus:ring-2 focus:ring-indigo-500"
                     value={advancedModal.month}
                     onChange={(e) => setAdvancedModal({...advancedModal, month: e.target.value})}
                   >
@@ -883,7 +883,7 @@ const Payment = () => {
                 <button
                   onClick={handleSubmitAdvancedPayment}
                   disabled={processing || !advancedModal.month || !barcodeImage}
-                  className="w-full py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition disabled:opacity-50"
+                  className="w-full py-3 bg-indigo-600 text-foreground font-bold rounded-xl hover:bg-indigo-700 transition disabled:opacity-50"
                 >
                   {processing ? 'Submitting...' : 'Submit Advanced Booking'}
                 </button>
@@ -896,21 +896,21 @@ const Payment = () => {
       {/* Multi-Month Bulk Modal */}
       {multiModal.open && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={closeModal}
         >
           <div
-            className="bg-white rounded-3xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
+            className="bg-card rounded-3xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="p-6">
               <div className="flex justify-between items-center mb-6">
                 <h3 className="text-2xl font-bold text-cyan-900">Bulk Payment</h3>
-                <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">✕</button>
+                <button onClick={closeModal} className="text-muted-foreground hover:text-foreground">✕</button>
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-bold text-gray-700 mb-3">Select Months to Pay</label>
+                <label className="block text-sm font-bold text-foreground mb-3">Select Months to Pay</label>
                 <div className="grid grid-cols-2 gap-2">
                   {monthNames.map((m) => {
                     const mIdx = monthNames.indexOf(m);
@@ -929,12 +929,12 @@ const Payment = () => {
                           }
                         }}
                         className={`p-3 rounded-xl border text-left transition-all ${
-                          isAlreadyPaid ? 'bg-slate-50 opacity-50 cursor-not-allowed' : 
-                          isSelected ? 'bg-cyan-50 border-cyan-500 shadow-sm' : 'bg-white border-slate-200 hover:border-cyan-300'
+                          isAlreadyPaid ? 'bg-card/50 opacity-50 cursor-not-allowed' : 
+                          isSelected ? 'bg-cyan-50 border-cyan-500 shadow-sm' : 'bg-card border-slate-200 hover:border-cyan-300'
                         }`}
                       >
                         <span className="text-xs font-bold block">{m}</span>
-                        <span className="text-[10px] text-slate-400">{currentYear + (mIdx < currentMonth ? 1 : 0)}</span>
+                        <span className="text-[10px] text-muted-foreground">{currentYear + (mIdx < currentMonth ? 1 : 0)}</span>
                       </button>
                     );
                   })}
@@ -947,7 +947,7 @@ const Payment = () => {
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Upload Receipt</label>
+                <label className="block text-sm font-semibold text-foreground mb-2">Upload Receipt</label>
                 <div className="border-2 border-dashed border-cyan-200 rounded-xl p-4 text-center hover:border-cyan-400 transition-colors">
                   <input type="file" accept="image/*" onChange={handleBarcodeChange} className="hidden" id="bulk-upload" />
                   <label htmlFor="bulk-upload" className="cursor-pointer block">
@@ -966,7 +966,7 @@ const Payment = () => {
               <button
                 onClick={handleSubmitBulkPayment}
                 disabled={processing || multiModal.selectedMonths.length === 0 || !barcodeImage}
-                className="w-full py-4 bg-cyan-600 text-white rounded-xl font-bold shadow-lg hover:bg-cyan-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full py-4 bg-cyan-600 text-foreground rounded-xl font-bold shadow-lg hover:bg-cyan-700 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {processing ? (
                   <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Processing...</>
@@ -979,11 +979,11 @@ const Payment = () => {
 
       {/* Full Screen Image Viewer */}
       {fullScreenImage && (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] bg-background/90 flex items-center justify-center p-4">
           <div className="relative max-w-full max-h-full">
             <button
               onClick={() => setFullScreenImage(null)}
-              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+              className="absolute -top-12 right-0 text-foreground hover:text-muted-foreground transition-colors"
             >
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -996,7 +996,7 @@ const Payment = () => {
               style={{ maxWidth: '90vw', maxHeight: '90vh' }}
             />
             <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-              <p className="text-white text-sm bg-black/50 px-3 py-1 rounded-full">
+              <p className="text-foreground text-sm bg-background/50 px-3 py-1 rounded-full">
                 Click outside or press ESC to close
               </p>
             </div>

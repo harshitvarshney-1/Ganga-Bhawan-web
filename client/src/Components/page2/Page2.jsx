@@ -4,7 +4,7 @@ import About from './About/About'
 const Page2 = () => {
   return (
     <div>
-      <hr className="text-white" id='about' />
+      <hr className="text-foreground" id='about' />
       <About/>
     </div>
   )

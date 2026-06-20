@@ -160,7 +160,7 @@ const TenantDashboard = () => {
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-600 mx-auto mb-4"></div>
-          <div className="text-xl text-gray-600">Loading...</div>
+          <div className="text-xl text-muted-foreground">Loading...</div>
         </div>
       </div>
     );
@@ -171,7 +171,7 @@ const TenantDashboard = () => {
       {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+          className="fixed inset-0 bg-background/50 z-40 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -201,13 +201,13 @@ const TenantDashboard = () => {
       {/* Main Content Area */}
       <div className="flex-1 overflow-y-auto">
         {/* Mobile Header with Hamburger */}
-        <div className="lg:hidden bg-white shadow-md p-4 flex items-center gap-4 sticky top-0 z-30">
+        <div className="lg:hidden bg-card shadow-md p-4 flex items-center gap-4 sticky top-0 z-30">
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-lg hover:bg-card transition-colors"
             aria-label="Toggle menu"
           >
-            <svg className="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-6 h-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               {isMobileMenuOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (

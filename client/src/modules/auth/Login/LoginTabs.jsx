@@ -13,7 +13,7 @@ const LoginTabs = () => {
             ${
               active === tab
                 ? "bg-gradient-to-r from-cyan-500 to-teal-500 text-foreground"
-                : "text-gray-400 hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
         >
           {tab === "tenant" ? "Tenant Login" : "Admin Login"}

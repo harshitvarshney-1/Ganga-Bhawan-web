@@ -10,7 +10,7 @@ const NavBar = () => {
     <>
       {/* NAVBAR */}
       <header className="fixed top-0 left-0 w-full z-50 bg-slate-900 border-b border-slate-800">
-        <nav className="h-20 px-4 sm:px-8 md:px-12 flex items-center justify-between text-white">
+        <nav className="h-20 px-4 sm:px-8 md:px-12 flex items-center justify-between text-foreground">
 
           {/* Logo */}
           <Logo />
@@ -26,9 +26,9 @@ const NavBar = () => {
             className="md:hidden flex flex-col gap-[5px]"
             onClick={() => setOpen(true)}
           >
-            <span className="w-6 h-[2px] bg-white"></span>
-            <span className="w-6 h-[2px] bg-white"></span>
-            <span className="w-6 h-[2px] bg-white"></span>
+            <span className="w-6 h-[2px] bg-card"></span>
+            <span className="w-6 h-[2px] bg-card"></span>
+            <span className="w-6 h-[2px] bg-card"></span>
           </button>
 
         </nav>
@@ -37,7 +37,7 @@ const NavBar = () => {
       {/* OVERLAY */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/60 z-40"
+          className="fixed inset-0 bg-background/60 z-40"
           onClick={() => setOpen(false)}
         ></div>
       )}
@@ -57,7 +57,7 @@ const NavBar = () => {
           </span>
 
           <button
-            className="text-2xl text-white hover:text-cyan-400 transition"
+            className="text-2xl text-foreground hover:text-cyan-400 transition"
             onClick={() => setOpen(false)}
           >
             ✕

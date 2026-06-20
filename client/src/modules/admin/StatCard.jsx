@@ -65,14 +65,14 @@ const StatCard = ({ title, value, icon: Icon, color, index, trend }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: index * 0.1 + 0.3 }}
-          className="text-5xl font-black text-slate-900 tracking-tight font-outfit"
+          className="text-5xl font-black text-foreground tracking-tight font-outfit"
         >
           {value}
         </motion.span>
       </div>
 
       {/* Label */}
-      <p className="text-sm font-semibold text-slate-400 uppercase tracking-widest">{title}</p>
+      <p className="text-sm font-semibold text-muted-foreground uppercase tracking-widest">{title}</p>
 
       {/* Bottom accent bar */}
       <motion.div

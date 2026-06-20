@@ -27,7 +27,7 @@ const Logo = () => {
       <i className="fa-solid fa-house text-cyan-400 text-xl"></i>
       <span>
         Ganga Bhawan
-        <span className="font-normal text-gray-400"> (Hariom)</span>
+        <span className="font-normal text-muted-foreground"> (Hariom)</span>
       </span>
     </Link>
   );

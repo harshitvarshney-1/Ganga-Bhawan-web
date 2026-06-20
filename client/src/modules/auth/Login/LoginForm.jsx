@@ -6,7 +6,7 @@ const LoginForm = () => {
 
       {/* Email */}
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-muted-foreground mb-2">
           Email Address
         </label>
         <input
@@ -22,7 +22,7 @@ const LoginForm = () => {
 
       {/* Password */}
       <div>
-        <label className="block text-sm font-medium text-gray-400 mb-2">
+        <label className="block text-sm font-medium text-muted-foreground mb-2">
           Password
         </label>
         <input
@@ -48,7 +48,7 @@ const LoginForm = () => {
       </button>
 
       {/* Register link */}
-      <p className="text-sm text-center text-gray-400 pt-3">
+      <p className="text-sm text-center text-muted-foreground pt-3">
         Don't have an account?{" "}
         <Link to="/register" className="text-primary hover:underline cursor-pointer">
           Register

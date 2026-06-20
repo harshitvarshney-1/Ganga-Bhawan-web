@@ -51,7 +51,7 @@ const ContactCards = () => {
             {item.title}
           </h3>
 
-          <div className="space-y-2 text-gray-400 text-sm">
+          <div className="space-y-2 text-muted-foreground text-sm">
             {item.value.map((line) => (
               <p key={line}>{line}</p>
             ))}

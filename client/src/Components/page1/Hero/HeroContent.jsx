@@ -19,13 +19,13 @@ const HeroContent = () => {
         </span>
       </h1>
 
-      <p className="text-gray-400 text-lg max-w-xl">
+      <p className="text-muted-foreground text-lg max-w-xl">
         Affordable accommodation for students and working professionals
         with all essential facilities.
       </p>
 
       {/* FEATURES */}
-      <ul className="grid grid-cols-2 gap-3 text-sm text-gray-300">
+      <ul className="grid grid-cols-2 gap-3 text-sm text-muted-foreground">
         <li>✔ Furnished Rooms</li>
         <li>✔ High Speed Wi-Fi</li>
         <li>✔ RO Drinking Water</li>

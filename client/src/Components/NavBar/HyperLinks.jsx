@@ -26,7 +26,7 @@ const HyperLinks = () => {
 
   return (
     <ul className="flex flex-col md:flex-row gap-6 md:gap-10
-      text-[16px] font-medium text-gray-300">
+      text-[16px] font-medium text-muted-foreground">
       {[
         { name: "Home", id: "home" },
         { name: "About", id: "about" },

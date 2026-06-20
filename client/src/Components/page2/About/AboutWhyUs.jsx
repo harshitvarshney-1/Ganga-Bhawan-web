@@ -22,7 +22,7 @@ const AboutWhyUs = () => {
             hover:border-cyan-500/40 hover:-translate-y-1
             transition"
           >
-            <p className="text-gray-300">{point}</p>
+            <p className="text-muted-foreground">{point}</p>
           </div>
         ))}
       </div>

@@ -63,7 +63,7 @@ const PaymentHistoryModal = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+      className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
       onClick={() => setIsHistoryModalOpen(false)}
     >
       <motion.div 
@@ -89,7 +89,7 @@ const PaymentHistoryModal = ({
           </div>
           <button 
             onClick={() => setIsHistoryModalOpen(false)}
-            className="w-12 h-12 flex items-center justify-center bg-muted/30 hover:bg-slate-100 rounded-2xl transition-all text-muted-foreground hover:text-foreground border border-border"
+            className="w-12 h-12 flex items-center justify-center bg-muted/30 hover:bg-card rounded-2xl transition-all text-muted-foreground hover:text-foreground border border-border"
           >
             <X className="w-6 h-6" />
           </button>
@@ -111,7 +111,7 @@ const PaymentHistoryModal = ({
                   <select 
                     value={assignMonth} 
                     onChange={(e) => setAssignMonth(e.target.value)}
-                    className="w-full bg-card border border-border rounded-xl px-4 py-3 font-semibold text-slate-700 outline-none focus:border-ring"
+                    className="w-full bg-card border border-border rounded-xl px-4 py-3 font-semibold text-foreground outline-none focus:border-ring"
                   >
                     <option value="">Select Month</option>
                     {monthNamesShort.map(m => <option key={m} value={m}>{m}</option>)}
@@ -127,7 +127,7 @@ const PaymentHistoryModal = ({
                       type="number" 
                       value={assignAmount}
                       onChange={(e) => setAssignAmount(e.target.value)}
-                      className="w-full bg-card border border-border rounded-xl pl-9 pr-4 py-3 font-semibold text-slate-700 outline-none focus:border-ring"
+                      className="w-full bg-card border border-border rounded-xl pl-9 pr-4 py-3 font-semibold text-foreground outline-none focus:border-ring"
                       placeholder="e.g. 5000"
                     />
                   </div>
@@ -203,7 +203,7 @@ const PaymentHistoryModal = ({
                         <div className="flex gap-2">
                           <button 
                             onClick={() => setFullScreenImage(payment.barcodeImage)}
-                            className="flex-1 py-2 bg-card rounded-xl shadow-sm text-[10px] font-bold text-slate-700 flex items-center justify-center gap-1.5 hover:bg-primary hover:text-foreground transition-all border border-border"
+                            className="flex-1 py-2 bg-card rounded-xl shadow-sm text-[10px] font-bold text-foreground flex items-center justify-center gap-1.5 hover:bg-primary hover:text-foreground transition-all border border-border"
                           >
                             <ImageIcon className="w-3.5 h-3.5" />
                             RECEIPT
@@ -286,7 +286,7 @@ const PaymentHistoryModal = ({
 
               {/* Transaction History List */}
               <div className="bg-card rounded-xl p-8 border border-border shadow-sm">
-                <h3 className="text-xl font-bold text-slate-800 mb-6 flex items-center gap-3">
+                <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
                   <Clock className="w-6 h-6 text-muted-foreground" /> Recent Transactions
                 </h3>
 
@@ -306,7 +306,7 @@ const PaymentHistoryModal = ({
                               {isSuccess ? <CheckCircle2 className="w-6 h-6" /> : isPending ? <Clock className="w-6 h-6" /> : <X className="w-6 h-6" />}
                             </div>
                             <div className="min-w-0">
-                              <h5 className="font-bold text-slate-800 text-sm sm:text-base truncate">
+                              <h5 className="font-bold text-foreground text-sm sm:text-base truncate">
                                 {payment.month} <span className="text-muted-foreground font-normal text-xs sm:text-sm ml-1">Rent</span>
                               </h5>
                               <p className="text-[10px] sm:text-xs text-muted-foreground font-medium mt-0.5">

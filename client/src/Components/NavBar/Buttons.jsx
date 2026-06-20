@@ -8,7 +8,7 @@ const Buttons = () => {
       <Link to="/login">
         <button
           className="w-full px-5 py-2 rounded-md border border-gray-600
-          text-gray-300 hover:bg-slate-800 transition"
+          text-muted-foreground hover:bg-slate-800 transition"
         >
           Login
         </button>
@@ -17,7 +17,7 @@ const Buttons = () => {
       {/* Register */}
       <Link to="/register">
         <button
-          className="w-full px-5 py-2 rounded-md font-medium text-white
+          className="w-full px-5 py-2 rounded-md font-medium text-foreground
           bg-gradient-to-r from-cyan-500 to-teal-500
           hover:opacity-90 transition"
         >

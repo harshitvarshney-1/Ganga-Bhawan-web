@@ -15,7 +15,7 @@ const Profile = ({ userData }) => {
         </div>
       </div>
       
-      <div className="bg-white rounded-2xl shadow-xl p-8">
+      <div className="bg-card rounded-2xl shadow-xl p-8">
         <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
           <div className="flex items-start gap-3">
             <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,76 +33,76 @@ const Profile = ({ userData }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               Full Name
             </label>
-            <p className="text-lg font-medium text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">{userData?.fullName}</p>
+            <p className="text-lg font-medium text-foreground px-4 py-3 bg-card/50 rounded-lg border border-border">{userData?.fullName}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               Email Address
             </label>
-            <p className="text-lg font-medium text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">{userData?.email}</p>
+            <p className="text-lg font-medium text-foreground px-4 py-3 bg-card/50 rounded-lg border border-border">{userData?.email}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               Mobile Number
             </label>
-            <p className="text-lg font-medium text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">{userData?.mobileNumber}</p>
+            <p className="text-lg font-medium text-foreground px-4 py-3 bg-card/50 rounded-lg border border-border">{userData?.mobileNumber}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               Gender
             </label>
-            <p className="text-lg font-medium text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">{userData?.gender}</p>
+            <p className="text-lg font-medium text-foreground px-4 py-3 bg-card/50 rounded-lg border border-border">{userData?.gender}</p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               Date of Birth
             </label>
-            <p className="text-lg font-medium text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">
+            <p className="text-lg font-medium text-foreground px-4 py-3 bg-card/50 rounded-lg border border-border">
               {new Date(userData?.dateOfBirth).toLocaleDateString()}
             </p>
           </div>
 
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-              <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+              <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               Aadhaar Number
             </label>
-            <p className="text-lg font-medium text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">{userData?.aadhaarNumber}</p>
+            <p className="text-lg font-medium text-foreground px-4 py-3 bg-card/50 rounded-lg border border-border">{userData?.aadhaarNumber}</p>
           </div>
         </div>
 
         <div className="mt-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
-            <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <label className="block text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+            <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
             Permanent Address
           </label>
-          <p className="text-lg text-gray-900 px-4 py-3 bg-gray-50 rounded-lg border border-gray-200">{userData?.permanentAddress}</p>
+          <p className="text-lg text-foreground px-4 py-3 bg-card/50 rounded-lg border border-border">{userData?.permanentAddress}</p>
         </div>
       </div>
     </div>

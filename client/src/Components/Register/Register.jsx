@@ -252,8 +252,8 @@ export default function Register() {
   return (
     <>
       {loading && <Loader text="REGISTERING" />}
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full bg-gray-800 rounded-lg p-4 sm:p-6 lg:p-8">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="max-w-4xl w-full bg-background rounded-lg p-4 sm:p-6 lg:p-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-cyan-400 mb-6">
           Tenant Registration Form
         </h2>
@@ -290,10 +290,10 @@ export default function Register() {
               {files.profilePicture ? (
                 <img src={URL.createObjectURL(files.profilePicture)} alt="Profile Preview" className="w-full h-full object-cover" />
               ) : (
-                <span className="text-4xl text-gray-400">👤</span>
+                <span className="text-4xl text-muted-foreground">👤</span>
               )}
             </div>
-            <label className="block text-gray-300 mb-2 font-bold text-sm">
+            <label className="block text-muted-foreground mb-2 font-bold text-sm">
               Profile Photo (Required)
               {getStatusIcon(uploadStatus.profilePicture, 'profilePicture')}
             </label>
@@ -304,7 +304,7 @@ export default function Register() {
               onChange={handleFileChange}
               accept="image/*"
               required
-              className="w-full max-w-xs text-xs text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-400/10 file:text-cyan-400 hover:file:bg-cyan-400/20 transition-all"
+              className="w-full max-w-xs text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-400/10 file:text-cyan-400 hover:file:bg-cyan-400/20 transition-all"
             />
             {uploadStatus.profilePicture === 'error' && (
               <button type="button" onClick={() => handleRetryUpload('profilePicture')} className="text-cyan-400 text-xs mt-2 underline">
@@ -315,29 +315,29 @@ export default function Register() {
 
           {/* Full Name */}
           <div>
-            <label className="block text-gray-300 mb-2">Full Name (as per ID)</label>
+            <label className="block text-muted-foreground mb-2">Full Name (as per ID)</label>
             <input type="text" name="fullName" value={formData.fullName} onChange={handleChange} required
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+              className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               placeholder="Enter your full name" />
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-gray-300 mb-2">Email Address</label>
+            <label className="block text-muted-foreground mb-2">Email Address</label>
             <input type="email" name="email" value={formData.email} onChange={handleChange} required
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+              className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               placeholder="your@email.com" />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-gray-300 mb-2">Password</label>
+            <label className="block text-muted-foreground mb-2">Password</label>
             <div className="relative">
               <input type={showPassword ? "text" : "password"} name="password" value={formData.password} onChange={handleChange} required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12"
+                className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400 pr-12"
                 placeholder="Create a strong password" />
               <button type="button" onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-cyan-400 transition">
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-cyan-400 transition">
                 {showPassword ? <span title="Hide">🔒</span> : <span title="Show">👁️</span>}
               </button>
             </div>
@@ -345,24 +345,24 @@ export default function Register() {
 
           {/* Mobile Number */}
           <div>
-            <label className="block text-gray-300 mb-2">Mobile Number</label>
+            <label className="block text-muted-foreground mb-2">Mobile Number</label>
             <input type="tel" name="mobileNumber" value={formData.mobileNumber} onChange={handleChange} required pattern="[0-9]{10}"
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+              className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               placeholder="10-digit number" />
           </div>
 
           {/* Father's Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-300 mb-2">Father's Name</label>
+              <label className="block text-muted-foreground mb-2">Father's Name</label>
               <input type="text" name="fatherName" value={formData.fatherName} onChange={handleChange} required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 placeholder="Father's name" />
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">Father's Phone No.</label>
+              <label className="block text-muted-foreground mb-2">Father's Phone No.</label>
               <input type="tel" name="fatherPhone" value={formData.fatherPhone} onChange={handleChange} pattern="[0-9]{10}"
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 placeholder="10-digit number" />
             </div>
           </div>
@@ -370,15 +370,15 @@ export default function Register() {
           {/* Mother's Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-300 mb-2">Mother's Name</label>
+              <label className="block text-muted-foreground mb-2">Mother's Name</label>
               <input type="text" name="motherName" value={formData.motherName} onChange={handleChange}
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 placeholder="Mother's name" />
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">Mother's Phone No.</label>
+              <label className="block text-muted-foreground mb-2">Mother's Phone No.</label>
               <input type="tel" name="motherPhone" value={formData.motherPhone} onChange={handleChange} pattern="[0-9]{10}"
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
                 placeholder="10-digit number" />
             </div>
           </div>
@@ -386,15 +386,15 @@ export default function Register() {
           {/* DOB and Gender */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-gray-300 mb-2">Date of Birth</label>
+              <label className="block text-muted-foreground mb-2">Date of Birth</label>
               <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required
                 min={minDate} max={eighteenYearsAgo}
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400" />
+                className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400" />
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">Gender</label>
+              <label className="block text-muted-foreground mb-2">Gender</label>
               <select name="gender" value={formData.gender} onChange={handleChange} required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400">
                 <option value="">Select Gender</option>
                 <option value="Male">Male</option>
                 <option value="Female">Female</option>
@@ -405,24 +405,24 @@ export default function Register() {
 
           {/* Permanent Address */}
           <div>
-            <label className="block text-gray-300 mb-2">Permanent Address</label>
+            <label className="block text-muted-foreground mb-2">Permanent Address</label>
             <textarea name="permanentAddress" value={formData.permanentAddress} onChange={handleChange} required rows="3"
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+              className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               placeholder="Enter your complete address" />
           </div>
 
           {/* Aadhaar Number */}
           <div>
-            <label className="block text-gray-300 mb-2">Aadhaar Card Number</label>
+            <label className="block text-muted-foreground mb-2">Aadhaar Card Number</label>
             <input type="text" name="aadhaarNumber" value={formData.aadhaarNumber} onChange={handleChange} required pattern="[0-9]{12}"
-              className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+              className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               placeholder="12-digit Aadhaar number" />
           </div>
 
           {/* Aadhaar Upload Sections */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-gray-300 mb-2">
+              <label className="block text-muted-foreground mb-2">
                 Aadhaar Front Photo
                 {getStatusIcon(uploadStatus.aadhaarFront, 'aadhaarFront')}
               </label>
@@ -433,17 +433,17 @@ export default function Register() {
                 onChange={handleFileChange}
                 accept="image/*"
                 required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
               {uploadStatus.aadhaarFront === 'error' && (
                 <button type="button" onClick={() => handleRetryUpload('aadhaarFront')} className="text-cyan-400 text-xs mt-1 underline">
                   Retry Upload
                 </button>
               )}
-              <p className="text-gray-400 text-xs mt-1">Upload JPG or PNG photo. Uploaded immediately on selection.</p>
+              <p className="text-muted-foreground text-xs mt-1">Upload JPG or PNG photo. Uploaded immediately on selection.</p>
             </div>
             <div>
-              <label className="block text-gray-300 mb-2">
+              <label className="block text-muted-foreground mb-2">
                 Aadhaar Back Photo
                 {getStatusIcon(uploadStatus.aadhaarBack, 'aadhaarBack')}
               </label>
@@ -454,14 +454,14 @@ export default function Register() {
                 onChange={handleFileChange}
                 accept="image/*"
                 required
-                className="w-full bg-gray-700 text-white px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
+                className="w-full bg-gray-700 text-foreground px-4 py-3 rounded focus:outline-none focus:ring-2 focus:ring-cyan-400"
               />
               {uploadStatus.aadhaarBack === 'error' && (
                 <button type="button" onClick={() => handleRetryUpload('aadhaarBack')} className="text-cyan-400 text-xs mt-1 underline">
                   Retry Upload
                 </button>
               )}
-              <p className="text-gray-400 text-xs mt-1">Upload JPG or PNG photo. Uploaded immediately on selection.</p>
+              <p className="text-muted-foreground text-xs mt-1">Upload JPG or PNG photo. Uploaded immediately on selection.</p>
             </div>
           </div>
 
@@ -469,7 +469,7 @@ export default function Register() {
           <button
             type="submit"
             disabled={loading || uploadStatus.aadhaarFront === 'uploading' || uploadStatus.aadhaarBack === 'uploading' || uploadStatus.profilePicture === 'uploading'}
-            className="w-full bg-cyan-400 text-gray-900 font-bold py-3 rounded hover:bg-cyan-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-cyan-400 text-foreground font-bold py-3 rounded hover:bg-cyan-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Registering...' : 
              (uploadStatus.aadhaarFront === 'uploading' || uploadStatus.aadhaarBack === 'uploading' || uploadStatus.profilePicture === 'uploading')
@@ -477,7 +477,7 @@ export default function Register() {
           </button>
         </form>
 
-        <p className="text-gray-400 text-center mt-6">
+        <p className="text-muted-foreground text-center mt-6">
           Already have an account?{' '}
           <a href="/login" className="text-cyan-400 hover:underline">Login here</a>
         </p>

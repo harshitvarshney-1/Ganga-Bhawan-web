@@ -9,7 +9,7 @@ const ContactHeader = () => {
         Let’s <span className="text-primary">Connect</span>
       </h1>
 
-      <p className="text-gray-400 text-lg">
+      <p className="text-muted-foreground text-lg">
         Have questions about rooms, facilities, or availability?
         Reach out to us anytime — we’re happy to help.
       </p>

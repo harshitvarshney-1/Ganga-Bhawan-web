@@ -880,7 +880,7 @@ const AdminDashboard = () => {
       {/* ── Tenant Detail Modal ── */}
       {showModal && selectedTenant && (
         <div
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() => setShowModal(false)}
         >
           <motion.div
@@ -1055,7 +1055,7 @@ const AdminDashboard = () => {
 
       {/* ── Full Screen Image ── */}
       {fullScreenImage && (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4" onClick={() => setFullScreenImage(null)}>
+        <div className="fixed inset-0 z-[100] bg-background/90 flex items-center justify-center p-4" onClick={() => setFullScreenImage(null)}>
           <motion.div
             initial={{ opacity: 0, scale: 0.92 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -1073,7 +1073,7 @@ const AdminDashboard = () => {
 
       {/* ── Aadhaar Viewer ── */}
       {selectedAadhaar && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedAadhaar(null)}>
+        <div className="fixed inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedAadhaar(null)}>
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
