@@ -20,6 +20,7 @@ const app = express();
 // CORS Configuration with Origin Whitelist
 const allowedOrigins = [
   currentConfig.clientUrl,
+  'https://ganga-bhawan-web.vercel.app',
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:5173'
