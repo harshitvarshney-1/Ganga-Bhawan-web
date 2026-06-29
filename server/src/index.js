@@ -17,6 +17,9 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
+// Set trust proxy to true for rate limiting behind reverse proxies (like Render)
+app.set('trust proxy', 1);
+
 // CORS Configuration with Origin Whitelist
 const allowedOrigins = [
   currentConfig.clientUrl,
