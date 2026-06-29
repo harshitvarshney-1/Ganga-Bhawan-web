@@ -35,7 +35,7 @@ const AboutFacilities = () => {
       </div>
 
       <div className="rounded-2xl p-10 bg-gradient-to-br
-        from-slate-900 to-slate-800 border border-slate-700">
+        from-card to-secondary border border-border shadow-sm">
         <h3 className="text-xl font-semibold mb-4 text-primary">
           Our Commitment
         </h3>

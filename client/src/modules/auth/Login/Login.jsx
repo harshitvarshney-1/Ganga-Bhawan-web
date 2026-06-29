@@ -5,6 +5,7 @@ import { loginAPI } from '../../../infra/auth/auth.api';
 import { authAtom, userAtom } from '../../../shared/hooks/store/auth.atom';
 import Loader from '../../../shared/components/atoms/Loader/Loader';
 import LogoIcon from "@/shared/components/atoms/Logo/LogoIcon";
+import NavBar from '../../../shared/components/organisms/NavBar/NavBar';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -44,8 +45,9 @@ export default function Login() {
 
   return (
     <>
+      <NavBar />
       {loading && <Loader text="LOGGING IN" />}
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 pt-20">
         <div className="w-full max-w-sm">
           {/* Brand */}
           <div className="text-center mb-8">
@@ -55,6 +57,8 @@ export default function Login() {
             <h1 className="text-lg font-semibold text-foreground">Ganga Bhawan</h1>
             <p className="text-[13px] text-muted-foreground mt-0.5">Sign in to your account</p>
           </div>
+
+
 
           <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
             {/* Tabs */}

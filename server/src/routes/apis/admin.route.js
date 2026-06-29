@@ -23,6 +23,7 @@ import {
   quickRejectPayment,
   assignDuePayment
 } from '../../controllers/admin/payment.controller.js';
+import { getAuditLogs, getAuditStats } from '../../controllers/admin/auditLog.controller.js';
 
 const router = express.Router();
 
@@ -63,6 +64,10 @@ router.post('/approve-payment/:paymentId', isAdmin, approvePayment);
 router.post('/reject-payment/:paymentId', isAdmin, rejectPayment);
 router.get('/tenant-payments/:tenantId', isAdmin, getTenantPayments);
 router.delete('/delete-payment/:paymentId', isAdmin, deletePayment);
+
+// Audit Log Routes
+router.get('/audit-logs', isAdmin, getAuditLogs);
+router.get('/audit-logs/stats', isAdmin, getAuditStats);
 
 // Other Admin Routes
 router.post('/reset-password/:tenantId', isAdmin, resetTenantPassword);

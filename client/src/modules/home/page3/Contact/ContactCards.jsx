@@ -33,12 +33,12 @@ const contactData = [
 
 const ContactCards = () => {
   return (
-    <div className="grid md:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {contactData.map((item) => (
         <div
           key={item.title}
-          className="p-8 rounded-2xl bg-slate-900
-          border border-slate-800
+          className="p-8 rounded-2xl bg-card
+          border border-border shadow-sm
           hover:border-primary/40
           hover:-translate-y-1 transition"
         >

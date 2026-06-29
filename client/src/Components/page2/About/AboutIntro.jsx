@@ -40,8 +40,8 @@ const AboutIntro = () => {
         ].map(([value, label]) => (
           <div
             key={label}
-            className="p-6 rounded-xl bg-slate-900 border border-slate-800
-            hover:border-cyan-500/40 transition"
+            className="p-6 rounded-xl bg-card border border-border
+            hover:border-cyan-500/40 transition shadow-sm"
           >
             <h3 className="text-2xl font-bold text-cyan-400">{value}</h3>
             <p className="text-muted-foreground mt-1">{label}</p>

@@ -13,10 +13,10 @@ const LoginForm = () => {
           type="email"
           placeholder="Enter your email"
           className="w-full px-4 py-3 rounded-lg
-            bg-slate-800 border border-slate-700
-            text-foreground placeholder-gray-500
+            bg-background border border-border
+            text-foreground placeholder-muted-foreground
             focus:outline-none focus:border-primary
-            focus:ring-2 focus:ring-cyan-500/20 transition"
+            focus:ring-2 focus:ring-primary/20 transition"
         />
       </div>
 
@@ -29,10 +29,10 @@ const LoginForm = () => {
           type="password"
           placeholder="Enter your password"
           className="w-full px-4 py-3 rounded-lg
-            bg-slate-800 border border-slate-700
-            text-foreground placeholder-gray-500
+            bg-background border border-border
+            text-foreground placeholder-muted-foreground
             focus:outline-none focus:border-primary
-            focus:ring-2 focus:ring-cyan-500/20 transition"
+            focus:ring-2 focus:ring-primary/20 transition"
         />
       </div>
 

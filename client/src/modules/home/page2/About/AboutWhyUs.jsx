@@ -13,12 +13,12 @@ const AboutWhyUs = () => {
         Why <span className="text-primary">Choose Ganga Bhawan?</span>
       </h2>
 
-      <div className="grid md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
         {points.map((point) => (
           <div
             key={point}
-            className="p-6 rounded-xl bg-slate-900
-            border border-slate-800
+            className="p-6 rounded-xl bg-card
+            border border-border shadow-sm
             hover:border-primary/40 hover:-translate-y-1
             transition"
           >

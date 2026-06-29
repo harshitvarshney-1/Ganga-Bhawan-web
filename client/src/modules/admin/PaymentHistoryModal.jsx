@@ -15,7 +15,7 @@ const PaymentHistoryModal = ({
   handleDeletePayment
 }) => {
   const auth = useAtomValue(authAtom);
-  const [assignMonth, setAssignMonth] = React.useState('');
+  const [assignDate, setAssignDate] = React.useState('');
   const [assignAmount, setAssignAmount] = React.useState('');
   const [assigning, setAssigning] = React.useState(false);
 
@@ -26,12 +26,16 @@ const PaymentHistoryModal = ({
   const currentYear = new Date().getFullYear();
 
   const handleAssignRent = async () => {
-    if (!assignMonth || !assignAmount) {
-      alert("Please select a month and enter an amount.");
+    if (!assignDate || !assignAmount) {
+      alert("Please select a date and enter an amount.");
       return;
     }
     setAssigning(true);
     try {
+      const d = new Date(assignDate);
+      const mIndex = d.getMonth();
+      const monthStr = `${d.getDate()} ${monthNamesShort[mIndex]} ${d.getFullYear()}`;
+
       const response = await fetch(`${API_URL}/admin/assign-due-payment`, {
         method: 'POST',
         headers: {
@@ -40,16 +44,17 @@ const PaymentHistoryModal = ({
         },
         body: JSON.stringify({
           userId: selectedHistoryTenant._id,
-          month: assignMonth,
-          monthIndex: monthNamesShort.indexOf(assignMonth),
+          month: monthStr,
+          monthIndex: mIndex,
           amount: assignAmount,
-          isAdvanced: false
+          isAdvanced: false,
+          paymentDate: d.toISOString()
         })
       });
       const data = await response.json();
       if (response.ok) {
         alert("✅ Rent assigned/updated successfully! Please close and reopen this record, or refresh, to see changes.");
-        setAssignMonth('');
+        setAssignDate('');
         setAssignAmount('');
       } else {
         alert(`❌ Error: ${data.error}`);
@@ -105,17 +110,15 @@ const PaymentHistoryModal = ({
           ) : (
             <div className="space-y-10">
               {/* Assign Manual Rent Section */}
-              <div className="bg-gradient-to-br from-indigo-50 to-white rounded-xl p-6 border border-indigo-100 shadow-sm flex flex-col md:flex-row items-end gap-4">
+              <div className="bg-gradient-to-br from-primary/5 to-primary/10 rounded-xl p-6 border border-border/50 shadow-sm flex flex-col md:flex-row items-end gap-4">
                 <div className="flex-1 w-full">
-                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Assign Month</label>
-                  <select 
-                    value={assignMonth} 
-                    onChange={(e) => setAssignMonth(e.target.value)}
+                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Assign Date</label>
+                  <input 
+                    type="date"
+                    value={assignDate} 
+                    onChange={(e) => setAssignDate(e.target.value)}
                     className="w-full bg-card border border-border rounded-xl px-4 py-3 font-semibold text-foreground outline-none focus:border-ring"
-                  >
-                    <option value="">Select Month</option>
-                    {monthNamesShort.map(m => <option key={m} value={m}>{m}</option>)}
-                  </select>
+                  />
                 </div>
                 <div className="flex-1 w-full">
                   <label className="block text-xs font-bold text-muted-foreground uppercase tracking-widest mb-2">Rent Amount</label>
@@ -164,15 +167,15 @@ const PaymentHistoryModal = ({
                   let label = "Upcoming";
 
                   if (isPaid) {
-                    style = "bg-emerald-50 border-emerald-100 text-emerald-700 shadow-sm";
+                    style = "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-400 shadow-sm";
                     icon = <CheckCircle2 className="w-5 h-5 text-emerald-500" />;
                     label = "Paid";
                   } else if (isPending) {
-                    style = "bg-amber-50 border-amber-100 text-amber-700";
+                    style = "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400";
                     icon = <Clock className="w-5 h-5 text-amber-500 animate-pulse" />;
                     label = "Verification";
                   } else if (isRejected) {
-                    style = "bg-rose-50 border-rose-100 text-rose-700";
+                    style = "bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-400";
                     icon = <AlertTriangle className="w-5 h-5 text-rose-500" />;
                     label = "Issue Found";
                   } else if (isDue) {
@@ -180,7 +183,7 @@ const PaymentHistoryModal = ({
                     icon = <Calendar className="w-5 h-5 text-primary" />;
                     label = "ASSIGNED (DUE)";
                   } else if (isOverdue) {
-                    style = "bg-rose-50 border-rose-200 text-rose-800 shadow-sm border-2 animate-pulse";
+                    style = "bg-rose-500/10 border-rose-500/40 text-rose-700 dark:text-rose-400 shadow-sm border-2 animate-pulse";
                     icon = <AlertTriangle className="w-5 h-5 text-rose-600" />;
                     label = "UNASSIGNED";
                   }
@@ -247,8 +250,8 @@ const PaymentHistoryModal = ({
                           <span className="font-bold text-foreground">{payment.month || 'Future'}</span>
                         </div>
                         <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${
-                          payment.status === 'success' ? 'bg-emerald-100 text-emerald-700' : 
-                          payment.status === 'pending' ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'
+                          payment.status === 'success' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' : 
+                          payment.status === 'pending' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-rose-500/20 text-rose-700 dark:text-rose-400'
                         }`}>
                           {payment.status}
                         </div>
@@ -300,8 +303,8 @@ const PaymentHistoryModal = ({
                         <div key={index} className="group flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-50 hover:border-indigo-100 hover:bg-primary/10/30 transition-all">
                           <div className="flex items-center gap-4 min-w-0">
                             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                              isSuccess ? 'bg-emerald-50 text-emerald-600' : 
-                              isPending ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
+                              isSuccess ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 
+                              isPending ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
                             }`}>
                               {isSuccess ? <CheckCircle2 className="w-6 h-6" /> : isPending ? <Clock className="w-6 h-6" /> : <X className="w-6 h-6" />}
                             </div>
@@ -346,10 +349,10 @@ const PaymentHistoryModal = ({
 
               {/* Legend */}
               <div className="flex flex-wrap items-center justify-center gap-8 py-6 px-8 bg-muted/30 rounded-3xl border border-border">
-                <LegendItem color="bg-emerald-500" bg="bg-emerald-50" label="Settled" />
-                <LegendItem color="bg-amber-500" bg="bg-amber-50" label="Verifying" />
-                <LegendItem color="bg-rose-500" bg="bg-rose-50" label="Overdue" />
-                <LegendItem color="bg-slate-300" bg="bg-muted/30" label="Upcoming" />
+                <LegendItem color="bg-emerald-500" bg="bg-emerald-500/10 border-emerald-500/20 text-emerald-700 dark:text-emerald-400" label="Settled" />
+                <LegendItem color="bg-amber-500" bg="bg-amber-500/10 border-amber-500/20 text-amber-700 dark:text-amber-400" label="Verifying" />
+                <LegendItem color="bg-rose-500" bg="bg-rose-500/10 border-rose-500/20 text-rose-700 dark:text-rose-400" label="Overdue" />
+                <LegendItem color="bg-slate-300" bg="bg-muted/30 border-border/50 text-muted-foreground" label="Upcoming" />
               </div>
             </div>
           )}
@@ -360,9 +363,9 @@ const PaymentHistoryModal = ({
 };
 
 const LegendItem = ({ color, bg, label }) => (
-  <div className={`flex items-center gap-3 px-4 py-2 rounded-2xl ${bg} border border-white transition-transform hover:scale-105`}>
+  <div className={`flex items-center gap-3 px-4 py-2 rounded-2xl ${bg} border transition-transform hover:scale-105`}>
     <div className={`w-2.5 h-2.5 rounded-full ${color} shadow-sm`}></div>
-    <span className="text-xs font-bold text-foreground uppercase tracking-widest">{label}</span>
+    <span className="text-xs font-bold uppercase tracking-widest">{label}</span>
   </div>
 );
 

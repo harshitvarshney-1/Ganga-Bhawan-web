@@ -4,7 +4,7 @@ const LoginTabs = () => {
   const [active, setActive] = useState("tenant");
 
   return (
-    <div className="flex bg-slate-800 rounded-lg p-1 mb-6">
+    <div className="flex bg-muted rounded-lg p-1 mb-6">
       {["tenant", "admin"].map((tab) => (
         <button
           key={tab}

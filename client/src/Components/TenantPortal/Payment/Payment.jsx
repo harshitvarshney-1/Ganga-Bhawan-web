@@ -485,14 +485,14 @@ const Payment = () => {
                   className={`
                     relative rounded-2xl p-6 border-2 transition-all duration-300
                     ${isPaid
-                    ? 'border-emerald-500 bg-emerald-50'
+                    ? 'border-emerald-500/30 bg-emerald-500/10'
                     : pendingPayment
-                      ? 'border-amber-500 bg-amber-50'
+                      ? 'border-amber-500/30 bg-amber-500/10'
                       : isCurrent
-                        ? 'border-red-500 bg-red-50 shadow-lg shadow-red-100'
+                        ? 'border-red-500/30 bg-red-500/10 shadow-lg shadow-red-500/10'
                         : isPast
-                          ? 'border-amber-500 bg-amber-50'
-                          : 'border-border bg-card/50'
+                          ? 'border-amber-500/30 bg-amber-500/10'
+                          : 'border-border/50 bg-card/50'
                   }
                     ${canPay ? 'cursor-pointer hover:scale-105 hover:shadow-xl' : ''}
                   `}
@@ -503,22 +503,22 @@ const Payment = () => {
                     <div className={`
                       w-12 h-12 rounded-xl flex items-center justify-center
                       ${isPaid
-                        ? 'bg-emerald-500'
+                        ? 'bg-emerald-500 text-white'
                         : pendingPayment
-                          ? 'bg-amber-500'
+                          ? 'bg-amber-500 text-white'
                           : isCurrent
-                            ? 'bg-red-500'
+                            ? 'bg-red-500 text-white'
                             : isPast
-                              ? 'bg-amber-500'
-                              : 'bg-gray-300'
+                              ? 'bg-amber-500 text-white'
+                              : 'bg-muted text-muted-foreground'
                       }
                     `}>
                       {isPaid ? (
-                        <svg className="w-7 h-7 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                         </svg>
                       ) : (
-                        <svg className="w-7 h-7 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                             d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
@@ -526,12 +526,12 @@ const Payment = () => {
                     </div>
 
                     {isCurrent && !isPaid && !pendingPayment && (
-                      <span className="px-2 py-1 bg-red-500 text-foreground text-xs font-bold rounded-full animate-pulse">
+                      <span className="px-2 py-1 bg-red-500 text-white text-[10px] font-bold rounded-full animate-pulse tracking-wider">
                         DUE
                       </span>
                     )}
                     {pendingPayment && (
-                      <span className="px-2 py-1 bg-amber-500 text-foreground text-xs font-bold rounded-full">
+                      <span className="px-2 py-1 bg-amber-500 text-white text-[10px] font-bold rounded-full tracking-wider">
                         PENDING
                       </span>
                     )}
@@ -544,14 +544,14 @@ const Payment = () => {
                   <div className={`
                     inline-block px-3 py-1 rounded-full text-xs font-bold
                     ${isPaid
-                    ? 'bg-emerald-500 text-foreground'
+                    ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400'
                     : pendingPayment
-                      ? 'bg-amber-500 text-foreground'
+                      ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
                       : isCurrent
-                        ? 'bg-red-500 text-foreground'
+                        ? 'bg-red-500/20 text-red-600 dark:text-red-400'
                         : isPast
-                          ? 'bg-amber-500 text-foreground'
-                          : 'bg-gray-300 text-foreground'
+                          ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400'
+                          : 'bg-muted text-muted-foreground'
                   }
                   `}>
                     {isPaid ? '✓ PAID' : pendingPayment ? '⏳ PENDING' : isCurrent ? 'PAY NOW' : isPast ? 'OVERDUE' : 'UPCOMING'}

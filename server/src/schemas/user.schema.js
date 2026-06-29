@@ -59,6 +59,10 @@ export const userSchema = new mongoose.Schema({
   profilePicture: {
     type: String
   },
+  roomNumber: {
+    type: Number,
+    required: function() { return this.role === 'tenant'; }
+  },
   role: {
     type: String,
     enum: ['tenant', 'admin'],

@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../../models/user.model.js';
 import { currentConfig } from '../../config/env.js';
+import { writeLog } from '../admin/auditLog.controller.js';
 
 export const loginUser = async (req, res) => {
   try {
@@ -26,6 +27,8 @@ export const loginUser = async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
+      // Log failed login
+      writeLog({ userId: user._id, action: 'login_failed', req, metadata: { reason: 'invalid_password' } });
       return res.status(401).json({ error: 'Invalid password' });
     }
 
@@ -53,14 +56,14 @@ export const loginUser = async (req, res) => {
       { expiresIn: '15m' }
     );
 
-    // Long-lived refresh token (7 days) - stored in httpOnly cookie
+    // Long-lived refresh token (1 day) - stored in httpOnly cookie
     const refreshToken = jwt.sign(
       {
         userId: user._id,
         type: 'refresh'
       },
       currentConfig.jwtSecret,
-      { expiresIn: '7d' }
+      { expiresIn: '1d' }
     );
 
     // Set refresh token in httpOnly cookie (secure in production)
@@ -68,9 +71,12 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
       sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
       secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days in milliseconds
+      maxAge: 1 * 24 * 60 * 60 * 1000 // 1 day in milliseconds
     };
     res.cookie('refreshToken', refreshToken, cookieOptions);
+
+    // Log successful login
+    writeLog({ userId: user._id, action: 'login_success', req, metadata: { role: user.role } });
 
     res.json({
       success: true,

@@ -10,6 +10,7 @@ import { connectDB } from './infra/mongodb.js';
 import routes from './routes/index.js';
 import { verifyEmailConnection } from './utils/email.util.js';
 import { sanitizeError } from './utils/error.util.js';
+import { startCronJobs } from './cron/paymentCron.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -81,6 +82,9 @@ app.use((req, res, next) => {
 connectDB().then(() => {
   // Verify Email connection after DB is up
   verifyEmailConnection();
+  
+  // Start background cron jobs
+  startCronJobs();
 }).catch(err => {
   console.error('Failed to connect to MongoDB:', err.message);
 });

@@ -22,7 +22,7 @@ const Details = ({ userData }) => {
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="max-w-5xl mx-auto space-y-6">
 
       {/* Page Header */}
-      <motion.div variants={cardVariants} className="relative overflow-hidden rounded-3xl bg-slate-900">
+      <motion.div variants={cardVariants} className="relative overflow-hidden rounded-3xl bg-card border border-border shadow-sm">
         <div className="absolute top-0 right-0 w-64 h-64 bg-violet-600/20 rounded-full -mr-24 -mt-24 blur-3xl pointer-events-none" />
         <div className="relative z-10 px-8 py-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -30,7 +30,7 @@ const Details = ({ userData }) => {
             <h1 className="text-2xl lg:text-3xl font-black text-foreground font-outfit">Personal Details</h1>
             <p className="text-muted-foreground text-sm font-medium mt-1">Family information and official documents</p>
           </div>
-          <div className="flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-2xl">
+          <div className="flex items-center gap-2 self-start sm:self-auto px-4 py-2.5 bg-card border border-border rounded-2xl shadow-sm">
             <Lock className="w-4 h-4 text-muted-foreground" />
             <span className="text-sm font-bold text-muted-foreground">Details Locked</span>
           </div>
@@ -38,7 +38,7 @@ const Details = ({ userData }) => {
       </motion.div>
 
       {/* Family Information */}
-      <motion.div variants={cardVariants} className="bg-card rounded-3xl p-6 border border-slate-100 shadow-sm">
+      <motion.div variants={cardVariants} className="bg-card rounded-3xl p-6 border border-border/50 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2.5 bg-muted text-primary rounded-2xl">
             <Users className="w-5 h-5" />
@@ -49,15 +49,15 @@ const Details = ({ userData }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <DetailRow icon={User}  label="Father's Name"  value={userData?.fatherName}  iconBg="bg-primary/10" iconColor="text-primary" />
           <DetailRow icon={Phone} label="Father's Phone" value={userData?.fatherPhone} iconBg="bg-primary/10" iconColor="text-primary" />
-          <DetailRow icon={User}  label="Mother's Name"  value={userData?.motherName}  iconBg="bg-pink-50"   iconColor="text-pink-600" />
-          <DetailRow icon={Phone} label="Mother's Phone" value={userData?.motherPhone} iconBg="bg-pink-50"   iconColor="text-pink-600" />
+          <DetailRow icon={User}  label="Mother's Name"  value={userData?.motherName}  iconBg="bg-pink-500/10"   iconColor="text-pink-600 dark:text-pink-400" />
+          <DetailRow icon={Phone} label="Mother's Phone" value={userData?.motherPhone} iconBg="bg-pink-500/10"   iconColor="text-pink-600 dark:text-pink-400" />
         </div>
       </motion.div>
 
       {/* Official Documents */}
-      <motion.div variants={cardVariants} className="bg-card rounded-3xl p-6 border border-slate-100 shadow-sm">
+      <motion.div variants={cardVariants} className="bg-card rounded-3xl p-6 border border-border/50 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
-          <div className="p-2.5 bg-cyan-100 text-cyan-600 rounded-2xl">
+          <div className="p-2.5 bg-cyan-500/20 text-cyan-600 dark:text-cyan-400 rounded-2xl">
             <FileText className="w-5 h-5" />
           </div>
           <h3 className="text-lg font-bold text-foreground font-outfit">Official Documents</h3>
@@ -71,24 +71,24 @@ const Details = ({ userData }) => {
               href={userData.aadhaarFront}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col justify-between bg-card/50 rounded-3xl border border-slate-200 p-6 hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer"
+              className="group flex flex-col justify-between bg-card/50 rounded-3xl border border-border/50 p-6 hover:shadow-xl hover:border-primary/50 transition-all cursor-pointer"
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="p-4 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                   <FileImage className="w-8 h-8 text-foreground" />
                 </div>
-                <div className="p-2 bg-card rounded-full group-hover:bg-primary/10 transition-colors border border-slate-200">
+                <div className="p-2 bg-card rounded-full group-hover:bg-primary/10 transition-colors border border-border/50">
                   <DownloadCloud className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                 </div>
               </div>
               <div>
                 <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-1">Identity Proof</p>
-                <h4 className="text-xl font-bold text-foreground group-hover:text-indigo-700 transition-colors font-outfit">Aadhaar Front</h4>
+                <h4 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors font-outfit">Aadhaar Front</h4>
                 <p className="text-sm font-medium text-muted-foreground mt-1">Front side image</p>
               </div>
             </motion.a>
           ) : (
-            <div className="flex flex-col items-center justify-center bg-card/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 text-center min-h-[200px]">
+            <div className="flex flex-col items-center justify-center bg-card/50 rounded-3xl border-2 border-dashed border-border/50 p-8 text-center min-h-[200px]">
               <FileImage className="w-10 h-10 text-slate-300 mb-3" />
               <p className="text-muted-foreground text-sm font-medium">Front photo not uploaded</p>
             </div>
@@ -101,24 +101,24 @@ const Details = ({ userData }) => {
               href={userData.aadhaarBack}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex flex-col justify-between bg-card/50 rounded-3xl border border-slate-200 p-6 hover:shadow-xl hover:border-indigo-300 transition-all cursor-pointer"
+              className="group flex flex-col justify-between bg-card/50 rounded-3xl border border-border/50 p-6 hover:shadow-xl hover:border-primary/50 transition-all cursor-pointer"
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="p-4 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-2xl shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
                   <FileImage className="w-8 h-8 text-foreground" />
                 </div>
-                <div className="p-2 bg-card rounded-full group-hover:bg-primary/10 transition-colors border border-slate-200">
+                <div className="p-2 bg-card rounded-full group-hover:bg-primary/10 transition-colors border border-border/50">
                   <DownloadCloud className="w-5 h-5 text-muted-foreground group-hover:text-primary" />
                 </div>
               </div>
               <div>
                 <p className="text-[10px] font-extrabold text-muted-foreground uppercase tracking-widest mb-1">Identity Proof</p>
-                <h4 className="text-xl font-bold text-foreground group-hover:text-indigo-700 transition-colors font-outfit">Aadhaar Back</h4>
+                <h4 className="text-xl font-bold text-foreground group-hover:text-primary transition-colors font-outfit">Aadhaar Back</h4>
                 <p className="text-sm font-medium text-muted-foreground mt-1">Back side image</p>
               </div>
             </motion.a>
           ) : (
-            <div className="flex flex-col items-center justify-center bg-card/50 rounded-3xl border-2 border-dashed border-slate-200 p-8 text-center min-h-[200px]">
+            <div className="flex flex-col items-center justify-center bg-card/50 rounded-3xl border-2 border-dashed border-border/50 p-8 text-center min-h-[200px]">
               <FileImage className="w-10 h-10 text-slate-300 mb-3" />
               <p className="text-muted-foreground text-sm font-medium">Back photo not uploaded</p>
             </div>
@@ -130,7 +130,7 @@ const Details = ({ userData }) => {
 };
 
 const DetailRow = ({ icon: Icon, label, value, iconBg, iconColor }) => (
-  <div className="flex items-center gap-4 p-5 bg-card/50 rounded-2xl border border-slate-100 hover:border-slate-200 hover:bg-card transition-all group">
+  <div className="flex items-center gap-4 p-5 bg-card/50 rounded-2xl border border-border/50 hover:border-border hover:bg-card transition-all group">
     <div className={`p-3 rounded-xl ${iconBg} group-hover:scale-110 transition-transform`}>
       <Icon className={`w-5 h-5 ${iconColor}`} />
     </div>

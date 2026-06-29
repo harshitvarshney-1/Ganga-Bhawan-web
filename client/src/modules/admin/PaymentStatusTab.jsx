@@ -14,7 +14,7 @@ const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {approvedTenants.length === 0 ? (
-          <div className="col-span-full py-20 text-center bg-card/50 backdrop-blur-sm rounded-3xl border-2 border-dashed border-slate-200">
+          <div className="col-span-full py-20 text-center bg-card/50 backdrop-blur-sm rounded-3xl border-2 border-dashed border-border/50">
             <div className="w-16 h-16 bg-card rounded-2xl flex items-center justify-center mx-auto mb-4 text-muted-foreground">
               <History className="w-8 h-8" />
             </div>
@@ -29,14 +29,14 @@ const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
               onClick={() => openHistoryModal(tenant)}
-              className="group bg-card rounded-3xl p-6 border border-slate-100 hover:border-primary hover:shadow-2xl hover:shadow-indigo-500/10 transition-all cursor-pointer relative overflow-hidden"
+              className="group bg-card rounded-3xl p-6 border border-border/50 hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 transition-all cursor-pointer relative overflow-hidden"
             >
               <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
                 <ChevronRight className="w-5 h-5 text-indigo-500" />
               </div>
 
               <div className="flex items-center gap-4 mb-6">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-50 to-indigo-100 flex items-center justify-center text-primary font-bold text-xl group-hover:scale-110 transition-transform duration-300">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center text-primary font-bold text-xl group-hover:scale-110 transition-transform duration-300">
                   {tenant.fullName.charAt(0).toUpperCase()}
                 </div>
                 <div>
@@ -48,7 +48,7 @@ const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
                 </div>
               </div>
 
-              <div className="space-y-3 pt-4 border-t border-slate-50">
+              <div className="space-y-3 pt-4 border-t border-border/30">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Contact</span>
                   <span className="text-sm font-semibold text-foreground">{tenant.mobileNumber}</span>
@@ -57,7 +57,7 @@ const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Status</span>
                   <div className="flex items-center gap-1.5">
                     <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
-                    <span className="text-xs font-bold text-emerald-600 uppercase">Active Tenant</span>
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase">Active Tenant</span>
                   </div>
                 </div>
               </div>

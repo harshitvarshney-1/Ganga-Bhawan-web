@@ -47,5 +47,17 @@ export const paymentSchema = new mongoose.Schema({
   approvedAt: {
     type: Date,
     default: null
+  },
+  dueDate: {
+    type: Date,
+    default: null
+  },
+  remindersSent: {
+    type: Number,
+    default: 0
+  },
+  lastReminderDate: {
+    type: Date,
+    default: null
   }
 }, { timestamps: true });

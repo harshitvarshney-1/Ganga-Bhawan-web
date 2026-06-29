@@ -8,6 +8,13 @@ import Login from './modules/auth/Login/Login';
 import Register from './modules/auth/Register/Register';
 import AdminDashboard from './modules/admin/AdminDashboard';
 import TenantDashboard from './modules/tenant/TenantDashboard';
+import { useAutoLogout } from './shared/hooks/useAutoLogout';
+
+const SessionManager = () => {
+  useAutoLogout();
+  return null;
+};
+
 
 // Protected Route Component using Jotai in-memory state
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -41,6 +48,7 @@ const PublicRoute = ({ children }) => {
 function App() {
   return (
     <Router>
+      <SessionManager />
       <Routes>
         <Route path="/" element={<Home />} />
         

@@ -37,8 +37,8 @@ const ContactCards = () => {
       {contactData.map((item) => (
         <div
           key={item.title}
-          className="p-8 rounded-2xl bg-slate-900
-          border border-slate-800
+          className="p-8 rounded-2xl bg-card
+          border border-border shadow-sm
           hover:border-cyan-500/40
           hover:-translate-y-1 transition"
         >

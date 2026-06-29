@@ -26,6 +26,8 @@ import StatCard from './StatCard';
 import TenantCard from './TenantCard';
 import PaymentStatusTab from './PaymentStatusTab';
 import PaymentHistoryModal from './PaymentHistoryModal';
+import AuditLogs from './AuditLogs';
+import RoomsTab from './RoomsTab';
 
 
 const AdminDashboard = () => {
@@ -176,14 +178,18 @@ const AdminDashboard = () => {
         t.createdAt && new Date(t.createdAt).toDateString() === new Date().toDateString()
       ).length;
 
+      const occupiedRooms = new Set(approvedData.map(t => Number(t.roomNumber)).filter(n => n > 0));
+      
       setStats({
         total,
         pending: pendingData.length,
         approved: approvedData.length,
         disabled: disabledData.length,
+        occupiedRooms: occupiedRooms.size,
         thisMonth,
         todayRegistrations: today
       });
+
 
       setLoading(false);
     } catch (error) {
@@ -204,6 +210,14 @@ const AdminDashboard = () => {
         const data = await res.json();
         setPendingPayments(Array.isArray(data) ? data : []);
       } else {
+        if (res.status === 401) {
+          // Clear token to stop spamming
+          setAuth({ token: null, isAuthenticated: false });
+          localStorage.removeItem('auth');
+          localStorage.removeItem('user');
+          navigate('/login');
+          return;
+        }
         console.warn('Pending payments fetch failed:', res.status, res.statusText);
         setPendingPayments([]);
       }
@@ -625,14 +639,14 @@ const AdminDashboard = () => {
 
                     {/* Occupancy Ring */}
                     <div className="bg-background rounded-xl p-5 border border-border flex flex-col items-center justify-center">
-                      <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-5 self-start">Occupancy Rate</h3>
+                      <h3 className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-5 self-start">Room Occupancy</h3>
 
                       <div className="relative w-32 h-32 mb-5">
                         <svg viewBox="0 0 36 36" className="w-32 h-32 -rotate-90">
                           <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--border)" strokeWidth="3" />
                           <circle cx="18" cy="18" r="15.9" fill="none"
                             stroke="url(#emeraldGrad)" strokeWidth="3"
-                            strokeDasharray={`${stats.total ? (stats.approved / stats.total) * 100 : 0} 100`}
+                            strokeDasharray={`${(stats.occupiedRooms / 12) * 100} 100`}
                             strokeLinecap="round"
                           />
                           <defs>
@@ -644,23 +658,24 @@ const AdminDashboard = () => {
                         </svg>
                         <div className="absolute inset-0 flex flex-col items-center justify-center">
                           <span className="text-3xl font-bold text-foreground">
-                            {stats.total ? Math.round((stats.approved / stats.total) * 100) : 0}%
+                            {stats.occupiedRooms}/12
                           </span>
-                          <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Filled</span>
+                          <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Rooms Full</span>
                         </div>
                       </div>
 
                       <div className="w-full grid grid-cols-2 gap-2.5">
                         <div className="p-3 bg-emerald-500/10 rounded-lg text-center border border-emerald-500/20">
-                          <p className="text-xl font-bold text-emerald-500">{stats.approved}</p>
-                          <p className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider">Approved</p>
+                          <p className="text-xl font-bold text-emerald-500">{stats.occupiedRooms}</p>
+                          <p className="text-[10px] font-semibold text-emerald-500 uppercase tracking-wider">Occupied</p>
                         </div>
-                        <div className="p-3 bg-amber-500/10 rounded-lg text-center border border-amber-500/20">
-                          <p className="text-xl font-bold text-amber-500">{stats.pending}</p>
-                          <p className="text-[10px] font-semibold text-amber-500 uppercase tracking-wider">Pending</p>
+                        <div className="p-3 bg-muted rounded-lg text-center border border-border">
+                          <p className="text-xl font-bold text-foreground">{12 - stats.occupiedRooms}</p>
+                          <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">Vacant</p>
                         </div>
                       </div>
                     </div>
+
 
                     {/* Recent Registrations */}
                     <div className="bg-background rounded-xl p-5 border border-border">
@@ -800,6 +815,7 @@ const AdminDashboard = () => {
                           transition={{ delay: i * 0.05 }}
                           className="bg-background rounded-xl p-6 border border-border"
                         >
+
                           <div className="flex items-start gap-4 mb-5">
                             <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-base shrink-0">
                               {payment.userId?.fullName?.charAt(0)?.toUpperCase() || 'T'}
@@ -871,6 +887,23 @@ const AdminDashboard = () => {
                 <PaymentStatusTab approvedTenants={approvedTenants} openHistoryModal={openHistoryModal} />
               )}
 
+              {/* ── Audit Logs ── */}
+              {activeTab === 'auditLogs' && (
+                <AuditLogs token={auth.token} />
+              )}
+
+              {/* ── Rooms Management ── */}
+              {activeTab === 'rooms' && (
+                <RoomsTab 
+                  tenants={[...pendingTenants, ...approvedTenants, ...disabledTenants]} 
+                  onTenantClick={(tenant) => {
+                    setSelectedTenant(tenant);
+                    setShowModal(true);
+                  }}
+                />
+              )}
+
+
             </motion.div>
           </AnimatePresence>
         </main>
@@ -929,6 +962,7 @@ const AdminDashboard = () => {
                   ['fullName', 'Full Name', editData.fullName || selectedTenant.fullName],
                   ['email', 'Email', editData.email || selectedTenant.email],
                   ['mobileNumber', 'Mobile', editData.mobileNumber || selectedTenant.mobileNumber],
+                  ['roomNumber', 'Room Number', editData.roomNumber || selectedTenant.roomNumber],
                   ['aadhaarNumber', 'Aadhaar', editData.aadhaarNumber || selectedTenant.aadhaarNumber],
                   ['dateOfBirth', 'Date of Birth', (editData.dateOfBirth || selectedTenant.dateOfBirth) ? new Date(editData.dateOfBirth || selectedTenant.dateOfBirth).toISOString().split('T')[0] : ''],
                   ['fatherName', "Father's Name", editData.fatherName || selectedTenant.fatherName],
@@ -947,16 +981,28 @@ const AdminDashboard = () => {
                           <option value="Female">Female</option>
                           <option value="Other">Other</option>
                         </select>
+                      ) : key === 'roomNumber' ? (
+                        <select value={value} onChange={(e) => setEditData({...editData, [key]: Number(e.target.value)})} className="w-full bg-background border border-border rounded-md px-2.5 py-1.5 text-[13px] text-foreground outline-none focus:border-ring">
+                          <option value="">No Room Assigned</option>
+                          {[...Array(12)].map((_, i) => (
+                            <option key={i + 1} value={i + 1}>Room {i + 1}</option>
+                          ))}
+                        </select>
                       ) : key === 'dateOfBirth' ? (
                         <input type="date" value={value} onChange={(e) => setEditData({...editData, [key]: e.target.value})} className="w-full bg-background border border-border rounded-md px-2.5 py-1.5 text-[13px] text-foreground outline-none focus:border-ring" />
                       ) : (
                         <input type="text" value={value} onChange={(e) => setEditData({...editData, [key]: e.target.value})} className="w-full bg-background border border-border rounded-md px-2.5 py-1.5 text-[13px] text-foreground outline-none focus:border-ring" />
                       )
                     ) : (
-                      <p className="text-[13px] font-medium text-foreground break-all">{key === 'dateOfBirth' && !isEditing ? new Date(value).toLocaleDateString() : value || 'N/A'}</p>
+                      <p className="text-[13px] font-medium text-foreground break-all">
+                        {key === 'dateOfBirth' && !isEditing ? new Date(value).toLocaleDateString() : 
+                         (key === 'roomNumber' && value) ? `Room ${value}` : 
+                         value || 'N/A'}
+                      </p>
                     )}
                   </div>
                 ))}
+
                 <div className="md:col-span-2 p-3 bg-muted/30 rounded-lg border border-border">
                   <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-[0.08em] mb-1">Address</p>
                   {isEditing ? (

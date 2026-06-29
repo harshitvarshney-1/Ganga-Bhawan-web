@@ -7,8 +7,8 @@ const Buttons = () => {
       {/* Login */}
       <Link to="/login">
         <button
-          className="w-full px-5 py-2 rounded-md border border-gray-600
-          text-muted-foreground hover:bg-slate-800 transition"
+          className="w-full px-5 py-2 rounded-md border border-border
+          text-muted-foreground hover:bg-muted transition"
         >
           Login
         </button>

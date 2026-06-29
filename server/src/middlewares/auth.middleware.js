@@ -23,7 +23,11 @@ export const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
-    console.error('❌ Token verification failed:', error.message);
+    if (error.name === 'TokenExpiredError') {
+      console.warn('⚠️ Token verification failed: jwt expired');
+    } else {
+      console.error('❌ Token verification failed:', error.message);
+    }
     res.status(401).json({ error: 'Token is not valid' });
   }
 };

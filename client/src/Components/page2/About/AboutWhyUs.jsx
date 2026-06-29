@@ -17,8 +17,8 @@ const AboutWhyUs = () => {
         {points.map((point) => (
           <div
             key={point}
-            className="p-6 rounded-xl bg-slate-900
-            border border-slate-800
+            className="p-6 rounded-xl bg-card
+            border border-border shadow-sm
             hover:border-cyan-500/40 hover:-translate-y-1
             transition"
           >

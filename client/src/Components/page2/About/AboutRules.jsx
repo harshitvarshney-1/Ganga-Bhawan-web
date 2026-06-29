@@ -8,7 +8,7 @@ const rules = [
 
 const AboutRules = () => {
   return (
-    <div className="bg-slate-900 border border-slate-800 rounded-2xl p-12">
+    <div className="bg-card border border-border shadow-sm rounded-2xl p-12">
 
       <h2 className="text-3xl font-bold mb-6">
         House <span className="text-cyan-400">Rules & Discipline</span>

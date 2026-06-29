@@ -127,12 +127,18 @@ const Payment = () => {
       if (!response.ok) {
         // If unauthorized, redirect to login
         if (response.status === 401) {
+          // Clear token to stop further requests
+          localStorage.removeItem('auth'); 
+          localStorage.removeItem('user');
+          
           setPayments([]);
           setLoading(false);
           setAlert({
             open: true,
             message: 'Session expired. Please login again.'
           });
+
+          // Redirect to login
           setTimeout(() => {
             window.location.href = '/login';
           }, 2000);
@@ -544,19 +550,19 @@ const Payment = () => {
             let baseStyle, iconStyle, tagStyle, tagText;
             
             if (isPaid) {
-              baseStyle = "border-emerald-100 bg-emerald-50/50 text-emerald-900";
-              iconStyle = "bg-emerald-500 text-foreground shadow-emerald-500/30 shadow-lg";
-              tagStyle = "bg-emerald-100 text-emerald-700";
+              baseStyle = "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400";
+              iconStyle = "bg-emerald-500 text-white shadow-emerald-500/30 shadow-lg";
+              tagStyle = "bg-emerald-500/20 text-emerald-700 dark:text-emerald-400";
               tagText = "Paid";
             } else if (pendingPayment) {
-              baseStyle = "border-amber-100 bg-amber-50 text-amber-900";
-              iconStyle = "bg-amber-500 text-foreground shadow-amber-500/30 shadow-lg";
-              tagStyle = "bg-amber-100 text-amber-700";
+              baseStyle = "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400";
+              iconStyle = "bg-amber-500 text-white shadow-amber-500/30 shadow-lg";
+              tagStyle = "bg-amber-500/20 text-amber-700 dark:text-amber-400";
               tagText = "Processing";
             } else if (isDue || isRejected) {
-              baseStyle = "border-primary/30 bg-card text-foreground shadow-xl shadow-indigo-100/50 ring-1 ring-primary/10";
-              iconStyle = "bg-primary text-foreground shadow-primary/30 shadow-lg";
-              tagStyle = "bg-rose-100 text-rose-600 animate-pulse";
+              baseStyle = "border-primary/30 bg-card text-foreground shadow-xl shadow-primary/20 ring-1 ring-primary/10";
+              iconStyle = "bg-primary text-primary-foreground shadow-primary/30 shadow-lg";
+              tagStyle = "bg-rose-500/20 text-rose-600 dark:text-rose-400 animate-pulse";
               tagText = isRejected ? "Rejected/Due" : "Due Now";
             } else {
               tagStyle = "bg-muted text-muted-foreground";
@@ -632,8 +638,8 @@ const Payment = () => {
                 <div key={index} className="group flex flex-wrap sm:flex-nowrap items-center justify-between gap-4 p-4 rounded-2xl border border-border hover:border-border hover:bg-background transition-colors">
                   <div className="flex items-center gap-3 sm:gap-4 min-w-0">
                     <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${
-                      isSuccess ? 'bg-emerald-50 text-emerald-600' : 
-                      isPending ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
+                      isSuccess ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' : 
+                      isPending ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
                     }`}>
                       {isSuccess ? <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" /> : isPending ? <Clock className="w-5 h-5 sm:w-6 sm:h-6" /> : <X className="w-5 h-5 sm:w-6 sm:h-6" />}
                     </div>

@@ -6,6 +6,7 @@ import { uploadToCloudinaryDirect } from '../../../infra/cloudinary';
 import { authAtom, userAtom } from '../../../shared/hooks/store/auth.atom';
 import Loader from '../../../shared/components/atoms/Loader/Loader';
 import LogoIcon from "@/shared/components/atoms/Logo/LogoIcon";
+import NavBar from '../../../shared/components/organisms/NavBar/NavBar';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -15,6 +16,7 @@ export default function Register() {
     fullName: '', email: '', password: '', mobileNumber: '',
     fatherName: '', fatherPhone: '', motherName: '', motherPhone: '',
     dateOfBirth: '', gender: '', permanentAddress: '', aadhaarNumber: '',
+    roomNumber: '',
   });
 
   const [files, setFiles] = useState({ aadhaarFront: null, aadhaarBack: null, profilePicture: null });
@@ -36,9 +38,10 @@ export default function Register() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const numericFields = ['mobileNumber', 'fatherPhone', 'motherPhone', 'aadhaarNumber'];
+    const numericFields = ['mobileNumber', 'fatherPhone', 'motherPhone', 'aadhaarNumber', 'roomNumber'];
     setFormData({ ...formData, [name]: numericFields.includes(name) ? value.replace(/\D/g, '') : value });
   };
+
 
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
@@ -119,8 +122,9 @@ export default function Register() {
 
   return (
     <>
+      <NavBar />
       {loading && <Loader text="REGISTERING" />}
-      <div className="min-h-screen bg-background py-8 px-4">
+      <div className="min-h-screen bg-background py-16 px-4 pt-24">
         <div className="max-w-2xl mx-auto">
           {/* Brand header */}
           <div className="text-center mb-6">
@@ -188,8 +192,8 @@ export default function Register() {
                 <div><label className={labelClass}>Mother's Phone</label><input type="tel" name="motherPhone" value={formData.motherPhone} onChange={handleChange} pattern="[0-9]{10}" className={inputClass} placeholder="10-digit number" /></div>
               </div>
 
-              {/* DOB & Gender */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* DOB & Gender & Room */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div><label className={labelClass}>Date of Birth</label><input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} required min={minDate} max={eighteenYearsAgo} className={inputClass} /></div>
                 <div>
                   <label className={labelClass}>Gender</label>
@@ -198,6 +202,15 @@ export default function Register() {
                     <option value="Male">Male</option>
                     <option value="Female">Female</option>
                     <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass}>Room Number</label>
+                  <select name="roomNumber" value={formData.roomNumber} onChange={handleChange} required className={inputClass}>
+                    <option value="">Select Room</option>
+                    {[...Array(12)].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>Room {i + 1}</option>
+                    ))}
                   </select>
                 </div>
               </div>

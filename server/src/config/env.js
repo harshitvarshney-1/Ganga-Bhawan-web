@@ -50,6 +50,7 @@ export const config = {
     mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/ganga-bhawan',
     jwtSecret: process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production',
     clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
+    apiUrl: process.env.SERVER_URL || process.env.API_URL || `http://localhost:${process.env.PORT || 5000}/api`,
     cloudinary: {
       cloudName: process.env.CLOUDINARY_CLOUD_NAME || 'dev-cloudinary',
       apiKey: process.env.CLOUDINARY_API_KEY || 'dev-api-key',

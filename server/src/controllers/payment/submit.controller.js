@@ -86,7 +86,11 @@ export const submitPayment = async (req, res) => {
       const tenant = await User.findById(userId);
       if (tenant) {
         const { approveToken, rejectToken } = generateQuickTokens(payment._id);
-        const baseUrl = process.env.API_URL || process.env.SERVER_URL || 'http://localhost:5000/api';
+        // Use SERVER_URL from config (set via env vars) so links work in production too
+        const baseUrl = currentConfig.apiUrl
+          || process.env.SERVER_URL
+          || process.env.API_URL
+          || `http://localhost:${currentConfig.port || 5000}/api`;
         const approveUrl = `${baseUrl}/admin/quick-approve?token=${approveToken}`;
         const rejectUrl  = `${baseUrl}/admin/quick-reject?token=${rejectToken}`;
 

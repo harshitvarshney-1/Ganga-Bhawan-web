@@ -11,6 +11,7 @@ import { useAtom, useSetAtom } from 'jotai';
 import { API_URL } from '../../infra/config';
 import { getTenantProfileAPI } from '../../infra/tenant/tenant.api';
 import Loader from '../../shared/components/atoms/Loader/Loader';
+import { ThemeToggle } from '../../shared/components/atoms/ThemeToggle/ThemeToggle';
 
 const TenantDashboard = () => {
   const [activeSection, setActiveSection] = useState('profile');
@@ -176,14 +177,18 @@ const TenantDashboard = () => {
             Tenant Portal
           </h1>
 
-          {/* User badge */}
-          <div className="flex items-center gap-2.5">
-            <div className="hidden sm:block text-right">
-              <p className="text-[13px] font-medium text-foreground truncate max-w-[140px] leading-none">{userData?.fullName}</p>
-              <p className="text-[11px] text-muted-foreground truncate max-w-[140px] mt-0.5">{userData?.email}</p>
-            </div>
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shadow-sm">
-              {userData?.fullName?.charAt(0).toUpperCase()}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            
+            {/* User badge */}
+            <div className="flex items-center gap-2.5 ml-1">
+              <div className="hidden sm:block text-right">
+                <p className="text-[13px] font-medium text-foreground truncate max-w-[140px] leading-none">{userData?.fullName}</p>
+                <p className="text-[11px] text-muted-foreground truncate max-w-[140px] mt-0.5">{userData?.email}</p>
+              </div>
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-sm shadow-sm">
+                {userData?.fullName?.charAt(0).toUpperCase()}
+              </div>
             </div>
           </div>
         </header>

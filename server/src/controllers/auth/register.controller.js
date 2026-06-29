@@ -11,13 +11,13 @@ export const registerUser = async (req, res) => {
       fullName, email, password, mobileNumber,
       fatherName, fatherPhone, motherName, motherPhone,
       dateOfBirth, gender, permanentAddress, aadhaarNumber,
-      // URLs uploaded directly to Cloudinary from the frontend
+      roomNumber,
       aadhaarFrontUrl, aadhaarBackUrl, profilePictureUrl
     } = req.body;
 
     // Validation
-    if (!fullName || !email || !password || !mobileNumber || !aadhaarNumber) {
-      return res.status(400).json({ error: 'Please fill all required fields' });
+    if (!fullName || !email || !password || !mobileNumber || !aadhaarNumber || !roomNumber) {
+      return res.status(400).json({ error: 'Please fill all required fields including Room Number' });
     }
 
     // Validate password strength
@@ -51,12 +51,15 @@ export const registerUser = async (req, res) => {
       fullName, email, password: hashedPassword, mobileNumber,
       fatherName, fatherPhone, motherName, motherPhone,
       dateOfBirth, gender, permanentAddress, aadhaarNumber,
+      roomNumber,
       aadhaarFront: aadhaarFrontUrl,
       aadhaarBack: aadhaarBackUrl,
       profilePicture: profilePictureUrl,
       role: 'tenant',
       isApproved: false
     });
+
+
 
     await newUser.save();
     console.log(`✅ Registered new tenant: ${email}`);

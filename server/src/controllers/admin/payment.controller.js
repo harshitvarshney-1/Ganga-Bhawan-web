@@ -10,7 +10,7 @@ const QUICK_SECRET = process.env.QUICK_APPROVE_SECRET || (currentConfig.jwtSecre
 
 export const assignDuePayment = async (req, res) => {
   try {
-    const { userId, month, monthIndex, amount, isAdvanced } = req.body;
+    const { userId, month, monthIndex, amount, isAdvanced, paymentDate } = req.body;
     
     if (!userId || monthIndex === undefined || month === undefined) {
       return res.status(400).json({ error: 'Missing required fields' });
@@ -37,7 +37,8 @@ export const assignDuePayment = async (req, res) => {
       monthIndex,
       amount: parseFloat(amount) || 0,
       isAdvanced: isAdvanced === true,
-      status: 'due'
+      status: 'due',
+      paymentDate: paymentDate || new Date()
     });
 
     await payment.save();
