@@ -25,6 +25,9 @@
     </filter>
   </defs>
 
+  <!-- Solid App-like Background so it looks big and visible on dark tabs -->
+  <rect width="240" height="240" rx="55" fill="#ffffff" />
+
   <!-- Outer decorative ring -->
   <circle cx="120" cy="120" r="115" fill="none" stroke="url(#gradientAccent)" stroke-width="1.5" opacity="0.6"/>
   <circle cx="120" cy="120" r="110" fill="none" stroke="url(--primary, #5e6ad2)" stroke-width="0.5" opacity="0.3"/>

@@ -45,5 +45,9 @@ export default defineConfig({
         },
       },
     },
+  },
+  // SECURITY: Drop console logs and debuggers in production build
+  esbuild: {
+    drop: ['console', 'debugger'],
   }
 })
