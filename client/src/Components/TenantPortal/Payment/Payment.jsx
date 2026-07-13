@@ -375,7 +375,7 @@ const Payment = () => {
     if (!barcodeImage || !advancedModal.month) {
       setAlert({
         open: true,
-        message: 'Please select a month and upload payment screenshot'
+        message: 'Please select a date and upload payment screenshot'
       });
       return;
     }
@@ -386,10 +386,15 @@ const Payment = () => {
       
       const formData = new FormData();
       formData.append('barcodeImage', barcodeImage);
-      formData.append('month', advancedModal.month);
-      // For advanced, generic index or parsed from month name (simplified here)
-      const mIndex = monthNames.indexOf(advancedModal.month);
-      formData.append('monthIndex', mIndex >= 0 ? mIndex : 99); 
+      // Format the date string nicely for display, default to what the input provides
+      const dateObj = new Date(advancedModal.month);
+      const formattedDate = isNaN(dateObj) ? advancedModal.month : dateObj.toLocaleDateString('en-IN', {
+        day: 'numeric', month: 'short', year: 'numeric'
+      });
+      formData.append('month', formattedDate);
+      
+      // For advanced, always use 99 as a sentinel value so it doesn't match calendar indices
+      formData.append('monthIndex', 99); 
       formData.append('amount', 0); // Amount handle by backend/admin
       formData.append('isAdvanced', 'true');
 
@@ -842,17 +847,13 @@ const Payment = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-semibold text-foreground mb-2">Select Month</label>
-                  <select
+                  <label className="block text-sm font-semibold text-foreground mb-2">Select Date</label>
+                  <input
+                    type="date"
                     className="w-full p-3 bg-card/50 border border-border rounded-xl focus:ring-2 focus:ring-indigo-500"
                     value={advancedModal.month}
                     onChange={(e) => setAdvancedModal({...advancedModal, month: e.target.value})}
-                  >
-                    <option value="">Select a Month</option>
-                    {monthNames.map((m) => (
-                      <option key={m} value={m}>{m} {new Date().getFullYear() + (monthNames.indexOf(m) < new Date().getMonth() ? 1 : 0)}</option>
-                    ))}
-                  </select>
+                  />
                 </div>
 
                 <div className="bg-indigo-50 p-4 rounded-xl text-center border-2 border-indigo-100">

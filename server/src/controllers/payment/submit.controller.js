@@ -33,9 +33,12 @@ export const submitPayment = async (req, res) => {
       finalMonthIndices = selectedMonths.map(m => parseInt(m.monthIndex));
     }
 
+    const isAdvancedPayment = isAdvanced === true || isAdvanced === 'true';
+
     // Check for overlap: Is any of these months already paid?
     const existing = await Payment.findOne({
       userId: userId,
+      isAdvanced: isAdvancedPayment, // only clash with same type
       status: { $in: ['pending', 'success'] },
       $or: [
         { monthIndex: { $in: finalMonthIndices } },
@@ -53,6 +56,7 @@ export const submitPayment = async (req, res) => {
     // Check if a 'due' payment exists
     const existingDue = await Payment.findOne({
       userId: userId,
+      isAdvanced: isAdvancedPayment,
       status: 'due',
       monthIndex: finalMonthIndices[0]
     });
