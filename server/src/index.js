@@ -26,7 +26,10 @@ const allowedOrigins = [
   'https://ganga-bhawan-web.vercel.app',
   'http://localhost:3000',
   'http://localhost:5173',
-  'http://127.0.0.1:5173'
+  'http://127.0.0.1:5173',
+  'http://localhost',
+  'capacitor://localhost',
+  'https://localhost'
 ].filter(Boolean);
 
 app.use((req, res, next) => {
