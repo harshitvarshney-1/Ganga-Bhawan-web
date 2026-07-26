@@ -137,11 +137,17 @@ const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSel
   );
 };
 
-const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
+const PaymentStatusTab = ({ approvedTenants, openHistoryModal, openManualPaymentModal }) => {
   return (
     <div className="space-y-6">
+      <div className="bg-card rounded-2xl shadow-lg p-6 border border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Payment Status (Monthly History)</h2>
+          <p className="text-sm text-muted-foreground">Track tenant payment history or record offline cash payments</p>
+        </div>
+      </div>
+
       <div className="bg-card rounded-2xl shadow-lg p-6 border border-border">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Payment Status (Monthly History)</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {approvedTenants.length === 0 ? (
             <div className="col-span-full py-12 text-center bg-card/50 rounded-2xl">
@@ -176,6 +182,274 @@ const PaymentStatusTab = ({ approvedTenants, openHistoryModal }) => {
   );
 };
 
+const ManualPaymentModal = ({
+  isOpen,
+  onClose,
+  approvedTenants,
+  selectedTenantId,
+  onSuccess
+}) => {
+  const [tenantId, setTenantId] = useState(selectedTenantId || '');
+  const [paymentType, setPaymentType] = useState('monthly'); // 'monthly' | 'advanced'
+  const [month, setMonth] = useState('January');
+  const [monthIndex, setMonthIndex] = useState(new Date().getMonth());
+  const [customMonth, setCustomMonth] = useState('');
+  const [amount, setAmount] = useState('');
+  const [paymentMode, setPaymentMode] = useState('Cash');
+  const [paymentDate, setPaymentDate] = useState(new Date().toISOString().split('T')[0]);
+  const [notes, setNotes] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  useEffect(() => {
+    if (selectedTenantId) {
+      setTenantId(selectedTenantId);
+    } else if (approvedTenants && approvedTenants.length > 0 && !tenantId) {
+      setTenantId(approvedTenants[0]._id);
+    }
+  }, [selectedTenantId, approvedTenants]);
+
+  useEffect(() => {
+    setMonth(monthNames[monthIndex]);
+  }, [monthIndex]);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!tenantId) {
+      alert('Please select a tenant');
+      return;
+    }
+
+    const finalMonth = paymentType === 'advanced'
+      ? (customMonth || `Advanced - ${new Date().toLocaleDateString('en-IN', { month: 'short', year: 'numeric' })}`)
+      : month;
+
+    setSubmitting(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${BASE_URL}/api/admin/record-manual-payment`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          userId: tenantId,
+          month: finalMonth,
+          monthIndex: paymentType === 'advanced' ? 99 : Number(monthIndex),
+          amount: parseFloat(amount) || 0,
+          isAdvanced: paymentType === 'advanced',
+          paymentDate,
+          paymentMode,
+          notes
+        })
+      });
+
+      const data = await response.json();
+      if (response.ok && data.success) {
+        alert(`✅ ${data.message || 'Manual payment recorded successfully!'}`);
+        if (onSuccess) onSuccess(tenantId);
+        onClose();
+      } else {
+        alert(`❌ ${data.error || 'Failed to record payment'}`);
+      }
+    } catch (err) {
+      console.error('Error submitting manual payment:', err);
+      alert('❌ Server error while submitting manual payment');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div 
+      className="fixed inset-0 bg-background/70 backdrop-blur-md flex items-center justify-center z-[70] p-4"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-card rounded-3xl w-full max-w-lg shadow-2xl p-6 lg:p-8 border border-border max-h-[90vh] overflow-y-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between pb-4 mb-6 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center text-foreground text-xl shadow-md">
+              💵
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Record Manual Payment</h2>
+              <p className="text-xs text-muted-foreground">Submit cash/offline payment & send mail to tenant</p>
+            </div>
+          </div>
+          <button 
+            onClick={onClose}
+            className="w-8 h-8 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-lg"
+          >
+            ✕
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Select Tenant *</label>
+            <select
+              value={tenantId}
+              onChange={e => setTenantId(e.target.value)}
+              className="w-full px-4 py-2.5 bg-card border border-border rounded-xl font-medium text-foreground outline-none focus:ring-2 focus:ring-cyan-500"
+              required
+            >
+              <option value="">-- Choose Tenant --</option>
+              {approvedTenants.map(t => (
+                <option key={t._id} value={t._id}>
+                  {t.fullName} ({t.mobileNumber || t.email})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Payment Type</label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setPaymentType('monthly')}
+                className={`py-2 px-4 rounded-xl font-semibold text-sm border transition-all ${
+                  paymentType === 'monthly'
+                    ? 'bg-cyan-500 text-foreground border-cyan-500 shadow-md'
+                    : 'bg-card text-foreground border-border hover:bg-gray-100'
+                }`}
+              >
+                📅 Monthly Rent
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentType('advanced')}
+                className={`py-2 px-4 rounded-xl font-semibold text-sm border transition-all ${
+                  paymentType === 'advanced'
+                    ? 'bg-indigo-600 text-foreground border-indigo-600 shadow-md'
+                    : 'bg-card text-foreground border-border hover:bg-gray-100'
+                }`}
+              >
+                🚀 Advanced Payment
+              </button>
+            </div>
+          </div>
+
+          {paymentType === 'monthly' ? (
+            <div>
+              <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Select Rent Month *</label>
+              <select
+                value={monthIndex}
+                onChange={e => {
+                  const idx = parseInt(e.target.value);
+                  setMonthIndex(idx);
+                  setMonth(monthNames[idx]);
+                }}
+                className="w-full px-4 py-2.5 bg-card border border-border rounded-xl font-medium text-foreground outline-none focus:ring-2 focus:ring-cyan-500"
+              >
+                {monthNames.map((m, idx) => (
+                  <option key={m} value={idx}>{m}</option>
+                ))}
+              </select>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Advanced Payment Label / Date *</label>
+              <input
+                type="text"
+                placeholder="e.g. August 2026 or Security Deposit"
+                value={customMonth}
+                onChange={e => setCustomMonth(e.target.value)}
+                className="w-full px-4 py-2.5 bg-card border border-border rounded-xl font-medium text-foreground outline-none focus:ring-2 focus:ring-indigo-500"
+                required
+              />
+            </div>
+          )}
+
+          <div>
+            <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Amount (₹) *</label>
+            <input
+              type="number"
+              placeholder="e.g. 5000"
+              value={amount}
+              onChange={e => setAmount(e.target.value)}
+              className="w-full px-4 py-2.5 bg-card border border-border rounded-xl font-medium text-foreground outline-none focus:ring-2 focus:ring-cyan-500"
+              required
+              min="1"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Payment Method</label>
+              <select
+                value={paymentMode}
+                onChange={e => setPaymentMode(e.target.value)}
+                className="w-full px-4 py-2.5 bg-card border border-border rounded-xl font-medium text-foreground outline-none focus:ring-2 focus:ring-cyan-500"
+              >
+                <option value="Cash">💵 Cash</option>
+                <option value="Direct Bank Transfer">🏦 Bank Transfer</option>
+                <option value="Direct UPI">📱 Direct UPI</option>
+                <option value="Other">📝 Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Date Paid</label>
+              <input
+                type="date"
+                value={paymentDate}
+                onChange={e => setPaymentDate(e.target.value)}
+                className="w-full px-4 py-2.5 bg-card border border-border rounded-xl font-medium text-foreground outline-none focus:ring-2 focus:ring-cyan-500"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase text-muted-foreground mb-1">Admin Notes (Optional)</label>
+            <input
+              type="text"
+              placeholder="e.g. Paid in cash to landlord"
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              className="w-full px-4 py-2.5 bg-card border border-border rounded-xl font-medium text-foreground outline-none focus:ring-2 focus:ring-cyan-500"
+            />
+          </div>
+
+          <div className="flex gap-3 pt-4 border-t border-border">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all"
+              disabled={submitting}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={submitting}
+              className="flex-1 py-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-foreground font-bold rounded-xl shadow-lg transition-all flex items-center justify-center gap-2"
+            >
+              {submitting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  Processing...
+                </>
+              ) : (
+                '✓ Submit & Email Tenant'
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 const PaymentHistoryModal = ({ 
   isHistoryModalOpen, 
   setIsHistoryModalOpen, 
@@ -183,7 +457,8 @@ const PaymentHistoryModal = ({
   loadingHistory, 
   tenantPayments, 
   setFullScreenImage,
-  handleDeletePayment // Added prop
+  handleDeletePayment,
+  openManualPaymentModal
 }) => {
   if (!isHistoryModalOpen || !selectedHistoryTenant) return null;
 
@@ -210,12 +485,23 @@ const PaymentHistoryModal = ({
               <p className="text-sm text-muted-foreground">Payment History for {currentYear}</p>
             </div>
           </div>
-          <button 
-            onClick={() => setIsHistoryModalOpen(false)}
-            className="w-10 h-10 flex items-center justify-center bg-card hover:bg-gray-200 rounded-xl transition-all text-muted-foreground text-2xl"
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                setIsHistoryModalOpen(false);
+                if (openManualPaymentModal) openManualPaymentModal(selectedHistoryTenant._id);
+              }}
+              className="px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-foreground text-xs font-bold rounded-xl shadow transition-all flex items-center gap-1.5"
+            >
+              💵 Record Cash Payment
+            </button>
+            <button 
+              onClick={() => setIsHistoryModalOpen(false)}
+              className="w-10 h-10 flex items-center justify-center bg-card hover:bg-gray-200 rounded-xl transition-all text-muted-foreground text-2xl"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         <div className="p-8">
@@ -397,6 +683,8 @@ const AdminDashboard = () => {
   const [resetPasswordInput, setResetPasswordInput] = useState('');
   const [resetting, setResetting] = useState(false);
   const [selectedAadhaar, setSelectedAadhaar] = useState(null);
+
+
 
   const navigate = useNavigate();
 
@@ -1255,6 +1543,7 @@ const AdminDashboard = () => {
           <PaymentStatusTab 
             approvedTenants={approvedTenants} 
             openHistoryModal={openHistoryModal} 
+            openManualPaymentModal={openManualPaymentModal}
           />
         )}
       </main>

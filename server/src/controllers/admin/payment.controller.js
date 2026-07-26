@@ -49,6 +49,102 @@ export const assignDuePayment = async (req, res) => {
   }
 };
 
+export const recordManualPayment = async (req, res) => {
+  try {
+    const { userId, month, monthIndex, monthIndices, amount, isAdvanced, paymentDate, notes, paymentMode } = req.body;
+
+    if (!userId || (!month && monthIndex === undefined && (!monthIndices || monthIndices.length === 0))) {
+      return res.status(400).json({ error: 'Missing required fields (tenant and payment month/details)' });
+    }
+
+    const tenant = await User.findById(userId);
+    if (!tenant) {
+      return res.status(404).json({ error: 'Tenant not found' });
+    }
+
+    const adminId = req.user.userId || req.user.id;
+    const isAdv = isAdvanced === true || isAdvanced === 'true';
+    const parsedAmount = parseFloat(amount) || 0;
+    const dateOfPayment = paymentDate ? new Date(paymentDate) : new Date();
+
+    let payment;
+
+    // Check if an existing payment (due or pending) exists for this user and selection
+    const queryConditions = {
+      userId,
+      isAdvanced: isAdv,
+    };
+
+    if (Array.isArray(monthIndices) && monthIndices.length > 0) {
+      queryConditions.$or = [
+        { monthIndex: { $in: monthIndices } },
+        { monthIndices: { $in: monthIndices } }
+      ];
+    } else if (monthIndex !== undefined && monthIndex !== null) {
+      queryConditions.monthIndex = Number(monthIndex);
+    } else if (month) {
+      queryConditions.month = month;
+    }
+
+    const existing = await Payment.findOne(queryConditions);
+
+    if (existing) {
+      existing.status = 'success';
+      existing.amount = parsedAmount || existing.amount;
+      existing.approvedBy = adminId;
+      existing.approvedAt = new Date();
+      existing.paymentDate = dateOfPayment;
+      // Overwrite receipt with manual mode if applied manually
+      if (paymentMode) existing.paymentMode = paymentMode;
+      existing.barcodeImage = null; // Explicitly remove receipt since admin is manually recording it
+      if (notes) existing.notes = notes;
+      payment = await existing.save();
+    } else {
+      payment = new Payment({
+        userId,
+        month: month || 'Manual Payment',
+        monthIndex: monthIndex !== undefined && monthIndex !== null ? Number(monthIndex) : 99,
+        monthIndices: Array.isArray(monthIndices) ? monthIndices : [],
+        amount: parsedAmount,
+        isAdvanced: isAdv,
+        status: 'success',
+        paymentDate: dateOfPayment,
+        approvedBy: adminId,
+        approvedAt: new Date(),
+        paymentMode: paymentMode || 'Cash',
+        barcodeImage: null,
+        notes: notes || ''
+      });
+      payment = await payment.save();
+    }
+
+    // Trigger Payment Approval Confirmation Email to Tenant
+    try {
+      const emailHtml = getPaymentApprovalEmailTemplate(tenant.fullName, payment.month, payment.paymentDate, parsedAmount, paymentMode || 'Cash', payment.isAdvanced);
+      sendEmail({
+        to: tenant.email,
+        subject: payment.isAdvanced 
+          ? `Advanced Payment Confirmed - ${payment.month} (${paymentMode || 'Cash/Offline'})`
+          : `Payment Confirmed - ${payment.month} (${paymentMode || 'Cash/Offline'})`,
+        html: emailHtml
+      }).catch(e => console.error('Background Email Error (Manual Payment):', e));
+      
+      console.log(`✅ Manual payment approval email triggered for ${tenant.email} for ${payment.month}`);
+    } catch (emailError) {
+      console.error('❌ Failed to send manual payment approval email:', emailError);
+    }
+
+    res.json({
+      success: true,
+      message: `Manual payment of ₹${parsedAmount} recorded for ${tenant.fullName} (${payment.month}). Confirmation email sent.`,
+      payment
+    });
+  } catch (error) {
+    console.error('Error recording manual payment:', error);
+    res.status(500).json({ error: error.message || 'Failed to record manual payment' });
+  }
+};
+
 export const getPaymentsSummary = async (req, res) => {
   try {
     const tenants = await User.find({ role: 'tenant' }).select('_id fullName email');
@@ -149,11 +245,13 @@ export const approvePayment = async (req, res) => {
     try {
       const tenant = await User.findById(payment.userId);
       if (tenant) {
-        const emailHtml = getPaymentApprovalEmailTemplate(tenant.fullName, payment.month, payment.paymentDate);
+        const emailHtml = getPaymentApprovalEmailTemplate(tenant.fullName, payment.month, payment.paymentDate, payment.amount, 'Online', payment.isAdvanced);
         // Send email in background to keep UI fast
         sendEmail({
           to: tenant.email,
-          subject: `Payment Successful - ${payment.month} Bill Approved`,
+          subject: payment.isAdvanced 
+            ? `Advanced Payment Successful - ${payment.month} Bill Approved`
+            : `Payment Successful - ${payment.month} Bill Approved`,
           html: emailHtml
         }).catch(e => console.error('Background Email Error:', e));
         

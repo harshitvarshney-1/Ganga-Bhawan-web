@@ -59,5 +59,14 @@ export const paymentSchema = new mongoose.Schema({
   lastReminderDate: {
     type: Date,
     default: null
+  },
+  paymentMode: {
+    type: String,
+    enum: ['Online', 'Cash', 'Direct UPI', 'Bank Transfer', 'Other'],
+    default: 'Online'
+  },
+  notes: {
+    type: String,
+    default: ''
   }
 }, { timestamps: true });

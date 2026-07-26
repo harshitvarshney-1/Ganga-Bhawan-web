@@ -192,25 +192,39 @@ export const getPasswordResetEmailTemplate = (fullName, resetLink, expiryMinutes
   return wrapInContainer(header, body);
 };
 
-export const getPaymentApprovalEmailTemplate = (fullName, month, date) => {
+export const getPaymentApprovalEmailTemplate = (fullName, month, date, amount, paymentMode, isAdvanced = false) => {
   const submissionDate = new Date(date).toLocaleDateString('en-IN', {
     day: 'numeric', month: 'long', year: 'numeric'
   });
-  const header = getEmailHeader('Payment Approved');
+  
+  const headerText = isAdvanced ? 'Advanced Payment Confirmed' : 'Payment Approved';
+  const confirmationText = isAdvanced 
+    ? 'Your advanced rent payment has been successfully verified and recorded for future booking. Thank you for your continued cooperation.'
+    : 'Your rent payment has been verified and recorded. Thank you for your continued cooperation.';
+
+  const header = getEmailHeader(headerText);
   const body = `
     <p style="color: #334155; font-family: Arial, sans-serif; font-size: 18px; line-height: 1.6; margin: 0 0 20px 0;">
       Dear <strong>${fullName}</strong>,
     </p>
     <p style="color: #475569; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 30px 0;">
-      Your rent payment has been verified and recorded. Thank you for your continued cooperation.
+      ${confirmationText}
     </p>
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f0fdf4; border-radius: 12px; border: 1px solid #bbf7d0; margin-bottom: 30px;">
       <tr>
         <td style="padding: 25px;">
           <table border="0" cellpadding="0" cellspacing="0" width="100%">
             <tr>
+              <td style="color: #166534; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600; padding-bottom: 10px;">Amount Paid:</td>
+              <td align="right" style="color: #166534; font-family: Arial, sans-serif; font-size: 16px; font-weight: 800; padding-bottom: 10px;">₹${amount}</td>
+            </tr>
+            <tr>
               <td style="color: #166534; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600; padding-bottom: 10px;">Month:</td>
               <td align="right" style="color: #166534; font-family: Arial, sans-serif; font-size: 16px; font-weight: 800; padding-bottom: 10px;">${month}</td>
+            </tr>
+            <tr>
+              <td style="color: #166534; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600; padding-bottom: 10px;">Payment Mode:</td>
+              <td align="right" style="color: #166534; font-family: Arial, sans-serif; font-size: 16px; font-weight: 800; padding-bottom: 10px;">${paymentMode || 'Online'}</td>
             </tr>
             <tr>
               <td style="color: #166534; font-family: Arial, sans-serif; font-size: 14px; font-weight: 600;">Approved On:</td>

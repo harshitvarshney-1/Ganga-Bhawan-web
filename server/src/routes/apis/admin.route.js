@@ -21,7 +21,8 @@ import {
   resetTenantPassword,
   quickApprovePayment,
   quickRejectPayment,
-  assignDuePayment
+  assignDuePayment,
+  recordManualPayment
 } from '../../controllers/admin/payment.controller.js';
 import { getAuditLogs, getAuditStats } from '../../controllers/admin/auditLog.controller.js';
 
@@ -60,6 +61,7 @@ router.put('/update-tenant/:id', isAdmin, updateTenant);
 router.get('/payments-summary', isAdmin, getPaymentsSummary);
 router.get('/pending-payments', isAdmin, getPendingPayments);
 router.post('/assign-due-payment', isAdmin, assignDuePayment);
+router.post('/record-manual-payment', isAdmin, recordManualPayment);
 router.post('/approve-payment/:paymentId', isAdmin, approvePayment);
 router.post('/reject-payment/:paymentId', isAdmin, rejectPayment);
 router.get('/tenant-payments/:tenantId', isAdmin, getTenantPayments);
