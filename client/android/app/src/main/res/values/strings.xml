@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Ganga Bhawan</string>
+    <string name="title_activity_main">Ganga Bhawan</string>
+    <string name="package_name">com.gangabhawan.app</string>
+    <string name="custom_url_scheme">com.gangabhawan.app</string>
+</resources>
