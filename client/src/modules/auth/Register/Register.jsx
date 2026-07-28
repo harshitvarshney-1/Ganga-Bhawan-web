@@ -111,7 +111,12 @@ export default function Register() {
       alert(result.message);
       navigate('/login', { replace: true });
     } catch (err) {
-      setError(err.message);
+      // Show detailed validation errors if available
+      if (err.details && Array.isArray(err.details)) {
+        setError(err.details.join(' • '));
+      } else {
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -177,6 +182,7 @@ export default function Register() {
                     {showPassword ? '🔒' : '👁️'}
                   </button>
                 </div>
+
               </div>
 
               {/* Mobile */}

@@ -22,7 +22,11 @@ export const registerTenantAPI = async (userData) => {
     throw new Error(`Server error (HTTP ${response.status}). Please try again later.`);
   }
 
-  if (!response.ok) throw new Error(data.error || 'Registration failed');
+  if (!response.ok) {
+    const err = new Error(data.error || 'Registration failed');
+    if (data.details) err.details = data.details;
+    throw err;
+  }
   return data;
 };
 
