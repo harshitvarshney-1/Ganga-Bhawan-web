@@ -446,10 +446,14 @@ const PaymentHistoryModal = ({
 
                   <div className="flex flex-wrap gap-4">
                     {tenantPayments.filter(p => p.isAdvanced).map((payment, idx) => (
-                      <div key={idx} className="bg-card px-5 py-4 rounded-2xl border border-indigo-100 shadow-sm flex items-center gap-5 group/adv">
+                      <div key={idx} className="bg-card px-5 py-4 rounded-2xl border border-border shadow-sm flex items-center gap-5 group/adv">
                         <div>
                           <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Target Month</p>
                           <span className="font-bold text-foreground">{payment.month || 'Future'}</span>
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Amount</p>
+                          <span className="font-bold text-foreground">{payment.amount > 0 ? `₹ ${payment.amount}` : <span className="text-muted-foreground text-xs">N/A</span>}</span>
                         </div>
                         <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${payment.status === 'success' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' :
                             payment.status === 'pending' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-rose-500/20 text-rose-700 dark:text-rose-400'
@@ -526,6 +530,9 @@ const PaymentHistoryModal = ({
                                 {payment.approvedBy && (!payment.barcodeImage || (payment.paymentMode && payment.paymentMode !== 'Online'))
                                   ? `Admin Recorded${payment.paymentMode && payment.paymentMode !== 'Online' ? ` • ${payment.paymentMode}` : ''}`
                                   : isSuccess ? 'Verified' : isPending ? 'Processing' : 'Declined'}
+                                {payment.amount > 0 && (
+                                  <span className="ml-1 font-bold text-foreground"> • ₹ {payment.amount}</span>
+                                )}
                               </p>
                             </div>
                           </div>

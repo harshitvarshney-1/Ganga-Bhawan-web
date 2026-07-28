@@ -462,16 +462,16 @@ const Payment = () => {
         </div>
 
         {/* Advanced Booking Box */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-primary to-primary/80 rounded-3xl p-6 relative overflow-hidden text-foreground shadow-xl shadow-primary/20 group">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full -mr-32 -mt-32 blur-2xl group-hover:bg-primary/20 transition-all duration-700 pointer-events-none" />
+        <div className="lg:col-span-2 bg-card border border-border rounded-3xl p-6 relative overflow-hidden shadow-sm group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-2xl group-hover:bg-primary/10 transition-all duration-700 pointer-events-none" />
           
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 h-full">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/20 backdrop-blur-md rounded-full text-xs font-bold tracking-wider uppercase mb-3 text-primary-foreground border border-primary/20">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full text-xs font-bold tracking-wider uppercase mb-3 text-primary border border-primary/20">
                 <Rocket className="w-3.5 h-3.5" /> Fast Track
               </div>
-              <h3 className="text-2xl font-bold mb-1">Advanced Booking</h3>
-              <p className="text-primary-foreground text-sm font-medium">Pre-pay for coming months to avoid late fees</p>
+              <h3 className="text-2xl font-bold mb-1 text-foreground">Advanced Booking</h3>
+              <p className="text-muted-foreground text-sm font-medium">Pre-pay for coming months to avoid late fees</p>
             </div>
             
             {payments.filter(p => p.isAdvanced && p.status !== 'rejected').length === 0 ? (
@@ -488,24 +488,16 @@ const Payment = () => {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={openMultiModal}
-                  className="whitespace-nowrap px-6 py-3.5 bg-indigo-400 text-foreground hover:bg-indigo-300 font-bold rounded-2xl shadow-lg transition-all border border-primary/30 flex items-center gap-2"
+                  className="whitespace-nowrap px-6 py-3.5 bg-muted text-foreground hover:bg-muted/80 font-bold rounded-2xl shadow-lg transition-all border border-border flex items-center gap-2"
                 >
                   Bulk Payment (Multi-Month)
                 </motion.button>
               </div>
             ) : (
               <div className="flex gap-2 flex-wrap self-start sm:self-center">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={openMultiModal}
-                  className="whitespace-nowrap px-4 py-2 bg-primary/20 backdrop-blur-md text-primary font-bold rounded-xl border border-primary/20 transition-all text-xs"
-                >
-                  + Add Bulk
-                </motion.button>
                 {payments.filter(p => p.isAdvanced && p.status !== 'rejected').map((payment, idx) => (
-                  <div key={idx} className="bg-primary/20 backdrop-blur-md px-4 py-2 rounded-xl border border-primary/20 flex items-center gap-3">
-                    <span className="font-bold text-sm">{payment.month}</span>
+                  <div key={idx} className="bg-muted px-4 py-2 rounded-xl border border-border flex items-center gap-3">
+                    <span className="font-bold text-sm text-foreground">{payment.month}</span>
                     <span className={`w-2 h-2 rounded-full ${
                       payment.status === 'success' ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]' : 
                       payment.status === 'pending' ? 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]' : 'bg-rose-400'
@@ -645,7 +637,7 @@ const Payment = () => {
                     </div>
                     <div className="min-w-0">
                       <h5 className="font-bold text-foreground text-sm sm:text-base truncate">
-                        {payment.month} <span className="text-muted-foreground font-normal text-xs sm:text-sm ml-1 hidden sm:inline">Rent</span>
+                        {payment.month} <span className="text-muted-foreground font-normal text-xs sm:text-sm ml-1 hidden sm:inline">{payment.isAdvanced ? 'Advanced' : 'Rent'}</span>
                       </h5>
                       <p className="text-[10px] sm:text-xs text-muted-foreground font-medium mt-0.5 truncate">
                         {new Date(payment.paymentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} • {isSuccess ? 'Verified' : isPending ? 'Processing' : 'Declined'}
