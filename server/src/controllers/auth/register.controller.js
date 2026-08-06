@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs';
 import User from '../../models/user.model.js';
 import { validatePassword } from '../../utils/password.util.js';
+import { sendEmail, getAdminRegistrationNotificationTemplate } from '../../utils/email.util.js';
+import { currentConfig } from '../../config/env.js';
+
 
 // Registration handler - Now strictly using direct Cloudinary URLs from frontend
 export const registerUser = async (req, res) => {
@@ -63,6 +66,13 @@ export const registerUser = async (req, res) => {
 
     await newUser.save();
     console.log(`✅ Registered new tenant: ${email}`);
+
+    // Notify Admin in background
+    sendEmail({
+      to: currentConfig.email.user,
+      subject: `🆕 New Tenant Registration: ${fullName} (Room ${roomNumber})`,
+      html: getAdminRegistrationNotificationTemplate(fullName, email, mobileNumber, roomNumber)
+    }).catch(e => console.error('Admin Registration Email Error:', e));
 
     res.status(201).json({
       success: true,

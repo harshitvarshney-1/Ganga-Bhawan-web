@@ -167,24 +167,24 @@ const PaymentHistoryModal = ({
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 border-b border-border flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-5">
-            <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center text-foreground font-bold text-2xl shadow-lg shadow-primary/20">
+        <div className="p-4 sm:p-5 border-b border-border flex items-start sm:items-center justify-between relative z-10 gap-2">
+          <div className="flex items-center gap-3 sm:gap-5 flex-1 min-w-0">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-primary flex items-center justify-center text-foreground font-bold text-xl sm:text-2xl shadow-lg shadow-primary/20 shrink-0">
               {selectedHistoryTenant.fullName.charAt(0).toUpperCase()}
             </div>
-            <div>
-              <h2 className="text-2xl font-bold text-foreground">{selectedHistoryTenant.fullName}</h2>
-              <div className="flex items-center gap-2 text-muted-foreground font-medium">
-                <Calendar className="w-4 h-4 text-indigo-500" />
-                <span>Payment Records for {currentYear}</span>
+            <div className="min-w-0">
+              <h2 className="text-lg sm:text-2xl font-bold text-foreground truncate">{selectedHistoryTenant.fullName}</h2>
+              <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-muted-foreground font-medium text-xs sm:text-sm">
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-indigo-500 shrink-0" />
+                <span className="truncate">Payment Records for {currentYear}</span>
               </div>
             </div>
           </div>
           <button
             onClick={() => setIsHistoryModalOpen(false)}
-            className="w-12 h-12 flex items-center justify-center bg-muted/30 hover:bg-card rounded-2xl transition-all text-muted-foreground hover:text-foreground border border-border"
+            className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-muted/30 hover:bg-card rounded-xl sm:rounded-2xl transition-all text-muted-foreground hover:text-foreground border border-border shrink-0"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
           </button>
         </div>
 
@@ -199,30 +199,30 @@ const PaymentHistoryModal = ({
             <div className="space-y-10">
               {/* Full Manual Payment Control Panel */}
               <div className="bg-card rounded-2xl p-6 border-2 border-primary/20 shadow-lg space-y-4">
-                <div className="flex items-center justify-between border-b border-border pb-3">
+                <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-border pb-3 gap-3 md:gap-0">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">💵</span>
-                    <h3 className="font-bold text-foreground text-base">Record Payment / Assign Rent</h3>
+                    <h3 className="font-bold text-foreground text-sm sm:text-base">Record Payment / Assign Rent</h3>
                   </div>
-                  <div className="flex bg-muted p-1 rounded-xl gap-1 text-xs font-bold">
+                  <div className="flex max-w-full overflow-x-auto bg-muted p-1 rounded-xl gap-1 text-xs font-bold hide-scrollbar">
                     <button
                       type="button"
                       onClick={() => setPaymentType('monthly')}
-                      className={`px-3 py-1.5 rounded-lg transition-all ${paymentType === 'monthly' ? 'bg-emerald-500 text-white shadow' : 'text-muted-foreground hover:text-foreground'}`}
+                      className={`px-3 py-1.5 rounded-lg transition-all text-[11px] sm:text-xs whitespace-nowrap shrink-0 text-center ${paymentType === 'monthly' ? 'bg-emerald-500 text-white shadow' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                       Monthly Paid
                     </button>
                     <button
                       type="button"
                       onClick={() => setPaymentType('advanced')}
-                      className={`px-3 py-1.5 rounded-lg transition-all ${paymentType === 'advanced' ? 'bg-indigo-600 text-white shadow' : 'text-muted-foreground hover:text-foreground'}`}
+                      className={`px-3 py-1.5 rounded-lg transition-all text-[11px] sm:text-xs whitespace-nowrap shrink-0 text-center ${paymentType === 'advanced' ? 'bg-indigo-600 text-white shadow' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                       🚀 Advanced
                     </button>
                     <button
                       type="button"
                       onClick={() => setPaymentType('due')}
-                      className={`px-3 py-1.5 rounded-lg transition-all ${paymentType === 'due' ? 'bg-amber-500 text-white shadow' : 'text-muted-foreground hover:text-foreground'}`}
+                      className={`px-3 py-1.5 rounded-lg transition-all text-[11px] sm:text-xs whitespace-nowrap shrink-0 text-center ${paymentType === 'due' ? 'bg-amber-500 text-white shadow' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                       Assign Due
                     </button>
@@ -390,7 +390,7 @@ const PaymentHistoryModal = ({
                       <p className="text-[10px] font-bold uppercase tracking-widest mb-4 opacity-70">{label}</p>
 
                       {(isPaid && payment?.approvedBy && (!payment?.barcodeImage || (payment?.paymentMode && payment.paymentMode !== 'Online'))) ? (
-                        <div className="flex items-center justify-between gap-2 mt-1">
+                        <div className="flex flex-wrap items-center justify-between gap-2 mt-1">
                           <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-lg">
                             💵 Cash Payment
                           </span>
@@ -399,28 +399,28 @@ const PaymentHistoryModal = ({
                               e.stopPropagation();
                               handleDeletePayment(payment._id, selectedHistoryTenant?._id || selectedHistoryTenant?.id);
                             }}
-                            className="p-1.5 bg-card rounded-lg shadow-sm text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all border border-border"
+                            className="p-1.5 bg-card rounded-lg shadow-sm text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all border border-border shrink-0"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
                       ) : (isPaid || isPending || isRejected) && payment?.barcodeImage ? (
-                        <div className="flex gap-2 mt-1">
+                        <div className="flex flex-wrap xl:flex-nowrap gap-2 mt-1">
                           <button
                             onClick={() => setFullScreenImage(payment.barcodeImage)}
-                            className="flex-1 py-2 bg-card rounded-xl shadow-sm text-[10px] font-bold text-foreground flex items-center justify-center gap-1.5 hover:bg-primary hover:text-foreground transition-all border border-border"
+                            className="flex-1 min-w-[70px] py-2 bg-card rounded-xl shadow-sm text-[10px] font-bold text-foreground flex items-center justify-center gap-1 hover:bg-primary hover:text-foreground transition-all border border-border"
                           >
-                            <ImageIcon className="w-3.5 h-3.5" />
-                            RECEIPT
+                            <ImageIcon className="w-3.5 h-3.5 shrink-0" />
+                            <span className="truncate">RECEIPT</span>
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeletePayment(payment._id, selectedHistoryTenant?._id || selectedHistoryTenant?.id);
                             }}
-                            className="p-2 bg-card rounded-xl shadow-sm text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all border border-border"
+                            className="p-2 sm:px-3 bg-card rounded-xl shadow-sm text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all border border-border shrink-0"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-3.5 h-3.5 mx-auto" />
                           </button>
                         </div>
                       ) : null}
@@ -444,40 +444,51 @@ const PaymentHistoryModal = ({
                     </div>
                   </div>
 
-                  <div className="flex flex-wrap gap-4">
+                  <div className="flex flex-col gap-4">
                     {tenantPayments.filter(p => p.isAdvanced).map((payment, idx) => (
-                      <div key={idx} className="bg-card px-5 py-4 rounded-2xl border border-border shadow-sm flex items-center gap-5 group/adv">
-                        <div>
-                          <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Target Month</p>
-                          <span className="font-bold text-foreground">{payment.month || 'Future'}</span>
+                      <div key={idx} className="bg-card p-4 sm:px-5 sm:py-4 rounded-2xl border border-border shadow-sm flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-5 group/adv">
+                        <div className="flex items-center sm:items-start justify-between sm:justify-start gap-4 w-full sm:w-auto">
+                          <div>
+                            <p className="text-[10px] font-bold text-primary uppercase tracking-widest">Target Month</p>
+                            <span className="font-bold text-foreground">{payment.month || 'Future'}</span>
+                          </div>
+                          <div className="sm:hidden text-right">
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Amount</p>
+                            <span className="font-bold text-foreground">{payment.amount > 0 ? `₹ ${payment.amount}` : <span className="text-muted-foreground text-xs">N/A</span>}</span>
+                          </div>
                         </div>
-                        <div>
+
+                        <div className="hidden sm:block">
                           <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Amount</p>
                           <span className="font-bold text-foreground">{payment.amount > 0 ? `₹ ${payment.amount}` : <span className="text-muted-foreground text-xs">N/A</span>}</span>
                         </div>
-                        <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${payment.status === 'success' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' :
-                            payment.status === 'pending' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-rose-500/20 text-rose-700 dark:text-rose-400'
-                          }`}>
-                          {payment.status}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          {payment.barcodeImage && (
+
+                        <div className="flex items-center justify-between sm:justify-start gap-4">
+                          <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shrink-0 ${payment.status === 'success' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' :
+                              payment.status === 'pending' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400' : 'bg-rose-500/20 text-rose-700 dark:text-rose-400'
+                            }`}>
+                            {payment.status}
+                          </div>
+                          
+                          <div className="flex items-center gap-2">
+                            {payment.barcodeImage && (
+                              <button
+                                onClick={() => setFullScreenImage(payment.barcodeImage)}
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-indigo-500 hover:bg-primary hover:text-foreground transition-all shrink-0"
+                              >
+                                <ImageIcon className="w-5 h-5" />
+                              </button>
+                            )}
                             <button
-                              onClick={() => setFullScreenImage(payment.barcodeImage)}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-indigo-500 hover:bg-primary hover:text-foreground transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeletePayment(payment._id, selectedHistoryTenant._id);
+                              }}
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all shrink-0"
                             >
-                              <ImageIcon className="w-5 h-5" />
+                              <Trash2 className="w-5 h-5" />
                             </button>
-                          )}
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeletePayment(payment._id, selectedHistoryTenant._id);
-                            }}
-                            className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -493,9 +504,9 @@ const PaymentHistoryModal = ({
               </div>
 
               {/* Transaction History List */}
-              <div className="bg-card rounded-xl p-8 border border-border shadow-sm">
-                <h3 className="text-xl font-bold text-foreground mb-6 flex items-center gap-3">
-                  <Clock className="w-6 h-6 text-muted-foreground" /> Recent Transactions
+              <div className="bg-card rounded-xl p-4 sm:p-8 border border-border shadow-sm">
+                <h3 className="text-lg sm:text-xl font-bold text-foreground mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                  <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-muted-foreground" /> Recent Transactions
                 </h3>
 
                 {tenantPayments.length > 0 ? (
@@ -505,54 +516,58 @@ const PaymentHistoryModal = ({
                       const isPending = payment.status === 'pending';
 
                       return (
-                        <div key={index} className="group flex items-center justify-between gap-4 p-4 rounded-2xl border border-slate-50 hover:border-indigo-100 hover:bg-primary/10/30 transition-all">
-                          <div className="flex items-center gap-4 min-w-0">
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isSuccess ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' :
+                        <div key={index} className="group flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 p-4 rounded-2xl border border-slate-50 hover:border-indigo-100 hover:bg-primary/10/30 transition-all">
+                          <div className="flex items-start sm:items-center gap-3 sm:gap-4 min-w-0">
+                            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center shrink-0 ${isSuccess ? 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400' :
                                 isPending ? 'bg-amber-500/20 text-amber-600 dark:text-amber-400' : 'bg-rose-500/20 text-rose-600 dark:text-rose-400'
                               }`}>
-                              {isSuccess ? <CheckCircle2 className="w-6 h-6" /> : isPending ? <Clock className="w-6 h-6" /> : <X className="w-6 h-6" />}
+                              {isSuccess ? <CheckCircle2 className="w-5 h-5 sm:w-6 sm:h-6" /> : isPending ? <Clock className="w-5 h-5 sm:w-6 sm:h-6" /> : <X className="w-5 h-5 sm:w-6 sm:h-6" />}
                             </div>
-                            <div className="min-w-0">
-                              <h5 className="font-bold text-foreground text-sm sm:text-base truncate flex items-center gap-2">
-                                {payment.month}
-                                <span className="text-muted-foreground font-normal text-xs sm:text-sm">
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                <h5 className="font-bold text-foreground text-sm sm:text-base truncate max-w-[120px] sm:max-w-none">
+                                  {payment.month}
+                                </h5>
+                                <span className="text-muted-foreground font-normal text-xs sm:text-sm shrink-0">
                                   {payment.isAdvanced ? 'Advanced' : 'Rent'}
                                 </span>
                                 {payment.approvedBy && (!payment.barcodeImage || (payment.paymentMode && payment.paymentMode !== 'Online')) && (
-                                  <span className="text-[10px] font-bold px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md border border-emerald-500/20">
-                                    💵 Cash Payment
+                                  <span className="text-[10px] sm:text-xs font-bold px-1.5 py-0.5 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-md border border-emerald-500/20 shrink-0">
+                                    💵 Cash
                                   </span>
                                 )}
-                              </h5>
-                              <p className="text-[10px] sm:text-xs text-muted-foreground font-medium mt-0.5">
-                                {new Date(payment.paymentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
-                                {' • '}
-                                {payment.approvedBy && (!payment.barcodeImage || (payment.paymentMode && payment.paymentMode !== 'Online'))
-                                  ? `Admin Recorded${payment.paymentMode && payment.paymentMode !== 'Online' ? ` • ${payment.paymentMode}` : ''}`
-                                  : isSuccess ? 'Verified' : isPending ? 'Processing' : 'Declined'}
-                                {payment.amount > 0 && (
-                                  <span className="ml-1 font-bold text-foreground"> • ₹ {payment.amount}</span>
-                                )}
+                              </div>
+                              <p className="text-[11px] sm:text-xs text-muted-foreground font-medium mt-1 leading-snug">
+                                <span className="block sm:inline">{new Date(payment.paymentDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                                <span className="hidden sm:inline">{' • '}</span>
+                                <span className="block sm:inline mt-0.5 sm:mt-0">
+                                  {payment.approvedBy && (!payment.barcodeImage || (payment.paymentMode && payment.paymentMode !== 'Online'))
+                                    ? `Admin Recorded${payment.paymentMode && payment.paymentMode !== 'Online' ? ` • ${payment.paymentMode}` : ''}`
+                                    : isSuccess ? 'Verified' : isPending ? 'Processing' : 'Declined'}
+                                  {payment.amount > 0 && (
+                                    <span className="sm:ml-1 font-bold text-foreground"> • ₹ {payment.amount}</span>
+                                  )}
+                                </span>
                               </p>
                             </div>
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 self-end sm:self-auto shrink-0 mt-2 sm:mt-0">
                             {payment.barcodeImage && (!payment.paymentMode || payment.paymentMode === 'Online') && (
                               <button
                                 onClick={() => setFullScreenImage(payment.barcodeImage)}
-                                className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-card transition-all shadow-sm"
+                                className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-card transition-all shadow-sm shrink-0"
                                 title="View Receipt"
                               >
-                                <ImageIcon className="w-5 h-5" />
+                                <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" />
                               </button>
                             )}
                             <button
                               onClick={() => handleDeletePayment(payment._id, selectedHistoryTenant?._id || selectedHistoryTenant?.id)}
-                              className="w-10 h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-rose-600 hover:border-rose-200 hover:bg-card transition-all shadow-sm"
+                              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-rose-600 hover:border-rose-200 hover:bg-card transition-all shadow-sm shrink-0"
                               title="Delete Record"
                             >
-                              <Trash2 className="w-5 h-5" />
+                              <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                             </button>
                           </div>
                         </div>

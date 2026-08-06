@@ -4,8 +4,7 @@ import Contact from './Contact/Contact'
 const Page3 = () => {
   return (
     <div>
-        <hr className="text-foreground" id='contact'/>
-      <Contact/>
+      <Contact id='contact' />
     </div>
   )
 }

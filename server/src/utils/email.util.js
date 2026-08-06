@@ -264,12 +264,13 @@ export const getAdminPaymentNotificationTemplate = (tenantName, tenantEmail, mon
     ` : ''}
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tr>
-        <td width="48%">
-          <a href="${approveUrl}" style="background-color: #10b981; color: #ffffff; display: block; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; padding: 15px; text-decoration: none; border-radius: 8px; text-align: center;">APPROVE</a>
+        <td style="padding-bottom: 12px;">
+          <a href="${approveUrl}" style="background-color: #10b981; color: #ffffff; display: block; font-family: Arial, sans-serif; font-size: 16px; font-weight: 800; padding: 18px 24px; text-decoration: none; border-radius: 10px; text-align: center; letter-spacing: 0.5px;">✅ APPROVE PAYMENT</a>
         </td>
-        <td width="4%">&nbsp;</td>
-        <td width="48%">
-          <a href="${rejectUrl}" style="background-color: #ef4444; color: #ffffff; display: block; font-family: Arial, sans-serif; font-size: 14px; font-weight: 700; padding: 15px; text-decoration: none; border-radius: 8px; text-align: center;">REJECT</a>
+      </tr>
+      <tr>
+        <td>
+          <a href="${rejectUrl}" style="background-color: #ef4444; color: #ffffff; display: block; font-family: Arial, sans-serif; font-size: 16px; font-weight: 800; padding: 18px 24px; text-decoration: none; border-radius: 10px; text-align: center; letter-spacing: 0.5px;">❌ REJECT PAYMENT</a>
         </td>
       </tr>
     </table>
@@ -317,6 +318,33 @@ export const getPaymentReminderEmailTemplate = (fullName, month, reminderNumber)
     </div>
     <div style="text-align: center;">
       <a href="${process.env.CLIENT_URL}" style="background-color: ${PRIMARY_COLOR}; color: #ffffff; display: inline-block; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; padding: 16px 32px; text-decoration: none; border-radius: 8px;">Go to Portal</a>
+    </div>
+  `;
+  return wrapInContainer(header, body);
+};
+
+export const getAdminRegistrationNotificationTemplate = (fullName, email, mobileNumber, roomNumber) => {
+  const header = getEmailHeader('New Tenant Registration');
+  const body = `
+    <p style="color: #475569; font-family: Arial, sans-serif; font-size: 16px; line-height: 1.6; margin: 0 0 25px 0;">
+      A new tenant has registered and is awaiting your approval.
+    </p>
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: ${LIGHT_BG}; border-radius: 12px; border: 1px solid ${BORDER_COLOR}; margin-bottom: 30px;">
+      <tr>
+        <td style="padding: 25px;">
+          <p style="color: #64748b; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px;">Name</p>
+          <p style="color: #1e293b; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; margin: 0 0 15px 0;">${fullName}</p>
+          <p style="color: #64748b; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px;">Email</p>
+          <p style="color: #1e293b; font-family: Arial, sans-serif; font-size: 15px; margin: 0 0 15px 0;">${email}</p>
+          <p style="color: #64748b; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px;">Mobile</p>
+          <p style="color: #1e293b; font-family: Arial, sans-serif; font-size: 15px; margin: 0 0 15px 0;">${mobileNumber || 'N/A'}</p>
+          <p style="color: #64748b; font-family: Arial, sans-serif; font-size: 12px; font-weight: 700; margin: 0 0 5px 0; text-transform: uppercase; letter-spacing: 1px;">Room Number</p>
+          <p style="color: #1e293b; font-family: Arial, sans-serif; font-size: 18px; font-weight: 800; margin: 0;">${roomNumber || 'Not specified'}</p>
+        </td>
+      </tr>
+    </table>
+    <div style="text-align: center;">
+      <a href="${process.env.CLIENT_URL}/admin" style="background-color: ${PRIMARY_COLOR}; color: #ffffff; display: inline-block; font-family: Arial, sans-serif; font-size: 16px; font-weight: 700; padding: 16px 32px; text-decoration: none; border-radius: 8px;">Review &amp; Approve in Portal</a>
     </div>
   `;
   return wrapInContainer(header, body);

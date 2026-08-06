@@ -820,15 +820,15 @@ const AdminDashboard = () => {
                             <div className="w-11 h-11 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-base shrink-0">
                               {payment.userId?.fullName?.charAt(0)?.toUpperCase() || 'T'}
                             </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2.5 mb-1 flex-wrap">
-                                <h3 className="text-[15px] font-semibold text-foreground">{payment.userId?.fullName || 'Unknown'}</h3>
+                                <h3 className="text-[15px] font-semibold text-foreground truncate">{payment.userId?.fullName || 'Unknown'}</h3>
                                 {payment.isAdvanced && (
-                                  <span className="px-2 py-0.5 bg-primary/10 text-primary text-[11px] font-semibold rounded-full">🚀 Advanced</span>
+                                  <span className="px-2 py-0.5 bg-primary/10 text-primary text-[11px] font-semibold rounded-full shrink-0">🚀 Advanced</span>
                                 )}
-                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[11px] font-semibold rounded-full">Pending Review</span>
+                                <span className="px-2 py-0.5 bg-amber-500/10 text-amber-500 text-[11px] font-semibold rounded-full shrink-0">Pending Review</span>
                               </div>
-                              <p className="text-muted-foreground text-[12px]">{payment.userId?.email}</p>
+                              <p className="text-muted-foreground text-[12px] truncate">{payment.userId?.email}</p>
                             </div>
                           </div>
 

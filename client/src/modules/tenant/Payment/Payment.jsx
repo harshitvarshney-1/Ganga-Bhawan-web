@@ -63,6 +63,7 @@ const Payment = () => {
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState({ open: false, month: null, amount: 0, monthIndex: null });
   const [advancedModal, setAdvancedModal] = useState({ open: false, month: "", monthIndex: null });
+  const [selfAssignModal, setSelfAssignModal] = useState({ open: false, month: "", monthIndex: null, amount: "" });
   const [processing, setProcessing] = useState(false);
   const [alert, setAlert] = useState({ open: false, message: "" });
   const [barcodeImage, setBarcodeImage] = useState(null);
@@ -197,6 +198,17 @@ const Payment = () => {
     setBarcodePreview(null);
   };
 
+  const openSelfAssignModal = () => {
+    setSelfAssignModal({
+      open: true,
+      month: "",
+      monthIndex: null,
+      amount: ""
+    });
+    setBarcodeImage(null);
+    setBarcodePreview(null);
+  };
+
   const [multiModal, setMultiModal] = useState({ open: false, selectedMonths: [] });
   const openMultiModal = () => {
     setMultiModal({ open: true, selectedMonths: [] });
@@ -208,6 +220,7 @@ const Payment = () => {
     setProcessing(false);
     setModal({ open: false, month: null, amount: 0, monthIndex: null });
     setAdvancedModal({ open: false, month: "", monthIndex: null });
+    setSelfAssignModal({ open: false, month: "", monthIndex: null, amount: "" });
     setMultiModal({ open: false, selectedMonths: [] });
     setBarcodeImage(null);
     setBarcodePreview(null);
@@ -405,6 +418,59 @@ const Payment = () => {
     }
   };
 
+  const handleSubmitSelfAssign = async () => {
+    if (!selfAssignModal.month || !selfAssignModal.amount || !barcodeImage) {
+      setAlert({
+        open: true,
+        message: 'Please select a month, enter amount, and upload payment screenshot'
+      });
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      const token = auth.token;
+      
+      console.log(`[Payment] Uploading self-assigned receipt to Cloudinary...`);
+      const barcodeImageUrl = await uploadToCloudinaryDirect(barcodeImage, 'payments');
+
+      const response = await fetch(`${API_URL}/payments/submit`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          barcodeImageUrl,
+          month: selfAssignModal.month,
+          monthIndex: selfAssignModal.monthIndex,
+          amount: selfAssignModal.amount,
+          isAdvanced: false
+        })
+      });
+
+      if (response.ok) {
+        setAlert({
+          open: true,
+          message: `Rent submitted for ${selfAssignModal.month}! Admin will verify soon.`
+        });
+        fetchUserAndPayments();
+        setTimeout(closeModal, 2000);
+      } else {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to submit rent');
+      }
+    } catch (error) {
+      console.error('Self Assign rent error:', error);
+      setAlert({
+        open: true,
+        message: error.message || 'Error submitting rent. Please try again.'
+      });
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   const handleAlertClose = () => setAlert({ open: false, message: "" });
 
   const containerVariants = {
@@ -468,56 +534,44 @@ const Payment = () => {
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 h-full">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-full text-xs font-bold tracking-wider uppercase mb-3 text-primary border border-primary/20">
-                <Rocket className="w-3.5 h-3.5" /> Fast Track
+                <Rocket className="w-3.5 h-3.5" /> Security Deposit
               </div>
-              <h3 className="text-2xl font-bold mb-1 text-foreground">Advanced Booking</h3>
-              <p className="text-muted-foreground text-sm font-medium">Pre-pay for coming months to avoid late fees</p>
+              <h3 className="text-2xl font-bold mb-1 text-foreground">Advance Payment</h3>
+              <p className="text-muted-foreground text-sm font-medium">One-time security fee, fully settled when leaving the PG</p>
             </div>
             
-            {payments.filter(p => p.isAdvanced && p.status !== 'rejected').length === 0 ? (
-              <div className="flex gap-3 self-start sm:self-center flex-wrap">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => openAdvancedModal()}
-                  className="whitespace-nowrap px-6 py-3.5 bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2"
-                >
-                  Pay in Advance
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={openMultiModal}
-                  className="whitespace-nowrap px-6 py-3.5 bg-muted text-foreground hover:bg-muted/80 font-bold rounded-2xl shadow-lg transition-all border border-border flex items-center gap-2"
-                >
-                  Bulk Payment (Multi-Month)
-                </motion.button>
-              </div>
-            ) : (
-              <div className="flex gap-2 flex-wrap self-start sm:self-center">
-                {payments.filter(p => p.isAdvanced && p.status !== 'rejected').map((payment, idx) => (
-                  <div key={idx} className="bg-muted px-4 py-2 rounded-xl border border-border flex items-center gap-3">
-                    <span className="font-bold text-sm text-foreground">{payment.month}</span>
-                    <span className={`w-2 h-2 rounded-full ${
-                      payment.status === 'success' ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]' : 
-                      payment.status === 'pending' ? 'bg-amber-400 shadow-[0_0_10px_rgba(251,191,36,0.8)]' : 'bg-rose-400'
-                    }`} />
-                  </div>
-                ))}
-              </div>
-            )}
+            <div className="flex gap-3 self-start sm:self-center flex-wrap">
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => openAdvancedModal()}
+                className="whitespace-nowrap px-6 py-3.5 bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2"
+              >
+                Pay in Advance
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.div>
 
       {/* Payment Calendar */}
       <motion.div variants={itemVariants} className="bg-card rounded-3xl p-8 border border-border shadow-sm relative overflow-hidden">
-        <div className="flex items-center justify-between mb-8 relative z-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 relative z-10">
           <h3 className="text-xl font-bold text-foreground flex items-center gap-3">
             <Calendar className="w-6 h-6 text-indigo-500" /> Payment Schedule
           </h3>
-          <div className="px-4 py-1.5 bg-muted text-muted-foreground font-bold rounded-full text-sm">
-            Year {currentYear}
+          <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => openSelfAssignModal()}
+              className="whitespace-nowrap px-5 py-2.5 bg-primary text-primary-foreground hover:bg-primary/90 font-bold rounded-2xl shadow-lg transition-all flex items-center gap-2 text-sm"
+            >
+              Pay Monthly Rent
+            </motion.button>
+            <div className="px-4 py-2 bg-muted text-muted-foreground font-bold rounded-full text-sm">
+              Year {currentYear}
+            </div>
           </div>
         </div>
 
@@ -699,6 +753,25 @@ const Payment = () => {
            />
         )}
 
+        {selfAssignModal.open && (
+           <PaymentModal 
+             title="Pay Monthly Rent"
+             closeModal={closeModal}
+             barcodeImg={barcodeImg}
+             handleBarcodeChange={handleBarcodeChange}
+             barcodePreview={barcodePreview}
+             handleSubmit={handleSubmitSelfAssign}
+             processing={processing}
+             barcodeImage={barcodeImage}
+             isSelfAssign={true}
+             selfAssignModal={selfAssignModal}
+             setSelfAssignModal={setSelfAssignModal}
+             monthNames={monthNames}
+             isMonthPaid={isMonthPaid}
+             isMonthPending={isMonthPending}
+           />
+        )}
+
         {multiModal.open && (
            <PaymentModal 
              title="Bulk Payment (Multi-Month)"
@@ -743,7 +816,8 @@ const Payment = () => {
 const PaymentModal = ({ 
   title, closeModal, barcodeImg, handleBarcodeChange, barcodePreview, 
   handleSubmit, processing, barcodeImage, isAdvanced, advancedModal, setAdvancedModal, 
-  monthNames, isMulti, multiModal, setMultiModal, isMonthPaid
+  monthNames, isMulti, multiModal, setMultiModal, isMonthPaid, 
+  isSelfAssign, selfAssignModal, setSelfAssignModal, isMonthPending
 }) => {
   return (
     <motion.div 
@@ -772,7 +846,7 @@ const PaymentModal = ({
                 <select
                   className="w-full appearance-none p-4 bg-background border border-border rounded-xl font-medium text-foreground focus:ring-2 focus:ring-primary/100 focus:border-primary outline-none transition-all cursor-pointer"
                   value={advancedModal.month}
-                  onChange={(e) => setAdvancedModal({...advancedModal, month: e.target.value})}
+                  onChange={(e) => setAdvancedModal({...advancedModal, month: e.target.value, monthIndex: monthNames.indexOf(e.target.value)})}
                 >
                   <option value="">Choose a month...</option>
                   {monthNames.map((m) => (
@@ -782,6 +856,48 @@ const PaymentModal = ({
                 <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-muted-foreground">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {isSelfAssign && (
+            <div className="mb-6 space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-foreground mb-2">Select Target Month</label>
+                <div className="relative">
+                  <select
+                    className="w-full appearance-none p-4 bg-background border border-border rounded-xl font-medium text-foreground focus:ring-2 focus:ring-primary/100 focus:border-primary outline-none transition-all cursor-pointer"
+                    value={selfAssignModal.month}
+                    onChange={(e) => setSelfAssignModal({...selfAssignModal, month: e.target.value, monthIndex: monthNames.indexOf(e.target.value)})}
+                  >
+                    <option value="">Choose a month to pay...</option>
+                    {monthNames.map((m) => {
+                      const mIdx = monthNames.indexOf(m);
+                      const cantPay = isMonthPaid(mIdx) || isMonthPending(mIdx);
+                      return (
+                       <option key={m} value={m} disabled={cantPay}>
+                         {m} {new Date().getFullYear() + (mIdx < new Date().getMonth() ? 1 : 0)} {cantPay ? '(Already Paid/Processing)' : ''}
+                       </option>
+                      );
+                    })}
+                  </select>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none text-muted-foreground">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-bold text-foreground mb-2">Rent Amount (₹)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="100"
+                  className="w-full p-4 bg-background border border-border rounded-xl font-medium text-foreground focus:ring-2 focus:ring-primary/100 focus:border-primary outline-none transition-all"
+                  placeholder="e.g. 6500"
+                  value={selfAssignModal.amount}
+                  onChange={(e) => setSelfAssignModal({...selfAssignModal, amount: e.target.value})}
+                />
               </div>
             </div>
           )}
@@ -851,7 +967,7 @@ const PaymentModal = ({
         <div className="p-6 border-t border-border bg-card shadow-[0_-10px_30px_rgba(0,0,0,0.03)] z-10 shrink-0">
           <button
             onClick={handleSubmit}
-            disabled={processing || !barcodeImage || (isAdvanced && !advancedModal.month) || (isMulti && multiModal.selectedMonths.length === 0)}
+            disabled={processing || !barcodeImage || (isAdvanced && !advancedModal.month) || (isMulti && multiModal.selectedMonths.length === 0) || (isSelfAssign && (!selfAssignModal.month || !selfAssignModal.amount))}
             className="w-full py-4 bg-primary text-foreground rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/100 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {processing ? (

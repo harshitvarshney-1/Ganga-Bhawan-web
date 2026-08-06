@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { currentConfig } from '../../config/env.js';
 import { sendEmail, getPaymentApprovalEmailTemplate, getPasswordResetEmailTemplate, getPaymentRejectedEmailTemplate } from '../../utils/email.util.js';
+import { deleteFromCloudinary } from '../../infra/cloudinary.js';
 
 // Secret used only for quick-approve links (separate from user JWT secret)
 const QUICK_SECRET = process.env.QUICK_APPROVE_SECRET || (currentConfig.jwtSecret + '_quick');
@@ -284,7 +285,15 @@ export const rejectPayment = async (req, res) => {
       return res.status(400).json({ error: 'Payment is not pending' });
     }
 
+    // 🗑️ Auto-delete the receipt image from Cloudinary before rejecting
+    if (payment.barcodeImage) {
+      deleteFromCloudinary(payment.barcodeImage).catch(e =>
+        console.error('[Cloudinary] Failed to delete receipt on rejection:', e)
+      );
+    }
+
     payment.status = 'rejected';
+    payment.barcodeImage = null; // Clear so tenant must re-upload
     payment.approvedBy = req.user.userId || req.user.id;
     payment.approvedAt = new Date();
 
@@ -309,7 +318,7 @@ export const rejectPayment = async (req, res) => {
 
     res.json({
       success: true,
-      message: 'Payment rejected',
+      message: 'Payment rejected and receipt image deleted from storage.',
       payment
     });
   } catch (error) {
@@ -503,9 +512,17 @@ export const quickRejectPayment = async (req, res) => {
 
     const monthSummary = batch.map(p => p.month).join(', ');
 
-    // Reject all in batch
+    // 🗑️ Auto-delete the shared receipt image from Cloudinary (only once - same image for batch)
+    if (payment.barcodeImage) {
+      deleteFromCloudinary(payment.barcodeImage).catch(e =>
+        console.error('[Cloudinary] Failed to delete receipt on batch rejection:', e)
+      );
+    }
+
+    // Reject all in batch and clear receipt reference
     for (const p of batch) {
       p.status = 'rejected';
+      p.barcodeImage = null; // Clear so tenant must re-upload
       await p.save();
     }
 
@@ -541,29 +558,108 @@ export const generateQuickTokens = (paymentId) => {
 // ─── Simple HTML response page (no React needed — email click lands here) ───
 function htmlPage(title, message, type) {
   const colors = {
-    success: { bg: '#f0fdf4', border: '#bbf7d0', icon: '#16a34a', btn: '#16a34a' },
-    error:   { bg: '#fef2f2', border: '#fecaca', icon: '#dc2626', btn: '#dc2626' },
-    warn:    { bg: '#fffbeb', border: '#fde68a', icon: '#d97706', btn: '#d97706' },
+    success: { bg: '#f0fdf4', border: '#bbf7d0', accent: '#16a34a', btn: '#16a34a', emoji: '✅' },
+    error:   { bg: '#fef2f2', border: '#fecaca', accent: '#dc2626', btn: '#dc2626', emoji: '❌' },
+    warn:    { bg: '#fffbeb', border: '#fde68a', accent: '#d97706', btn: '#d97706', emoji: '⚠️' },
   };
   const c = colors[type] || colors.warn;
   return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} — Ganga Bhawan</title></head>
-<body style="font-family:'Segoe UI',sans-serif;background:#f8fafc;margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;">
-  <div style="max-width:480px;width:90%;background:#fff;border-radius:16px;overflow:hidden;border:1px solid #e5e7eb;box-shadow:0 10px 40px rgba(0,0,0,0.08);">
-    <div style="background:#0f172a;padding:28px 36px;">
-      <p style="color:#818cf8;font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;margin:0 0 4px;">Ganga Bhawan Admin</p>
-      <h1 style="color:#fff;font-size:20px;font-weight:800;margin:0;">${title}</h1>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>${title} — Ganga Bhawan</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .card {
+      background: #1e293b;
+      border-radius: 20px;
+      overflow: hidden;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+    }
+    .header {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      padding: 28px 28px 24px;
+      border-bottom: 1px solid #334155;
+    }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #818cf8;
+      margin-bottom: 8px;
+    }
+    .header h1 {
+      color: #f1f5f9;
+      font-size: 22px;
+      font-weight: 800;
+      line-height: 1.3;
+    }
+    .body { padding: 28px; }
+    .alert-box {
+      background: ${c.bg};
+      border: 1px solid ${c.border};
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+    .alert-box p {
+      color: #1e293b;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .portal-btn {
+      display: block;
+      width: 100%;
+      background: ${c.btn};
+      color: #fff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 17px;
+      padding: 18px 24px;
+      border-radius: 12px;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .footer {
+      border-top: 1px solid #334155;
+      padding: 16px 28px;
+      text-align: center;
+    }
+    .footer p {
+      font-size: 12px;
+      color: #475569;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <span class="badge">Ganga Bhawan Admin</span>
+      <h1>${c.emoji} ${title}</h1>
     </div>
-    <div style="padding:32px 36px;">
-      <div style="background:${c.bg};border:1px solid ${c.border};border-radius:10px;padding:20px 24px;margin-bottom:24px;">
-        <p style="margin:0;color:#1f2937;font-size:15px;line-height:1.6;">${message}</p>
+    <div class="body">
+      <div class="alert-box">
+        <p>${message}</p>
       </div>
-      <a href="${currentConfig.clientUrl}/login" style="display:inline-block;background:${c.btn};color:#fff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 28px;border-radius:8px;">Go to Admin Portal</a>
+      <a href="${currentConfig.clientUrl}/login" class="portal-btn">Open Admin Portal</a>
     </div>
-    <div style="border-top:1px solid #f1f5f9;padding:16px 36px;background:#f8fafc;">
-      <p style="font-size:11px;color:#9ca3af;margin:0;text-align:center;">Ganga Bhawan (Hariom) | Mathura, UP</p>
+    <div class="footer">
+      <p>Ganga Bhawan (Hariom) &bull; Mathura, Uttar Pradesh</p>
     </div>
   </div>
-</body></html>`;
-}
+</body>
+</html>`;}

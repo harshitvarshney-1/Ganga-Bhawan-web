@@ -120,16 +120,16 @@ const RoomsTab = ({ tenants, onTenantClick }) => {
                         onClick={() => { onTenantClick(tenant); setSelectedRoom(null); }}
                         className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-accent cursor-pointer transition-colors"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold shrink-0">
                             {tenant.fullName.charAt(0)}
                           </div>
-                          <div>
-                            <p className="text-[14px] font-semibold text-foreground">{tenant.fullName}</p>
-                            <p className="text-[11px] text-muted-foreground">{tenant.email}</p>
+                          <div className="min-w-0 pr-2">
+                            <p className="text-[14px] font-semibold text-foreground truncate">{tenant.fullName}</p>
+                            <p className="text-[11px] text-muted-foreground truncate">{tenant.email}</p>
                           </div>
                         </div>
-                        <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                        <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
                       </div>
                     ))}
                   </div>

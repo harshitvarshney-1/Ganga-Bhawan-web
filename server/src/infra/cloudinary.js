@@ -89,3 +89,25 @@ export const uploadToCloudinary = async (buffer, folder = 'ganga-bhawan', mimety
 };
 
 export default cloudinary;
+
+/**
+ * 🗑️ Delete a file from Cloudinary by its secure URL.
+ * Extracts the public_id from the URL and calls destroy.
+ */
+export const deleteFromCloudinary = async (imageUrl) => {
+  if (!imageUrl || imageUrl === 'upload_failed') return;
+  try {
+    // Extract public_id: path after /upload/vXXXXXX/ without file extension
+    const matches = imageUrl.match(/\/upload\/(?:v\d+\/)?(.+)\.[a-z]+$/i);
+    if (!matches || !matches[1]) {
+      console.warn('[Cloudinary] Could not parse public_id from URL:', imageUrl);
+      return;
+    }
+    const publicId = matches[1];
+    const result = await cloudinary.uploader.destroy(publicId);
+    console.log(`[Cloudinary] 🗑️ Deleted asset: ${publicId} → ${result.result}`);
+    return result;
+  } catch (err) {
+    console.error('[Cloudinary] ❌ Failed to delete asset:', err.message);
+  }
+};

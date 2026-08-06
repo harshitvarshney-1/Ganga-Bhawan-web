@@ -56,7 +56,7 @@ export default function Login() {
       </div>
 
       {/* Right side: Login Form */}
-      <div className={`flex-1 w-full flex items-center justify-center p-6 lg:p-12 relative z-10 mt-10 lg:mt-0 lg:border-l border-border transition-all duration-1000 ${isLampOn ? 'opacity-100 pointer-events-auto translate-y-0' : 'opacity-0 pointer-events-none translate-y-10'}`}>
+      <div className={`flex-1 w-full flex items-center justify-center p-6 lg:p-12 relative z-10 mt-10 lg:mt-0 transition-all duration-1000 ${isLampOn ? 'opacity-100 pointer-events-auto translate-y-0' : 'opacity-0 pointer-events-none translate-y-10'}`}>
         <div className="w-full max-w-sm">
           {/* Brand */}
           <div className="text-center mb-8">
