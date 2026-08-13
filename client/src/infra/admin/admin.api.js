@@ -104,3 +104,5 @@ export const updateTenantAPI = async (tenantId, updates, token) => {
   });
   return handleResponse(response);
 };
+
+

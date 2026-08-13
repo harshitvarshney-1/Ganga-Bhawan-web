@@ -357,6 +357,39 @@ export const deletePayment = async (req, res) => {
   }
 };
 
+export const updatePaymentAmount = async (req, res) => {
+  try {
+    const { amount } = req.body;
+    
+    if (amount === undefined || amount === null) {
+      return res.status(400).json({ error: 'Amount is required' });
+    }
+
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount < 0) {
+      return res.status(400).json({ error: 'Invalid amount provided' });
+    }
+
+    const payment = await Payment.findById(req.params.paymentId);
+
+    if (!payment) {
+      return res.status(404).json({ error: 'Payment not found' });
+    }
+
+    payment.amount = parsedAmount;
+    await payment.save();
+
+    res.json({
+      success: true,
+      message: 'Payment amount updated successfully.',
+      payment
+    });
+  } catch (error) {
+    console.error('Error updating payment amount:', error);
+    res.status(500).json({ error: 'Failed to update payment amount' });
+  }
+};
+
 export const resetTenantPassword = async (req, res) => {
   try {
     const { newPassword } = req.body;
@@ -663,3 +696,5 @@ function htmlPage(title, message, type) {
   </div>
 </body>
 </html>`;}
+
+

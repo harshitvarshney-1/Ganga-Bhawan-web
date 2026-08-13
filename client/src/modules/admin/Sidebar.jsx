@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, UserPlus, Users, IndianRupee, History, LogOut, ShieldCheck, Home } from 'lucide-react';
+import { LayoutDashboard, UserPlus, Users, IndianRupee, History, LogOut, ShieldCheck, Home, TrendingUp } from 'lucide-react';
 import LogoIcon from "@/shared/components/atoms/Logo/LogoIcon";
 
 const menuItems = [
@@ -11,7 +11,6 @@ const menuItems = [
   { id: 'pendingPayments', label: 'Payment Approvals', icon: IndianRupee },
   { id: 'disabled',        label: 'Disabled Acc',     icon: Users },
   { id: 'paymentStatus',   label: 'Payment History',  icon: History },
-  { id: 'auditLogs',       label: 'Audit Logs',       icon: ShieldCheck },
 ];
 
 

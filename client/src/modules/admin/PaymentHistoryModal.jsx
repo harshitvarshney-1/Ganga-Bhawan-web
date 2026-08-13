@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Calendar, CheckCircle2, Clock, AlertTriangle, Image as ImageIcon, Trash2, Rocket, Info, IndianRupee } from 'lucide-react';
+import { X, Calendar, CheckCircle2, Clock, AlertTriangle, Image as ImageIcon, Trash2, Edit2, Rocket, Info, IndianRupee } from 'lucide-react';
 import { useAtomValue } from 'jotai';
 import { authAtom } from '../../shared/hooks/store/auth.atom';
 import { API_URL } from '../../infra/config';
@@ -25,6 +25,39 @@ const PaymentHistoryModal = ({
   const [customMonthLabel, setCustomMonthLabel] = React.useState('');
   const [paymentMode, setPaymentMode] = React.useState('Cash');
   const [notes, setNotes] = React.useState('');
+  
+  const [editAmountModal, setEditAmountModal] = React.useState({ isOpen: false, paymentId: null, currentAmount: '', updating: false });
+
+  const submitEditAmount = async () => {
+    if (editAmountModal.currentAmount === '' || parseFloat(editAmountModal.currentAmount) < 0) {
+      alert("Please enter a valid amount.");
+      return;
+    }
+    setEditAmountModal(prev => ({ ...prev, updating: true }));
+    try {
+      const token = auth?.token || (typeof auth === 'string' ? auth : null) || localStorage.getItem('token');
+      const res = await fetch(`${API_URL}/admin/update-payment-amount/${editAmountModal.paymentId}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ amount: parseFloat(editAmountModal.currentAmount) })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setEditAmountModal({ isOpen: false, paymentId: null, currentAmount: '', updating: false });
+        fetchPaymentsHistory();
+      } else {
+        alert(data.error || 'Failed to update amount');
+        setEditAmountModal(prev => ({ ...prev, updating: false }));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error updating amount');
+      setEditAmountModal(prev => ({ ...prev, updating: false }));
+    }
+  };
 
   if (!isHistoryModalOpen || !selectedHistoryTenant) return null;
 
@@ -397,9 +430,20 @@ const PaymentHistoryModal = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              setEditAmountModal({ isOpen: true, paymentId: payment._id, currentAmount: payment.amount || 0, updating: false });
+                            }}
+                            className="p-1.5 bg-card rounded-lg shadow-sm text-indigo-500 hover:bg-indigo-600 hover:text-white transition-all border border-border shrink-0"
+                            title="Edit Amount"
+                          >
+                            <Edit2 className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleDeletePayment(payment._id, selectedHistoryTenant?._id || selectedHistoryTenant?.id);
                             }}
-                            className="p-1.5 bg-card rounded-lg shadow-sm text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all border border-border shrink-0"
+                            className="p-1.5 bg-card rounded-lg shadow-sm text-rose-500 hover:bg-rose-600 hover:text-white transition-all border border-border shrink-0"
+                            title="Delete Payment"
                           >
                             <Trash2 className="w-3 h-3" />
                           </button>
@@ -416,9 +460,20 @@ const PaymentHistoryModal = ({
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
+                              setEditAmountModal({ isOpen: true, paymentId: payment._id, currentAmount: payment.amount || 0, updating: false });
+                            }}
+                            className="p-2 sm:px-3 bg-card rounded-xl shadow-sm text-indigo-500 hover:bg-indigo-600 hover:text-white transition-all border border-border shrink-0"
+                            title="Edit Amount"
+                          >
+                            <Edit2 className="w-3.5 h-3.5 mx-auto" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
                               handleDeletePayment(payment._id, selectedHistoryTenant?._id || selectedHistoryTenant?.id);
                             }}
-                            className="p-2 sm:px-3 bg-card rounded-xl shadow-sm text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all border border-border shrink-0"
+                            className="p-2 sm:px-3 bg-card rounded-xl shadow-sm text-rose-500 hover:bg-rose-600 hover:text-white transition-all border border-border shrink-0"
+                            title="Delete Payment"
                           >
                             <Trash2 className="w-3.5 h-3.5 mx-auto" />
                           </button>
@@ -482,9 +537,20 @@ const PaymentHistoryModal = ({
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
+                                setEditAmountModal({ isOpen: true, paymentId: payment._id, currentAmount: payment.amount || 0, updating: false });
+                              }}
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-indigo-500 hover:bg-indigo-600 hover:text-white transition-all shrink-0"
+                              title="Edit Amount"
+                            >
+                              <Edit2 className="w-5 h-5" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
                                 handleDeletePayment(payment._id, selectedHistoryTenant._id);
                               }}
-                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-rose-500 hover:bg-rose-600 hover:text-foreground transition-all shrink-0"
+                              className="w-10 h-10 flex items-center justify-center rounded-xl bg-muted/30 text-rose-500 hover:bg-rose-600 hover:text-white transition-all shrink-0"
+                              title="Delete Payment"
                             >
                               <Trash2 className="w-5 h-5" />
                             </button>
@@ -563,8 +629,18 @@ const PaymentHistoryModal = ({
                               </button>
                             )}
                             <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditAmountModal({ isOpen: true, paymentId: payment._id, currentAmount: payment.amount || 0, updating: false });
+                              }}
+                              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-card border border-border flex items-center justify-center text-indigo-500 hover:text-white hover:border-indigo-600 hover:bg-indigo-600 transition-all shadow-sm shrink-0"
+                              title="Edit Amount"
+                            >
+                              <Edit2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                            </button>
+                            <button
                               onClick={() => handleDeletePayment(payment._id, selectedHistoryTenant?._id || selectedHistoryTenant?.id)}
-                              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-rose-600 hover:border-rose-200 hover:bg-card transition-all shadow-sm shrink-0"
+                              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-card border border-border flex items-center justify-center text-rose-500 hover:text-white hover:border-rose-600 hover:bg-rose-600 transition-all shadow-sm shrink-0"
                               title="Delete Record"
                             >
                               <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -592,6 +668,53 @@ const PaymentHistoryModal = ({
           )}
         </div>
       </motion.div>
+
+      {/* Edit Amount Modal Fragment */}
+      <AnimatePresence>
+        {editAmountModal.isOpen && (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4"
+            onClick={() => setEditAmountModal({ isOpen: false, paymentId: null, currentAmount: '', updating: false })}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-card w-full max-w-sm rounded-2xl p-6 shadow-2xl border border-border"
+              onClick={e => e.stopPropagation()}
+            >
+              <h3 className="text-xl font-bold mb-2 text-foreground">Edit Amount</h3>
+              <p className="text-sm text-muted-foreground mb-4">You can update the payment amount below.</p>
+              
+              <div className="relative mb-5">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted-foreground font-bold">₹</span>
+                <input
+                  type="number"
+                  className="w-full bg-background border border-border rounded-xl pl-8 pr-4 py-2.5 text-base font-semibold outline-none focus:ring-2 focus:ring-primary text-foreground"
+                  value={editAmountModal.currentAmount}
+                  onChange={e => setEditAmountModal(prev => ({ ...prev, currentAmount: e.target.value }))}
+                />
+              </div>
+
+              <div className="flex gap-3 justify-end">
+                <button
+                  className="px-5 py-2.5 bg-muted hover:bg-muted/80 text-foreground rounded-xl font-semibold transition-all text-sm"
+                  onClick={() => setEditAmountModal({ isOpen: false, paymentId: null, currentAmount: '', updating: false })}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="px-5 py-2.5 bg-primary hover:bg-primary/90 text-white shadow-lg rounded-xl font-semibold transition-all text-sm"
+                  onClick={submitEditAmount}
+                  disabled={editAmountModal.updating}
+                >
+                  {editAmountModal.updating ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

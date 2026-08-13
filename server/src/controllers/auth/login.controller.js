@@ -2,7 +2,6 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../../models/user.model.js';
 import { currentConfig } from '../../config/env.js';
-import { writeLog } from '../admin/auditLog.controller.js';
 
 export const loginUser = async (req, res) => {
   try {
@@ -27,8 +26,6 @@ export const loginUser = async (req, res) => {
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
-      // Log failed login
-      writeLog({ userId: user._id, action: 'login_failed', req, metadata: { reason: 'invalid_password' } });
       return res.status(401).json({ error: 'Invalid password' });
     }
 
@@ -75,8 +72,7 @@ export const loginUser = async (req, res) => {
     };
     res.cookie('refreshToken', refreshToken, cookieOptions);
 
-    // Log successful login
-    writeLog({ userId: user._id, action: 'login_success', req, metadata: { role: user.role } });
+
 
     res.json({
       success: true,

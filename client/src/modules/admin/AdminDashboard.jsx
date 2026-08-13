@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, IndianRupee, UserPlus } from 'lucide-react';
+import { Users, IndianRupee, UserPlus, ZoomIn, ZoomOut, RotateCw, FileText, Download } from 'lucide-react';
 import { authAtom, userAtom } from '../../shared/hooks/store/auth.atom';
 import { useAtom, useSetAtom } from 'jotai';
 import { API_URL } from '../../infra/config';
@@ -26,9 +26,53 @@ import StatCard from './StatCard';
 import TenantCard from './TenantCard';
 import PaymentStatusTab from './PaymentStatusTab';
 import PaymentHistoryModal from './PaymentHistoryModal';
-import AuditLogs from './AuditLogs';
 import RoomsTab from './RoomsTab';
 
+const AadhaarImagePanel = ({ src, alt, label }) => {
+  const [zoom, setZoom] = useState(1);
+  const [rotation, setRotation] = useState(0);
+
+  if (!src) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-2 w-full h-[30vh] md:h-[50vh] bg-muted/30 rounded-lg border border-dashed border-border">
+        <p className="text-muted-foreground text-[11px] font-semibold uppercase tracking-[0.08em]">{label}</p>
+        <p className="text-muted-foreground text-[13px]">No Photo</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-3 w-full md:flex-1 min-w-0">
+      <div className="flex items-center justify-between">
+        <p className="text-muted-foreground text-[11px] font-semibold uppercase tracking-[0.08em]">{label}</p>
+        <div className="flex items-center gap-0.5 bg-muted/40 rounded-md p-1 border border-border">
+          <button onClick={() => setZoom(z => Math.max(0.5, z - 0.25))} className="p-1.5 text-muted-foreground hover:bg-background hover:text-foreground rounded transition-colors" title="Zoom Out">
+            <ZoomOut className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setZoom(z => Math.min(3, z + 0.25))} className="p-1.5 text-muted-foreground hover:bg-background hover:text-foreground rounded transition-colors" title="Zoom In">
+            <ZoomIn className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => setRotation(r => r + 90)} className="p-1.5 text-muted-foreground hover:bg-background hover:text-foreground rounded transition-colors" title="Rotate">
+            <RotateCw className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </div>
+      <div className="relative w-full h-[45vh] md:h-[55vh] overflow-hidden rounded-lg border border-border bg-black/5 dark:bg-white/5">
+        <div className="absolute inset-0 flex items-center justify-center p-2">
+          <img 
+            src={src} 
+            alt={alt} 
+            style={{ 
+              transform: `scale(${zoom}) rotate(${rotation}deg)`, 
+              transition: 'transform 0.2s ease-in-out',
+            }} 
+            className="max-w-full max-h-full object-contain origin-center" 
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -459,24 +503,78 @@ const AdminDashboard = () => {
 
   const exportToCSV = () => {
     const allTenants = [...pendingTenants, ...approvedTenants];
+    const header = [
+      'Name', 'Email', 'Mobile', 'Room Number', 'Aadhaar', 'DOB', 'Gender',
+      'Father Name', 'Father Phone', 'Mother Name', 'Mother Phone',
+      'Permanent Address', 'Status', 'Registration Date'
+    ];
+    
+    const escapeCSV = (val) => val === undefined || val === null ? '' : `"${String(val).replace(/"/g, '""')}"`;
+
     const csvContent = [
-      ['Name', 'Email', 'Mobile', 'Aadhaar', 'Status', 'Registration Date'].join(','),
+      header.join(','),
       ...allTenants.map(t => [
-        t.fullName,
-        t.email,
-        t.mobileNumber,
-        t.aadhaarNumber,
-        pendingTenants.includes(t) ? 'Pending' : 'Approved',
-        new Date(t.createdAt).toLocaleDateString()
+        escapeCSV(t.fullName),
+        escapeCSV(t.email),
+        escapeCSV(t.mobileNumber),
+        escapeCSV(t.roomNumber || 'N/A'),
+        escapeCSV(t.aadhaarNumber),
+        escapeCSV(t.dateOfBirth ? new Date(t.dateOfBirth).toISOString().split('T')[0] : ''),
+        escapeCSV(t.gender || 'N/A'),
+        escapeCSV(t.fatherName || 'N/A'),
+        escapeCSV(t.fatherPhone || 'N/A'),
+        escapeCSV(t.motherName || 'N/A'),
+        escapeCSV(t.motherPhone || 'N/A'),
+        escapeCSV(t.permanentAddress || 'N/A'),
+        escapeCSV(pendingTenants.includes(t) ? 'Pending' : 'Approved'),
+        escapeCSV(new Date(t.createdAt).toLocaleDateString('en-IN'))
       ].join(','))
     ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `tenants-${new Date().toISOString()}.csv`;
     a.click();
+  };
+
+  const exportToPDF = async () => {
+    try {
+      const { jsPDF } = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
+
+      const doc = new jsPDF('landscape');
+      const allTenants = [...pendingTenants, ...approvedTenants];
+      
+      doc.setFontSize(16);
+      doc.text('Ganga Bhawan - Tenants List', 14, 15);
+      
+      const tableData = allTenants.map(t => [
+        t.fullName,
+        t.mobileNumber,
+        t.roomNumber || '-',
+        t.aadhaarNumber,
+        t.fatherName || '-',
+        t.permanentAddress || '-',
+        pendingTenants.includes(t) ? 'Pending' : 'Approved',
+        new Date(t.createdAt).toLocaleDateString('en-IN')
+      ]);
+      
+      autoTable(doc, {
+        startY: 20,
+        head: [['Name', 'Mobile', 'Room', 'Aadhaar', "Father's Name", 'Address', 'Status', 'Reg Date']],
+        body: tableData,
+        theme: 'grid',
+        styles: { fontSize: 8, cellPadding: 2 },
+        headStyles: { fillColor: [16, 185, 129] } // emerald-500
+      });
+
+      doc.save(`tenants-${new Date().toISOString()}.pdf`);
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      alert('❌ Error generating PDF. Please ensure dependencies are loaded. ' + err.message);
+    }
   };
 
   const filteredTenants = useMemo(() => {
@@ -752,13 +850,18 @@ const AdminDashboard = () => {
                         <option value="date">Sort by Date</option>
                         <option value="name">Sort by Name</option>
                       </select>
-                      <button
-                        onClick={exportToCSV}
-                        className="flex items-center gap-2 px-4 py-1.5 bg-primary text-primary-foreground rounded-md font-medium text-[13px] hover:bg-primary/90 transition-colors"
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          if (e.target.value === 'csv') exportToCSV();
+                          if (e.target.value === 'pdf') exportToPDF();
+                        }}
+                        className="px-3 py-1.5 bg-background border border-border rounded-md text-foreground text-[13px] focus:outline-none focus:ring-2 focus:ring-ring/20 focus:border-ring"
                       >
-                        <IndianRupee className="w-3.5 h-3.5" />
-                        Export CSV
-                      </button>
+                        <option value="" disabled>Export Data...</option>
+                        <option value="csv">Export as CSV</option>
+                        <option value="pdf">Export as PDF</option>
+                      </select>
                     </div>
                   </div>
 
@@ -778,6 +881,7 @@ const AdminDashboard = () => {
                           setSelectedTenant={setSelectedTenant}
                           setShowModal={setShowModal}
                           setSelectedAadhaar={setSelectedAadhaar}
+                          setFullScreenImage={setFullScreenImage}
                           handleApprove={handleApprove}
                           handleReject={handleReject}
                           handleDisable={handleDisable}
@@ -788,6 +892,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
               )}
+
 
               {/* ── Pending Payments ── */}
               {activeTab === 'pendingPayments' && (
@@ -887,10 +992,6 @@ const AdminDashboard = () => {
                 <PaymentStatusTab approvedTenants={approvedTenants} openHistoryModal={openHistoryModal} />
               )}
 
-              {/* ── Audit Logs ── */}
-              {activeTab === 'auditLogs' && (
-                <AuditLogs token={auth.token} />
-              )}
 
               {/* ── Rooms Management ── */}
               {activeTab === 'rooms' && (
@@ -924,9 +1025,14 @@ const AdminDashboard = () => {
           >
             <div className="sticky top-0 bg-card/90 backdrop-blur-xl border-b border-border px-6 py-4 flex items-center justify-between z-10">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-base overflow-hidden">
+                <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-semibold text-base overflow-hidden relative">
                   {selectedTenant.profilePicture ? (
-                    <img src={selectedTenant.profilePicture} alt={selectedTenant.fullName} className="w-full h-full object-cover" />
+                    <img 
+                      src={selectedTenant.profilePicture} 
+                      alt={selectedTenant.fullName} 
+                      onClick={() => setFullScreenImage(selectedTenant.profilePicture)}
+                      className="w-full h-full object-cover cursor-pointer hover:opacity-80 transition-opacity" 
+                    />
                   ) : (
                     selectedTenant.fullName.charAt(0)
                   )}
@@ -1134,24 +1240,11 @@ const AdminDashboard = () => {
               </div>
               <button onClick={() => setSelectedAadhaar(null)} className="w-8 h-8 flex items-center justify-center bg-accent hover:bg-accent/80 rounded-md text-muted-foreground transition-colors">✕</button>
             </div>
-            <div className="flex-1 bg-background flex flex-col md:flex-row items-center justify-center p-5 gap-5 overflow-y-auto">
-              <div className="flex-1 flex flex-col items-center gap-2.5 h-full min-h-[280px]">
-                <p className="text-muted-foreground text-[11px] font-semibold uppercase tracking-[0.08em]">Front Side</p>
-                {selectedAadhaar.aadhaarFront ? (
-                  <img src={selectedAadhaar.aadhaarFront} alt="Aadhaar Front" className="max-w-full max-h-[55vh] object-contain rounded-lg border border-border" />
-                ) : (
-                  <div className="flex-1 w-full bg-muted/30 rounded-lg flex items-center justify-center text-muted-foreground border border-dashed border-border">No Front Photo</div>
-                )}
-              </div>
-              <div className="hidden md:block w-px h-28 bg-border" />
-              <div className="flex-1 flex flex-col items-center gap-2.5 h-full min-h-[280px]">
-                <p className="text-muted-foreground text-[11px] font-semibold uppercase tracking-[0.08em]">Back Side</p>
-                {selectedAadhaar.aadhaarBack ? (
-                  <img src={selectedAadhaar.aadhaarBack} alt="Aadhaar Back" className="max-w-full max-h-[55vh] object-contain rounded-lg border border-border" />
-                ) : (
-                  <div className="flex-1 w-full bg-muted/30 rounded-lg flex items-center justify-center text-muted-foreground border border-dashed border-border">No Back Photo</div>
-                )}
-              </div>
+            <div className="flex-1 bg-background flex flex-col md:flex-row p-4 md:p-5 gap-6 md:gap-5 overflow-y-auto">
+              <AadhaarImagePanel src={selectedAadhaar.aadhaarFront} alt="Aadhaar Front" label="Front Side" />
+              <div className="hidden md:block w-px bg-border my-6" />
+              <div className="md:hidden h-px w-full bg-border" />
+              <AadhaarImagePanel src={selectedAadhaar.aadhaarBack} alt="Aadhaar Back" label="Back Side" />
             </div>
           </motion.div>
         </div>

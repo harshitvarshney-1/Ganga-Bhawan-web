@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Mail, Phone, CreditCard, MapPin, Calendar, Clock, CheckCircle2, Eye, Trash2 } from 'lucide-react';
 import { API_URL } from '../../infra/config';
 
-const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSelectedAadhaar, handleApprove, handleReject, handleDisable, handleEnable }) => {
+const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSelectedAadhaar, setFullScreenImage, handleApprove, handleReject, handleDisable, handleEnable }) => {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -37,7 +37,17 @@ const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSel
                   ? tenant.profilePicture
                   : `${API_URL.replace('/api', '')}/${tenant.profilePicture}`}
                 alt={tenant.fullName}
-                className="w-full h-full object-cover"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (setFullScreenImage) {
+                    setFullScreenImage(
+                      tenant.profilePicture.startsWith('data:') || tenant.profilePicture.startsWith('http')
+                        ? tenant.profilePicture
+                        : `${API_URL.replace('/api', '')}/${tenant.profilePicture}`
+                    );
+                  }
+                }}
+                className="w-full h-full object-cover cursor-pointer hover:scale-110 transition-transform duration-300"
               />
             ) : (
               tenant.fullName.charAt(0).toUpperCase()
