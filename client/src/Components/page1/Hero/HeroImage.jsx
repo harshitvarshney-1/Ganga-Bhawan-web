@@ -10,7 +10,7 @@ const HeroImage = () => {
           bg-cyan-500/20 blur-2xl"></div>
 
         <img
-          src="https://images.unsplash.com/photo-1522708323590-d24dbb6b0267"
+          src="https://res.cloudinary.com/dti0b5pna/image/upload/v1788930033/Home_chiz7c.png"
           alt="Hostel Room"
           className="relative w-[420px] rounded-2xl shadow-2xl
           hover:scale-105 transition duration-300"
