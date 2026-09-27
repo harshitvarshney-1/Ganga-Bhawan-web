@@ -996,7 +996,7 @@ const AdminDashboard = () => {
               {/* ── Rooms Management ── */}
               {activeTab === 'rooms' && (
                 <RoomsTab 
-                  tenants={[...pendingTenants, ...approvedTenants, ...disabledTenants]} 
+                  tenants={[...pendingTenants, ...approvedTenants]} 
                   onTenantClick={(tenant) => {
                     setSelectedTenant(tenant);
                     setShowModal(true);
