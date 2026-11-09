@@ -10,7 +10,7 @@ const NavBar = () => {
   return (
     <>
       {/* NAVBAR */}
-      <header className="fixed top-0 left-0 w-full z-50 bg-background border-b border-border">
+      <header className="fixed top-0 left-0 w-full z-50 bg-background/80 backdrop-blur-md border-b border-border/70">
         <nav className="h-16 px-4 sm:px-8 md:px-12 flex items-center justify-between text-foreground">
 
           {/* Logo */}

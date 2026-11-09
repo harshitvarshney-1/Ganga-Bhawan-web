@@ -87,8 +87,8 @@ const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSel
           <div className="flex gap-2">
             <button
               onClick={() => { setSelectedTenant(tenant); setShowModal(true); }}
-              className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-medium text-[12px] transition-colors border border-border ${
-                isPending ? 'flex-1 bg-accent text-foreground hover:bg-accent/80' : (!tenant.isDisabled ? 'flex-1 bg-primary/10 text-primary hover:bg-primary/20 border-primary/20' : 'w-full bg-primary/10 text-primary hover:bg-primary/20 border-primary/20')
+              className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-md font-medium text-[12px] transition-colors border border-border whitespace-nowrap ${
+                isPending ? 'bg-accent text-foreground hover:bg-accent/80' : 'bg-primary/10 text-primary hover:bg-primary/20 border-primary/20'
               }`}
             >
               <Eye className="w-3.5 h-3.5" />
@@ -125,9 +125,9 @@ const TenantCard = ({ tenant, isPending, setSelectedTenant, setShowModal, setSel
             {tenant.isDisabled && (
               <button
                 onClick={() => handleEnable(tenant._id)}
-                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-[12px] font-medium"
+                className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 text-[12px] font-medium whitespace-nowrap"
               >
-                Enable Acc
+                Enable Account
               </button>
             )}
           </div>

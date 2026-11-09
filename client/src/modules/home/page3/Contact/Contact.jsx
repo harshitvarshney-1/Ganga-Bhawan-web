@@ -4,11 +4,17 @@ import ContactMap from "./ContactMap";
 
 const Contact = () => {
   return (
-    <section className="pt-10 sm:pt-14 pb-16 sm:pb-20 px-4 sm:px-8 md:px-12 bg-background text-foreground">
-      <div className="max-w-7xl mx-auto space-y-16">
+    <section className="py-20 sm:py-28 px-4 sm:px-8 md:px-12">
+      <div className="max-w-7xl mx-auto space-y-12">
+
         <ContactHeader />
-        <ContactCards />
-        <ContactMap />
+
+        {/* Split panel: contact info left + map right */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ContactCards />
+          <ContactMap />
+        </div>
+
       </div>
     </section>
   );
